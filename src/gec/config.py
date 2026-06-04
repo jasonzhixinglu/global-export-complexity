@@ -1,0 +1,49 @@
+"""Central configuration: paths and analysis constants.
+
+Importing this module is side-effect free except for resolving paths relative
+to the repository root, so scripts can `from gec import config as cfg`.
+"""
+from __future__ import annotations
+
+from pathlib import Path
+
+# --- paths -----------------------------------------------------------------
+ROOT = Path(__file__).resolve().parents[2]
+DATA_DIR = ROOT / "data"
+RAW_DIR = DATA_DIR / "raw"
+RAW_CSV = RAW_DIR / "hs92_country_product_year_4.csv"
+RESULTS_DIR = ROOT / "results"
+FIG_DIR = RESULTS_DIR / "figures"
+TABLE_DIR = RESULTS_DIR / "tables"
+
+# --- data provenance -------------------------------------------------------
+# Harvard Growth Lab, Atlas of Economic Complexity, HS92 HS4 country-product-year.
+DATAVERSE_DOI = "doi:10.7910/DVN/T4CHWJ"
+DATAVERSE_FILE_ID = 13685110  # hs92_country_product_year_4.csv, dataset version 18
+DOWNLOAD_URL = (
+    f"https://dataverse.harvard.edu/api/access/datafile/"
+    f"{DATAVERSE_FILE_ID}?format=original"
+)
+
+# --- analysis constants ----------------------------------------------------
+YEARS = list(range(2000, 2025))   # 2000-2024 inclusive
+N_TOP = 30                        # number of top exporters to track (per-country panels)
+COVER_THRESHOLDS = [20, 30, 50]   # cumulative-coverage thresholds to report
+SNAPSHOT_YEARS = [2000, 2008, 2012, 2018, 2024]
+FOCUS_COUNTRIES = ["CHN", "USA", "DEU", "JPN", "KOR", "MEX"]  # for readable line plots
+LEGACY_COUNTRIES = ["CHN", "DEU", "JPN", "KOR"]  # the four from legacy/ notebook
+REPRO_YEARS = [2000, 2012, 2024]                 # snapshot years for line-chart reproductions
+STACK_COUNTRIES = ["CHN", "JPN", "DEU"]          # stacked cumulative-share chart (bottom->top)
+
+# Estimator settings
+BANDWIDTH = 0.30                  # Gaussian kernel bandwidth in PCI units (shares)
+H_DIST = 0.30                     # Gaussian bandwidth for the dollar-distribution density
+PCI_LO, PCI_HI = -3.0, 3.0        # plotting/aggregation window for PCI
+SHARE_GRID_N = 120                # grid points for the share curves over [-2.5, 2.5]
+KDE_GRID_N = 300                  # grid points for density curves over [PCI_LO, PCI_HI]
+BIN_WIDTH = 0.25                  # PCI bin width for the mass-conservation diagnostic
+
+
+def ensure_dirs() -> None:
+    for d in (RAW_DIR, FIG_DIR, TABLE_DIR):
+        d.mkdir(parents=True, exist_ok=True)

@@ -1,3 +1,7 @@
+# Raw + derived trade data (large; download/regenerate, see data/README.md)
+data/raw/
+data/derived/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
