@@ -30,19 +30,13 @@ export default function App() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="h-1 bg-gradient-to-r from-indigo-500 via-violet-500 to-sky-400" />
-      <header className="sticky top-0 z-10 border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur px-4 sm:px-6 py-3">
-        <div className="max-w-screen-2xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="min-w-0 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-indigo-900/30 shrink-0">
-              PCI
-            </div>
-            <div className="min-w-0">
-              <h1 className="text-[15px] font-semibold leading-tight tracking-tight">Global Export Complexity</h1>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Exports across the Product Complexity Index · 2000–2024 · Atlas of Economic Complexity
-              </p>
-            </div>
+      <header className="border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-3">
+        <div className="max-w-screen-2xl mx-auto flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-base font-semibold leading-tight">Global Export Complexity</h1>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Exports across the Product Complexity Index · 2000–2024 · Atlas of Economic Complexity
+            </p>
           </div>
           <div className="flex items-start gap-2 flex-shrink-0">
             <nav className="grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap">

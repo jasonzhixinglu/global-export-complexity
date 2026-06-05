@@ -15,15 +15,14 @@ export function fmtPci(x) {
   return (x >= 0 ? '+' : '') + x.toFixed(2)
 }
 
-// Curated categorical palette — modern, harmonious, distinct in light & dark.
-// First four are tuned to look good together (default CHN / USA / DEU / JPN).
+// 20-colour categorical palette (distinct in light & dark)
 export const PALETTE = [
-  '#6366f1', '#f59e0b', '#10b981', '#f43f5e', '#38bdf8',
-  '#a78bfa', '#2dd4bf', '#fb923c', '#f472b6', '#a3e635',
-  '#22d3ee', '#e879f9', '#60a5fa', '#34d399', '#fbbf24',
-  '#fb7185', '#818cf8', '#4ade80', '#facc15', '#c084fc',
-  '#5eead4', '#fdba74', '#93c5fd', '#d8b4fe', '#86efac',
-  '#fcd34d', '#fda4af', '#67e8f9', '#bef264', '#f0abfc',
+  '#ef4444', '#3b82f6', '#22c55e', '#a855f7', '#f59e0b',
+  '#06b6d4', '#ec4899', '#84cc16', '#f97316', '#8b5cf6',
+  '#14b8a6', '#eab308', '#f43f5e', '#0ea5e9', '#10b981',
+  '#d946ef', '#fb7185', '#65a30d', '#fbbf24', '#2dd4bf',
+  '#60a5fa', '#c084fc', '#4ade80', '#facc15', '#fca5a5',
+  '#34d399', '#a78bfa', '#fdba74', '#67e8f9', '#fda4af',
 ]
 
 export function colorFor(index) {
