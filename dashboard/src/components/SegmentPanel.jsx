@@ -87,7 +87,7 @@ export default function SegmentPanel({ data, year, setYear, measure, setMeasure 
               <XAxis type="number" tick={{ fill: ac.tick, fontSize: 11 }} tickFormatter={axfmt} />
               <YAxis type="category" dataKey="iso" width={44} tick={{ fill: ac.tick, fontSize: 11 }} />
               <Tooltip contentStyle={tooltipStyle(isDark)} formatter={(v, _n, p) => [vfmt(v), byIso[p.payload.iso]?.name]} />
-              <Bar dataKey="v" isAnimationActive={false}>
+              <Bar dataKey="v" isAnimationActive={false} radius={[0, 4, 4, 0]}>
                 {ranked.slice(0, 15).map(d => <Cell key={d.iso} fill={colorFor(colorByIso[d.iso])} />)}
               </Bar>
             </BarChart>
