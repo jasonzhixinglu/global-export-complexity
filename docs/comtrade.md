@@ -16,6 +16,29 @@ the live API — so the limits are explicit.
 | Does it have PCI? | **No.** We join the Atlas PCI as a proxy (default 2024). |
 | HS revision? | Recent years serve only **as-reported** (`clCode='HS'`, ≈HS2022); `H0`/HS92 is empty for 2024–25. We map as-reported HS4 → Atlas HS92 by identity, which covers **~97–98% of export value** at the 4-digit level. |
 
+## Free no-key endpoints (no registration needed)
+
+UN Comtrade exposes a set of **public, no-key** endpoints at `https://comtradeapi.un.org/public/v1`
+(OpenAPI spec saved here as `comtrade-public-api.yaml`). The useful ones:
+
+- **`/getDA/{type}/{freq}/{cl}`** — *data availability*: which periods a reporter has published. This
+  is the authoritative, no-key, no-data-pull way to tell who has filed a year. `gec.comtrade.
+  published_years(iso3)` wraps it; `fetch_comtrade.py --check` prints a filing-status table:
+
+  ```
+  python scripts/fetch_comtrade.py --year 2025 --reporters CHN,USA,DEU,VNM --check
+    CHN  latest=2024  2025->MIRROR (not filed)
+    USA  latest=2025  2025->filed
+    VNM  latest=2023  2025->MIRROR (not filed)   # chronic laggard
+  ```
+  (The Python package's `getFinalDataAvailability` needs a key; the public `/getDA` does not.)
+- **`/getComtradeReleases`** — release calendar (when new data drops; handy for "re-run when China
+  files 2025").
+- **`/preview/...`** — the 500-row preview the no-key fallback uses.
+
+The puller's `--mode auto` uses `/getDA` to choose direct vs mirror per country instead of trial
+pulls. None of this replaces the registered key needed for full (100k-row) data pulls.
+
 ## Two pull modes
 
 - **direct** — a country's own exports to World (flow `X`, FOB). Used when the country filed.

@@ -23,8 +23,9 @@ which is capped at 500 rows/call -- fine for smoke tests, NOT for production pul
 """
 from __future__ import annotations
 
+import json
 import os
-import time
+import urllib.request
 
 import numpy as np
 import pandas as pd
@@ -34,6 +35,7 @@ from . import config as cfg
 
 WORLD = "0"
 CIF_FOB = 1.10          # rough CIF->FOB deflation for mirror (imports are CIF)
+PUBLIC = "https://comtradeapi.un.org/public/v1"   # free, no-key endpoints (see docs/comtrade.md)
 _REF = None
 
 
@@ -76,6 +78,24 @@ def country_code(iso3) -> str:
     """All M49 reporter codes for an ISO3, comma-joined (e.g. USA -> '840,842,841').
     Comtrade accepts the list; only the active code has data, so summing is safe."""
     return str(ctc.convertCountryIso3ToCode(iso3))
+
+
+def published_years(iso3, typeCode="C", freqCode="A", clCode="HS") -> list[int]:
+    """Years a reporter has published, via the FREE public data-availability endpoint
+    (/getDA, NO key). The cleanest way to tell who has filed a given year -- no data pull,
+    no mirror. Returns sorted ints (empty on error or chronic non-reporters)."""
+    url = f"{PUBLIC}/getDA/{typeCode}/{freqCode}/{clCode}?reporterCode={country_code(iso3)}"
+    try:
+        with urllib.request.urlopen(url, timeout=40) as r:
+            rows = json.loads(r.read().decode()).get("data", [])
+    except Exception:
+        return []
+    return sorted({int(d["period"]) for d in rows if str(d.get("period", "")).isdigit()})
+
+
+def latest_year(iso3, **kw):
+    ys = published_years(iso3, **kw)
+    return ys[-1] if ys else None
 
 
 def fetch_country_exports(year, iso3, key=None) -> pd.DataFrame:

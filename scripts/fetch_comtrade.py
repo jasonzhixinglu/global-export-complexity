@@ -42,18 +42,33 @@ def main():
     ap.add_argument("--reporters", default="top30", help="'top30' or comma ISO3 list")
     ap.add_argument("--mode", choices=["auto", "direct", "mirror"], default="auto")
     ap.add_argument("--pci-year", type=int, default=2024, help="Atlas vintage for PCI proxy")
+    ap.add_argument("--check", action="store_true",
+                    help="only report each reporter's latest filed year (no-key) and exit")
     args = ap.parse_args()
 
     cfg.ensure_dirs()
+    reporters = resolve_reporters(args.reporters)
+
+    if args.check:
+        print(f"Filing status (free /getDA, no key) - requested year {args.year}:")
+        for iso3 in reporters:
+            ys = ct.published_years(iso3)
+            latest = ys[-1] if ys else None
+            mark = "filed" if args.year in ys else ("MIRROR (not filed)" if ys else "NON-REPORTER")
+            print(f"  {iso3:4s} latest={latest}  {args.year}->{mark}")
+        return
+
     key = ct.api_key()
     print(f"Comtrade key: {'present' if key else 'NONE (preview, <=500 rows/call)'}")
-    reporters = resolve_reporters(args.reporters)
     print(f"year={args.year}  mode={args.mode}  reporters={len(reporters)}: {', '.join(reporters)}")
 
     records = []
     for iso3 in reporters:
+        # decide direct vs mirror from no-key availability, not trial-and-error
+        filed = args.year in ct.published_years(iso3) if args.mode == "auto" else None
+        use_direct = args.mode == "direct" or (args.mode == "auto" and filed)
         prov, df = "direct", None
-        if args.mode in ("auto", "direct"):
+        if use_direct:
             df = ct.fetch_country_exports(args.year, iso3, key)
         if (df is None or df.empty) and args.mode in ("auto", "mirror"):
             df, n = ct.fetch_mirror_exports(args.year, iso3, key)
