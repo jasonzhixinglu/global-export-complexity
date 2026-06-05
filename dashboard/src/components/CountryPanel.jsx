@@ -73,15 +73,21 @@ export default function CountryPanel({ data, year, setYear, measure, setMeasure 
         <div className="label mb-2">{byIso[iso].name} — {MEASURES[measure].label} across complexity, {year}</div>
         <ResponsiveContainer width="100%" height={340}>
           <AreaChart data={rows} margin={{ top: 8, right: 16, bottom: 24, left: 8 }}>
-            <CartesianGrid stroke={ac.grid} strokeDasharray="3 3" />
+            <defs>
+              <linearGradient id="grad-country" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={color} stopOpacity={0.45} />
+                <stop offset="100%" stopColor={color} stopOpacity={0.02} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid stroke={ac.grid} strokeDasharray="2 4" vertical={false} />
             <XAxis dataKey="pci" type="number" domain={['dataMin', 'dataMax']} tickFormatter={fmtPci}
-              tick={{ fill: ac.tick, fontSize: 11 }}
+              tickLine={false} axisLine={{ stroke: ac.grid }} tick={{ fill: ac.tick, fontSize: 11 }}
               label={{ value: 'PCI', position: 'insideBottom', offset: -12, fill: ac.tick, fontSize: 12 }} />
-            <YAxis tick={{ fill: ac.tick, fontSize: 11 }} tickFormatter={yfmt} width={52} />
-            <ReferenceLine x={0} stroke={ac.grid} />
+            <YAxis tick={{ fill: ac.tick, fontSize: 11 }} tickFormatter={yfmt} width={52} tickLine={false} axisLine={false} />
+            <ReferenceLine x={0} stroke={ac.grid} strokeDasharray="3 3" />
             <Tooltip contentStyle={tooltipStyle(isDark)} labelFormatter={(p) => `PCI ${fmtPci(p)}`}
               formatter={(v) => [vfmt(v), MEASURES[measure].label]} />
-            <Area dataKey={iso} stroke={color} fill={color} fillOpacity={0.5} strokeWidth={2} isAnimationActive={false} />
+            <Area type="monotone" dataKey={iso} stroke={color} fill="url(#grad-country)" strokeWidth={2.5} isAnimationActive={false} />
           </AreaChart>
         </ResponsiveContainer>
       </div>
