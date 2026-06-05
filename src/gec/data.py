@@ -64,6 +64,62 @@ def product_table(df_year: pd.DataFrame, pci_lo=None, pci_hi=None) -> pd.DataFra
     return prod[prod["pci"].between(pci_lo, pci_hi)].reset_index(drop=True)
 
 
+BILATERAL_USECOLS = ["country_iso3_code", "partner_iso3_code",
+                     "product_hs92_code", "year", "export_value"]
+
+
+def load_bilateral(year_ranges=("2020_2024",), origins=None, dests=None, years=None,
+                   hs_level=4, chunksize=2_000_000) -> pd.DataFrame:
+    """Load Atlas bilateral (origin x destination x product x year) data, aggregated from
+    HS6 to `hs_level` digits, in bounded memory.
+
+    The Atlas only ships bilateral product data at HS6; HS4 bilateral is the first 4 digits
+    summed (lossless to HS4). The full files are multi-GB, so we read in chunks, filter, and
+    aggregate per chunk before concatenating.
+
+    Parameters
+    ----------
+    year_ranges : iterable of keys into cfg.BILATERAL_FILE_IDS (e.g. "2020_2024").
+    origins, dests : optional iterables of ISO3 to keep (exporter / importer).
+    years : optional iterable of ints to keep.
+    hs_level : product-code digits to aggregate to (4 = HS4).
+
+    Returns columns: country_iso3_code, partner_iso3_code, product_hs92_code, year, export_value.
+    """
+    origins = set(origins) if origins else None
+    dests = set(dests) if dests else None
+    years = set(int(y) for y in years) if years else None
+    parts = []
+    for yr_range in year_ranges:
+        path = cfg.bilateral_path(yr_range)
+        if not path.exists():
+            raise FileNotFoundError(f"{path} not found - run download_data.py --bilateral {yr_range}")
+        for chunk in pd.read_csv(path, usecols=BILATERAL_USECOLS,
+                                 dtype={"country_iso3_code": str, "partner_iso3_code": str,
+                                        "product_hs92_code": str},
+                                 chunksize=chunksize):
+            chunk["year"] = chunk["year"].astype(int)
+            if years is not None:
+                chunk = chunk[chunk["year"].isin(years)]
+            if origins is not None:
+                chunk = chunk[chunk["country_iso3_code"].isin(origins)]
+            if dests is not None:
+                chunk = chunk[chunk["partner_iso3_code"].isin(dests)]
+            if chunk.empty:
+                continue
+            chunk["export_value"] = pd.to_numeric(chunk["export_value"], errors="coerce")
+            chunk = chunk.dropna(subset=["export_value"])
+            chunk["product_hs92_code"] = chunk["product_hs92_code"].str.zfill(6).str[:hs_level]
+            g = chunk.groupby(["country_iso3_code", "partner_iso3_code",
+                               "product_hs92_code", "year"], as_index=False)["export_value"].sum()
+            parts.append(g)
+    if not parts:
+        return pd.DataFrame(columns=BILATERAL_USECOLS)
+    out = pd.concat(parts, ignore_index=True)
+    return out.groupby(["country_iso3_code", "partner_iso3_code", "product_hs92_code", "year"],
+                       as_index=False)["export_value"].sum()
+
+
 def country_value_vectors(df_year, products, countries) -> dict[str, np.ndarray]:
     """For a year, return {country: array of its export value aligned to `products`}."""
     idx = pd.Index(products)

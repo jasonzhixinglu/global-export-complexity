@@ -20,10 +20,26 @@ TABLE_DIR = RESULTS_DIR / "tables"
 # Harvard Growth Lab, Atlas of Economic Complexity, HS92 HS4 country-product-year.
 DATAVERSE_DOI = "doi:10.7910/DVN/T4CHWJ"
 DATAVERSE_FILE_ID = 13685110  # hs92_country_product_year_4.csv, dataset version 18
-DOWNLOAD_URL = (
-    f"https://dataverse.harvard.edu/api/access/datafile/"
-    f"{DATAVERSE_FILE_ID}?format=original"
-)
+
+
+def datafile_url(file_id) -> str:
+    return f"https://dataverse.harvard.edu/api/access/datafile/{file_id}?format=original"
+
+
+DOWNLOAD_URL = datafile_url(DATAVERSE_FILE_ID)
+
+# Bilateral origin x destination x HS6 x year files (one per year range). HS4 bilateral is
+# obtained by truncating product_hs92_code to 4 digits and summing -- see data.load_bilateral.
+BILATERAL_FILE_IDS = {
+    "1995_1999": 13685106,
+    "2000_2009": 13685108,
+    "2010_2019": 13685120,
+    "2020_2024": 13685118,
+}
+
+
+def bilateral_path(year_range: str):
+    return RAW_DIR / f"hs92_country_country_product_year_6_{year_range}.csv"
 
 # --- analysis constants ----------------------------------------------------
 YEARS = list(range(2000, 2025))   # 2000-2024 inclusive
