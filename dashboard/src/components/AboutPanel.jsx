@@ -17,11 +17,10 @@ const REFS = [
   ['Methods & code (this project)', 'https://github.com/jasonzhixinglu/global-export-complexity'],
 ]
 
-function Acc({ title, defaultOpen = false, children }) {
-  const [open, setOpen] = useState(defaultOpen)
+function Acc({ title, open, onToggle, children }) {
   return (
     <div className="border-b border-slate-200 dark:border-slate-800 last:border-0">
-      <button onClick={() => setOpen(o => !o)}
+      <button onClick={onToggle}
         className="w-full flex items-center justify-between py-2.5 text-left group">
         <span className="text-sm font-medium text-slate-800 dark:text-slate-100 group-hover:text-indigo-500">{title}</span>
         <span className="text-slate-400 text-lg leading-none w-5 text-center">{open ? '–' : '+'}</span>
@@ -38,6 +37,8 @@ export default function AboutPanel({ data, year, setYear }) {
   const { coverage, meta } = data
   const ac = axisColors(isDark)
   const yi = coverage.years.indexOf(year)
+  const [open, setOpen] = useState(null)  // Overview is always shown; the rest are single-open
+  const sec = (title) => ({ open: open === title, onToggle: () => setOpen(s => (s === title ? null : title)) })
 
   const rows = useMemo(() => coverage.grid.map((pci, gi) => {
     const row = { pci }
@@ -72,8 +73,9 @@ export default function AboutPanel({ data, year, setYear }) {
       </div>
 
       <div className="panel px-4 py-1">
-        <Acc title="Overview" defaultOpen>
-          <p>
+        <div className="border-b border-slate-200 dark:border-slate-800 py-2.5">
+          <div className="text-sm font-medium text-slate-800 dark:text-slate-100 mb-1.5">Overview</div>
+          <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
             A non-parametric view of global exports across the <strong>Product Complexity Index
             (PCI)</strong>, 2000–2024, from the Harvard Growth Lab <em>Atlas of Economic
             Complexity</em>. The Explorer shows, for any set of countries, either their
@@ -81,9 +83,9 @@ export default function AboutPanel({ data, year, setYear }) {
             <strong> distribution of their export value</strong> across complexity; click the chart
             (or drag the slider) to see the largest products near a chosen PCI.
           </p>
-        </Acc>
+        </div>
 
-        <Acc title="Estimation method">
+        <Acc title="Estimation method" {...sec('Estimation method')}>
           <p>
             <strong>Market share by complexity</strong> is a value-weighted <em>local-linear</em>
             kernel regression of each country's product-level share on PCI (Gaussian kernel,
@@ -101,7 +103,7 @@ export default function AboutPanel({ data, year, setYear }) {
           </p>
         </Acc>
 
-        <Acc title="Reading the PCI axis">
+        <Acc title="Reading the PCI axis" {...sec('Reading the PCI axis')}>
           <p>
             PCI is standardised within each year's cross-section, so compare value-weighted
             <em> shifts</em> across years, not absolute levels. Low PCI ≈ raw materials and
@@ -109,7 +111,7 @@ export default function AboutPanel({ data, year, setYear }) {
           </p>
         </Acc>
 
-        <Acc title="Tech & AI baskets">
+        <Acc title="Tech & AI baskets" {...sec('Tech & AI baskets')}>
           <p>
             <strong>AI compute</strong> follows the Fed FEDS Note (HS 8471.50 / 8471.80 / 8473.30 —
             AI servers and accelerator/GPU cards). The <strong>semiconductor</strong> categories
@@ -120,7 +122,7 @@ export default function AboutPanel({ data, year, setYear }) {
           </p>
         </Acc>
 
-        <Acc title="Caveats">
+        <Acc title="Caveats" {...sec('Caveats')}>
           <p>
             Source trade data is reconciled upstream (Bustos–Yildirim / BACI-style mirror
             reconciliation). Coverage of a top-N set is genuinely lowest at low complexity, where
@@ -129,7 +131,7 @@ export default function AboutPanel({ data, year, setYear }) {
           </p>
         </Acc>
 
-        <Acc title="Data & references">
+        <Acc title="Data & references" {...sec('Data & references')}>
           <ul className="space-y-1.5">
             {REFS.map(([label, href]) => (
               <li key={href} className="flex gap-2">
