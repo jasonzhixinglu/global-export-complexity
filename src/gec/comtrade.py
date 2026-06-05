@@ -15,9 +15,11 @@ This module therefore offers two pull modes and bolts on an Atlas-2024 PCI proxy
 HS4 codes are matched to the Atlas HS92 4-digit set by identity (most headings are
 stable); unmatched value is reported so the loss is explicit rather than hidden.
 
-Auth: set COMTRADE_API_KEY (free registered key) for full pulls via getFinalData
-(250k rows/call). Without a key it falls back to previewFinalData, which is capped at
-500 rows/call -- fine for smoke tests, NOT for production pulls.
+Auth: set COMTRADE_API_KEY (free registered key from comtradedeveloper.un.org) for full
+pulls via getFinalData. The FREE tier allows 100k records/call and 500 calls/day -- enough
+for direct (~1.2k rows) and mirror (~60-70k rows) pulls; a full world-denominator pull
+(~240k rows) must be chunked under 100k. Without a key it falls back to previewFinalData,
+which is capped at 500 rows/call -- fine for smoke tests, NOT for production pulls.
 """
 from __future__ import annotations
 
