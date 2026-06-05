@@ -41,6 +41,12 @@ BILATERAL_FILE_IDS = {
 def bilateral_path(year_range: str):
     return RAW_DIR / f"hs92_country_country_product_year_6_{year_range}.csv"
 
+
+# HS2012 vintage (needed for AI/semiconductor HS6 codes that don't exist in HS92).
+HS12_DOI = "doi:10.7910/DVN/YAVJDF"
+HS12_HS6_FILE_ID = 13685185  # hs12_country_product_year_6.csv (~463 MB, 2012-2023)
+HS12_HS6_CSV = RAW_DIR / "hs12_country_product_year_6.csv"
+
 # --- analysis constants ----------------------------------------------------
 YEARS = list(range(2000, 2025))   # 2000-2024 inclusive
 N_TOP = 30                        # number of top exporters to track (per-country panels)

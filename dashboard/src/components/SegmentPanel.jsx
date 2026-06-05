@@ -40,7 +40,7 @@ function bandMetric(data, iso, year, measure, band) {
   return t != null ? frac * t : null              // $B in the band
 }
 
-export default function SegmentPanel({ data, year, setYear, measure, setMeasure }) {
+export default function SegmentPanel({ data, year, measure }) {
   const { isDark } = useDarkMode()
   const { meta, byIso, colorByIso } = data
   const [bandId, setBandId] = useState('high')
@@ -67,15 +67,9 @@ export default function SegmentPanel({ data, year, setYear, measure, setMeasure 
 
   return (
     <div className="space-y-4">
-      <div className="panel p-4 space-y-3">
-        <div className="flex flex-wrap items-center gap-3 justify-between">
-          <div className="flex items-center gap-2">
-            <span className="label">Complexity band</span>
-            <Toggle value={bandId} onChange={setBandId} options={BANDS.map(b => ({ value: b.id, label: b.label }))} />
-          </div>
-          <MeasureToggle value={measure} onChange={setMeasure} measures={MEASURES} />
-        </div>
-        <YearSlider years={meta.years} year={year} onChange={setYear} />
+      <div className="panel p-3 flex flex-wrap items-center gap-2">
+        <span className="label">Complexity band</span>
+        <Toggle value={bandId} onChange={setBandId} options={BANDS.map(b => ({ value: b.id, label: b.label }))} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
