@@ -29,7 +29,7 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
 
   // PCI drill-down: within a window around the selected PCI, the 10 LARGEST products by
   // export value (continuous window, so the list shifts as you move the selector).
-  const PCI_WINDOW = 0.1
+  const PCI_WINDOW = 0.02
   const pp = data.pciProducts
   const prods = useMemo(() => {
     const list = pp?.byYear?.[String(year)] || []
@@ -141,7 +141,9 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
             <span className="text-2xl font-bold font-mono text-amber-500">PCI {fmtPci(selectedPci)}</span>
             <span className="text-xs text-slate-400">{year}</span>
           </div>
-          <div className="text-[11px] text-slate-400 mb-2">largest exports within ±{PCI_WINDOW} PCI · click the chart to move</div>
+          <input type="range" min={-2.5} max={2.5} step={0.01} value={selectedPci}
+            onChange={e => setSelectedPci(Number(e.target.value))} className="w-full my-1.5" />
+          <div className="text-[11px] text-slate-400 mb-2">largest exports within ±{PCI_WINDOW} PCI · drag the slider or click the chart</div>
           {prods.length === 0 ? (
             <div className="text-sm text-slate-400 py-2">No products in this bin.</div>
           ) : (
