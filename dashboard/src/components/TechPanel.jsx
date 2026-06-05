@@ -18,7 +18,7 @@ export default function TechPanel({ data, year, setYear }) {
   const { isDark } = useDarkMode()
   const t = data.techai
   const { byIso, colorByIso } = data
-  const [basketId, setBasketId] = useState('ai')
+  const [basketId, setBasketId] = useState('semi')
   const [tm, setTm] = useState('share')
   const ac = axisColors(isDark)
 
@@ -58,27 +58,28 @@ export default function TechPanel({ data, year, setYear }) {
   const axfmt = isPct ? (v) => `${Math.round(v * 100)}%` : (v) => `$${Math.round(v)}B`
   const metricLabel = tm === 'value' ? 'Export value' : tm === 'own' ? 'Share of own exports' : 'World market share'
   const topShare = tm === 'share' ? ranked.slice(0, 3).reduce((s, d) => s + d.v, 0) : 0
-  const stacked = tm === 'share'
+  const stacked = tm !== 'own'  // share and value are additive across countries; "% of own" is not
 
   return (
     <div className="space-y-3">
       <div className="panel p-4 space-y-3">
-        <div className="flex flex-wrap items-center gap-3 justify-between">
-          <div className="flex items-center gap-2">
-            <span className="label">Basket</span>
-            <select value={basketId} onChange={e => setBasketId(e.target.value)}
-              className="bg-transparent border border-slate-300 dark:border-slate-600 rounded px-3 py-1.5 text-sm">
-              <option value="ai">AI compute (Fed)</option>
-              <optgroup label="Semiconductor value chain (OECD)">
-                {t.baskets.filter(b => b.id === 'semi' || b.parent === 'semi').map(b => (
-                  <option key={b.id} value={b.id}>{b.label}</option>
-                ))}
-              </optgroup>
-            </select>
-          </div>
-          <Toggle value={tm} onChange={setTm} options={METRICS} />
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+          <span className="label mr-0.5">Semiconductors</span>
+          <button onClick={() => setBasketId('semi')}
+            className={`chip ${basketId === 'semi' ? 'chip-on' : 'chip-off'}`}>All</button>
+          {t.baskets.filter(b => b.parent === 'semi').map(b => (
+            <button key={b.id} onClick={() => setBasketId(b.id)}
+              className={`chip ${basketId === b.id ? 'chip-on' : 'chip-off'}`}>{b.label}</button>
+          ))}
+          <span className="mx-1 text-slate-300 dark:text-slate-600">·</span>
+          <span className="label mr-0.5">AI</span>
+          <button onClick={() => setBasketId('ai')}
+            className={`chip ${basketId === 'ai' ? 'chip-on' : 'chip-off'}`}>AI compute</button>
         </div>
-        <YearStepper years={t.years} year={ty} onChange={setYear} />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <Toggle value={tm} onChange={setTm} options={METRICS} />
+          <YearStepper years={t.years} year={ty} onChange={setYear} />
+        </div>
         <div className="text-xs text-slate-500">
           {basket.nCodes} HS6 codes · world {fmtB(world, 1)} ({ty}){' '}
           {tm === 'share' && topShare ? `· top-3 = ${fmtPct(topShare, 0)} of world` : ''}

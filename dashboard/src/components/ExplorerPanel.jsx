@@ -27,11 +27,20 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
   }, [selected])
   const cOf = (iso) => colorOf[iso] || '#94a3b8'
 
-  // PCI drill-down: top global products near the selected complexity (current year)
+  // PCI drill-down: within a window around the selected PCI, the 10 LARGEST products by
+  // export value (avoids surfacing tiny niche products that merely sit at the target),
+  // displayed high -> low complexity. Continuous window so the list shifts as you move it.
+  const PCI_WINDOW = 0.1
   const pp = data.pciProducts
-  const bin = pp ? Math.max(0, Math.min(pp.centers.length - 1, Math.floor((selectedPci - pp.lo) / pp.binWidth))) : 0
-  const prods = pp ? (pp.top[String(year)]?.[bin] || []) : []
-  const maxVal = prods.length ? prods[0][1] : 1
+  const prods = useMemo(() => {
+    const list = pp?.byYear?.[String(year)] || []
+    return list
+      .filter(p => Math.abs(p[1] - selectedPci) <= PCI_WINDOW)
+      .sort((a, b) => b[2] - a[2]).slice(0, 10)
+      .map(p => ({ hs4: p[0], pci: p[1], val: p[2] }))
+      .sort((a, b) => b.pci - a.pci)
+  }, [pp, year, selectedPci])
+  const maxVal = prods.length ? Math.max(...prods.map(p => p.val)) : 1
   const onPick = (e) => { if (e && e.activeLabel != null) setSelectedPci(Number(e.activeLabel)) }
 
   const yfmt = measure === 'share' ? (v) => `${Math.round(v * 100)}%`
@@ -134,19 +143,19 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
             <span className="text-2xl font-bold font-mono text-amber-500">PCI {fmtPci(selectedPci)}</span>
             <span className="text-xs text-slate-400">{year}</span>
           </div>
-          <div className="text-[11px] text-slate-400 mb-2">click the chart to change the complexity level</div>
+          <div className="text-[11px] text-slate-400 mb-2">largest exports within ±{PCI_WINDOW} PCI · click the chart to move</div>
           {prods.length === 0 ? (
             <div className="text-sm text-slate-400 py-2">No products in this bin.</div>
           ) : (
             <div className="space-y-0.5">
-              {prods.map(([hs4, val, pci], i) => (
+              {prods.map(({ hs4, val, pci }) => (
                 <div key={hs4} className="relative flex items-center gap-2 py-1 border-b border-slate-100 dark:border-slate-800/60">
                   <div className="absolute inset-y-0 left-0 rounded-sm bg-amber-500/10"
                     style={{ width: `${Math.max(3, (val / maxVal) * 100)}%` }} />
-                  <span className="relative text-slate-400 w-4 text-right text-xs">{i + 1}</span>
+                  <span className="relative font-mono text-xs text-amber-600 dark:text-amber-400 w-10">{fmtPci(pci)}</span>
                   <div className="relative flex-1 min-w-0">
                     <div className="text-sm leading-tight truncate" title={pp?.names?.[hs4]}>{pp?.names?.[hs4] || hs4}</div>
-                    <div className="text-[11px] text-slate-400 font-mono">{hs4} · PCI {fmtPci(pci)}</div>
+                    <div className="text-[11px] text-slate-400 font-mono">{hs4}</div>
                   </div>
                   <span className="relative font-semibold tabular-nums text-sm whitespace-nowrap">{fmtB(val, 1)}</span>
                 </div>

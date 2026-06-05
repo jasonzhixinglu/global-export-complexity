@@ -58,8 +58,8 @@ REPRO_YEARS = [2000, 2012, 2024]                 # snapshot years for line-chart
 STACK_COUNTRIES = ["CHN", "JPN", "DEU"]          # stacked cumulative-share chart (bottom->top)
 
 # Estimator settings
-BANDWIDTH = 0.30                  # Gaussian kernel bandwidth in PCI units (shares)
-H_DIST = 0.30                     # Gaussian bandwidth for the dollar-distribution density
+BANDWIDTH = 0.15                  # Gaussian kernel bandwidth in PCI units (shares)
+H_DIST = 0.15                     # Gaussian bandwidth for the dollar-distribution density
 PCI_LO, PCI_HI = -3.0, 3.0        # plotting/aggregation window for PCI
 SHARE_GRID_N = 120                # grid points for the share curves over [-2.5, 2.5]
 KDE_GRID_N = 300                  # grid points for density curves over [PCI_LO, PCI_HI]
