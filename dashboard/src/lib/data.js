@@ -19,13 +19,14 @@ export function useDataset() {
       getJSON('meta.json'), getJSON('series.json'),
       getJSON('coverage.json'), getJSON('anchors.json'),
       getJSON('techai.json').catch(() => null),
-    ]).then(([meta, series, coverage, anchors, techai]) => {
+      getJSON('pci_products.json').catch(() => null),
+    ]).then(([meta, series, coverage, anchors, techai, pciProducts]) => {
       if (!alive) return
       // index helpers
       const byIso = Object.fromEntries(meta.countries.map(c => [c.iso3, c]))
       const colorByIso = {}
       meta.countries.forEach((c, i) => { colorByIso[c.iso3] = i })
-      setData({ meta, series, coverage, anchors, techai, byIso, colorByIso })
+      setData({ meta, series, coverage, anchors, techai, pciProducts, byIso, colorByIso })
     }).catch(e => alive && setError(e))
     return () => { alive = false }
   }, [])

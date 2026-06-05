@@ -14,10 +14,17 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
   const { meta, colorByIso, byIso } = data
   const stackable = MEASURES[measure].stack
   const [display, setDisplay] = useState('stack')
+  const [selectedPci, setSelectedPci] = useState(1.0)
   const mode = stackable && display === 'stack' ? 'stack' : 'line'
 
   const rows = useMemo(() => buildRows(data, selected, year, measure), [data, selected, year, measure])
   const ac = axisColors(isDark)
+
+  // PCI drill-down: top global products near the selected complexity (current year)
+  const pp = data.pciProducts
+  const bin = pp ? Math.max(0, Math.min(pp.centers.length - 1, Math.floor((selectedPci - pp.lo) / pp.binWidth))) : 0
+  const prods = pp ? (pp.top[String(year)]?.[bin] || []) : []
+  const onPick = (e) => { if (e && e.activeLabel != null) setSelectedPci(Number(e.activeLabel)) }
 
   const yfmt = measure === 'share' ? (v) => `${Math.round(v * 100)}%`
     : measure === 'value' ? (v) => `$${v >= 1000 ? (v / 1000).toFixed(1) + 'T' : Math.round(v) + 'B'}`
@@ -47,13 +54,14 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
       <div className="panel p-3">
         <ResponsiveContainer width="100%" height={440}>
           {mode === 'stack' ? (
-            <AreaChart data={rows} margin={{ top: 8, right: 16, bottom: 24, left: 8 }}>
+            <AreaChart data={rows} margin={{ top: 8, right: 16, bottom: 24, left: 8 }} onClick={onPick}>
               <CartesianGrid stroke={ac.grid} strokeDasharray="2 2" />
               <XAxis dataKey="pci" type="number" domain={['dataMin', 'dataMax']} tickCount={11}
                 tick={{ fill: ac.tick, fontSize: 10 }} tickFormatter={fmtPci}
                 label={{ value: 'Product Complexity Index (PCI)', position: 'insideBottom', offset: -12, fill: ac.tick, fontSize: 11 }} />
               <YAxis tick={{ fill: ac.tick, fontSize: 10 }} tickFormatter={yfmt} width={48} tickCount={9} />
               <ReferenceLine x={0} stroke={ac.grid} />
+              <ReferenceLine x={selectedPci} stroke="#f59e0b" strokeWidth={1.5} strokeDasharray="4 2" />
               <Tooltip contentStyle={tooltipStyle(isDark)} labelFormatter={(p) => `PCI ${fmtPci(p)}`}
                 formatter={(v, n) => [vfmt(v), byIso[n]?.name || n]} />
               {selected.map(iso => (
@@ -62,13 +70,14 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
               ))}
             </AreaChart>
           ) : (
-            <LineChart data={rows} margin={{ top: 8, right: 16, bottom: 24, left: 8 }}>
+            <LineChart data={rows} margin={{ top: 8, right: 16, bottom: 24, left: 8 }} onClick={onPick}>
               <CartesianGrid stroke={ac.grid} strokeDasharray="2 2" />
               <XAxis dataKey="pci" type="number" domain={['dataMin', 'dataMax']} tickCount={11}
                 tick={{ fill: ac.tick, fontSize: 10 }} tickFormatter={fmtPci}
                 label={{ value: 'Product Complexity Index (PCI)', position: 'insideBottom', offset: -12, fill: ac.tick, fontSize: 11 }} />
               <YAxis tick={{ fill: ac.tick, fontSize: 10 }} tickFormatter={yfmt} width={48} tickCount={9} />
               <ReferenceLine x={0} stroke={ac.grid} />
+              <ReferenceLine x={selectedPci} stroke="#f59e0b" strokeWidth={1.5} strokeDasharray="4 2" />
               <Tooltip contentStyle={tooltipStyle(isDark)} labelFormatter={(p) => `PCI ${fmtPci(p)}`}
                 formatter={(v, n) => [vfmt(v), byIso[n]?.name || n]} />
               {selected.map(iso => (
@@ -79,6 +88,29 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
           )}
         </ResponsiveContainer>
         <div className="mt-2"><PciAxisLegend anchors={data.anchors} /></div>
+      </div>
+
+      <div className="panel p-3">
+        <div className="flex items-baseline justify-between mb-2 flex-wrap gap-2">
+          <div className="label">Top global products near PCI{' '}
+            <span className="text-amber-500 font-mono normal-case">{fmtPci(selectedPci)}</span> · {year}</div>
+          <span className="text-xs text-slate-400">click the chart to inspect a complexity level · world export value</span>
+        </div>
+        {prods.length === 0 ? (
+          <div className="text-sm text-slate-400 py-2">No products in this complexity bin.</div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-0.5">
+            {prods.map(([hs4, val, pci], i) => (
+              <div key={hs4} className="flex items-center gap-2 text-sm py-1 border-b border-slate-100 dark:border-slate-800/60">
+                <span className="text-slate-400 w-4 text-right text-xs">{i + 1}</span>
+                <span className="font-mono text-xs text-slate-500 w-11">{hs4}</span>
+                <span className="flex-1 truncate" title={pp?.names?.[hs4]}>{pp?.names?.[hs4] || hs4}</span>
+                <span className="font-mono text-xs text-slate-400 w-12 text-right">{fmtPci(pci)}</span>
+                <span className="font-semibold tabular-nums w-16 text-right">{fmtB(val, 1)}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="panel p-3">

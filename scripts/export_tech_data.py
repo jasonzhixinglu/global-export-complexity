@@ -42,19 +42,24 @@ def main():
 
     union = sorted({c for b in baskets for c in b["codes"]})
     union_set = set(union)
+    ship_set = set(ship)
 
-    # stream HS12, keep only basket codes
-    keep = []
+    # stream HS12: keep basket rows AND accumulate each shipped country's TOTAL exports/year
+    keep, totals = [], []
     for ch in pd.read_csv(cfg.HS12_HS6_CSV,
                           usecols=["country_iso3_code", "product_hs12_code", "year", "export_value"],
                           dtype={"country_iso3_code": str, "product_hs12_code": str},
                           chunksize=3_000_000):
-        ch = ch[ch["product_hs12_code"].isin(union_set)]
-        if len(ch):
-            ch["export_value"] = pd.to_numeric(ch["export_value"], errors="coerce")
-            keep.append(ch.dropna(subset=["export_value"]))
+        ch["export_value"] = pd.to_numeric(ch["export_value"], errors="coerce")
+        ch = ch.dropna(subset=["export_value"])
+        st = ch[ch["country_iso3_code"].isin(ship_set)]
+        totals.append(st.groupby(["country_iso3_code", "year"])["export_value"].sum())
+        bk = ch[ch["product_hs12_code"].isin(union_set)]
+        if len(bk):
+            keep.append(bk)
     df = pd.concat(keep, ignore_index=True)
     df["year"] = df["year"].astype(int)
+    ctot = pd.concat(totals).groupby(level=[0, 1]).sum()  # (iso, year) -> total exports
     years = sorted(int(y) for y in df["year"].unique())
     print(f"basket rows: {len(df):,} | years {years[0]}-{years[-1]} | codes {df.product_hs12_code.nunique()}/{len(union)}")
 
@@ -73,12 +78,15 @@ def main():
                 d[iso] = s
         value[b["id"]] = d
 
+    country_total = {iso: {str(y): r(ctot.get((iso, y), 0) / 1e9) for y in years} for iso in ship}
+
     out = {
         "baskets": [{"id": b["id"], "label": b["label"], "parent": b["parent"], "nCodes": len(b["codes"])} for b in baskets],
         "years": years,
         "countries": ship,
         "valueB": value,    # value[basket][iso][year] in $B
-        "worldB": worldB,   # world total[basket][year] in $B (denominator for share)
+        "worldB": worldB,   # world total[basket][year] in $B (denominator for world share)
+        "countryTotalB": country_total,  # each country's TOTAL exports/year (for 'share of own exports')
         "note": "HS2012; AI compute = Fed FEDS 2026-02; semiconductors = OECD 2025 value chain.",
         "missingCodes": [c for c in union if c not in set(df["product_hs12_code"].unique())],
     }
