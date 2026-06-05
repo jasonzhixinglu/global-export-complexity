@@ -99,8 +99,12 @@ def main():
     countries = list(s["countries"])
     years = [int(y) for y in s["years"]]
     share_grid = [r(x, 4) for x in s["share_grid"]]
-    kde_grid = [r(x, 4) for x in s["kde_grid"]]
     thresholds = [int(t) for t in s["cover_thresholds"]]
+    # subsample the density grid (every 2nd point) to keep the 3-level payload small
+    KSTEP = 2
+    kde_idx = list(range(0, len(s["kde_grid"]), KSTEP))
+    kde_grid = [r(s["kde_grid"][i], 4) for i in kde_idx]
+    levels = [lv["id"] for lv in cfg.SMOOTHING]
 
     # --- meta ---
     regions_order = ["Asia-Pacific", "Europe", "Americas", "Middle East", "Other"]
@@ -116,21 +120,26 @@ def main():
         "kdeGrid": kde_grid,
         "coverThresholds": thresholds,
         "bandwidth": cfg.BANDWIDTH,
+        "smoothing": [{"id": lv["id"], "label": lv["label"], "win": lv["win"]} for lv in cfg.SMOOTHING],
+        "defaultLevel": "med",
         "source": "Harvard Growth Lab, Atlas of Economic Complexity (HS92 HS4), 2000-2024",
     }
     (OUT / "meta.json").write_text(json.dumps(meta))
 
-    # --- per-country series: share, density, total ---
-    share, density, totals = s["share_raw"], s["density"], s["totals_cy"]
-    ser_share, ser_dens, ser_tot = {}, {}, {}
+    # --- per-country series at each smoothness level: share, density (+ shared total) ---
+    share_lvl, dens_lvl, totals = s["share_lvl"], s["density_lvl"], s["totals_cy"]
+    ser_share = {lid: {} for lid in levels}
+    ser_dens = {lid: {} for lid in levels}
+    ser_tot = {}
     for ci, c in enumerate(countries):
-        ser_share[c] = {str(years[yi]): [r(max(0.0, v), 4) for v in np.clip(share[ci, yi], 0, 1)]
-                        for yi in range(len(years))}
-        ser_dens[c] = {str(years[yi]): [r(v, 6) for v in density[ci, yi]]
-                       for yi in range(len(years))}
+        for li, lid in enumerate(levels):
+            ser_share[lid][c] = {str(years[yi]): [r(max(0.0, v), 4) for v in np.clip(share_lvl[li, ci, yi], 0, 1)]
+                                 for yi in range(len(years))}
+            ser_dens[lid][c] = {str(years[yi]): [r(dens_lvl[li, ci, yi][k], 6) for k in kde_idx]
+                                for yi in range(len(years))}
         ser_tot[c] = {str(years[yi]): r(totals[ci, yi] / 1e9, 2) for yi in range(len(years))}  # $B
     (OUT / "series.json").write_text(json.dumps(
-        {"share": ser_share, "density": ser_dens, "totalB": ser_tot}))
+        {"levels": levels, "share": ser_share, "density": ser_dens, "totalB": ser_tot}))
 
     # --- coverage ---
     cov = s["coverage"]  # (nThresh, nY, grid)

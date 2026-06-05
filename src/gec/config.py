@@ -58,8 +58,15 @@ REPRO_YEARS = [2000, 2012, 2024]                 # snapshot years for line-chart
 STACK_COUNTRIES = ["CHN", "JPN", "DEU"]          # stacked cumulative-share chart (bottom->top)
 
 # Estimator settings
-BANDWIDTH = 0.10                  # Gaussian kernel bandwidth in PCI units (shares)
-H_DIST = 0.10                     # Gaussian bandwidth for the dollar-distribution density
+BANDWIDTH = 0.10                  # canonical bandwidth for figures / coverage / diagnostics
+H_DIST = 0.10                     # canonical bandwidth for the dollar-distribution density
+# Dashboard smoothness levels: bw = kernel bandwidth (PCI units); win = starting half-width
+# of the product drill-down window (widened adaptively until it holds ~10 products).
+SMOOTHING = [
+    {"id": "low", "label": "Low", "bw": 0.05, "win": 0.02},
+    {"id": "med", "label": "Medium", "bw": 0.10, "win": 0.05},
+    {"id": "high", "label": "High", "bw": 0.20, "win": 0.10},
+]
 PCI_LO, PCI_HI = -3.0, 3.0        # plotting/aggregation window for PCI
 SHARE_GRID_N = 120                # grid points for the share curves over [-2.5, 2.5]
 KDE_GRID_N = 300                  # grid points for density curves over [PCI_LO, PCI_HI]

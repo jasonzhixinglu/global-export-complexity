@@ -41,9 +41,14 @@ def main() -> None:
     kde_grid = np.linspace(cfg.PCI_LO, cfg.PCI_HI, cfg.KDE_GRID_N)
     edges = np.arange(cfg.PCI_LO, cfg.PCI_HI + 1e-9, cfg.BIN_WIDTH)
 
+    LEVELS = cfg.SMOOTHING
+    nL = len(LEVELS)
+    med_idx = next(i for i, lv in enumerate(LEVELS) if lv["id"] == "med")
+
     nC, nY = len(TOP), len(years)
-    density = np.full((nC, nY, kde_grid.size), np.nan)        # per-country export $ shape
-    share_raw = np.full((nC, nY, share_grid.size), np.nan)    # UNCLIPPED shares
+    # multi-bandwidth surfaces for the dashboard smoothness toggle (level, country, year, grid)
+    density_lvl = np.full((nL, nC, nY, kde_grid.size), np.nan)
+    share_lvl = np.full((nL, nC, nY, share_grid.size), np.nan)
     coverage = np.full((len(thresholds), nY, share_grid.size), np.nan)  # cum share per threshold
     addup = np.full((nY, share_grid.size), np.nan)            # all-country share sum (~1)
     totals_cy = np.full((nC, nY), np.nan)                     # total export value per country-year
@@ -70,21 +75,25 @@ def main() -> None:
                   .groupby("product_hs92_code")["export_value"].sum())
             cov_vecs[f"_cov{N}_"] = tv.reindex(pd.Index(pcodes)).fillna(0.0).to_numpy()
 
-        # shares (unclipped) + coverage (single ratio) in one local-linear call
-        res = est.local_linear_shares(pci, W, {**cvecs, **cov_vecs},
-                                      share_grid, cfg.BANDWIDTH, clip=False)
-        for c in TOP:
-            share_raw[cidx[c], yi] = res[c]
+        # coverage (single ratio) + adding-up at the canonical bandwidth
+        covres = est.local_linear_shares(pci, W, cov_vecs, share_grid, cfg.BANDWIDTH, clip=False)
         for ti, N in enumerate(thresholds):
-            coverage[ti, yi] = np.clip(res[f"_cov{N}_"], 0, 1)
+            coverage[ti, yi] = np.clip(covres[f"_cov{N}_"], 0, 1)
         addup[yi] = est.adding_up(pci, W, share_grid, cfg.BANDWIDTH)  # C = W -> exactly 1
 
-        # per-country dollar distribution (each country's own products & values)
+        # per-country shares at each smoothness level
+        for li, lv in enumerate(LEVELS):
+            sres = est.local_linear_shares(pci, W, cvecs, share_grid, lv["bw"], clip=False)
+            for c in TOP:
+                share_lvl[li, cidx[c], yi] = sres[c]
+
+        # per-country dollar distribution at each smoothness level
         for c in TOP:
             dc = dy[dy["country_iso3_code"] == c]
             x, w = dc["pci"].to_numpy(), dc["export_value"].to_numpy()
-            density[cidx[c], yi] = est.density_fixed(x, w, kde_grid, cfg.H_DIST)
             totals_cy[cidx[c], yi] = w[np.isfinite(x)].sum()
+            for li, lv in enumerate(LEVELS):
+                density_lvl[li, cidx[c], yi] = est.density_fixed(x, w, kde_grid, lv["bw"])
 
         # conservation diagnostic at snapshot years
         if yr in cfg.SNAPSHOT_YEARS:
@@ -98,9 +107,14 @@ def main() -> None:
                 totals[fi, si] = [tot, est.kde_bin_mass(x, w, edges, cfg.H_DIST).sum()]
         print(f"  {yr} done", end="\r")
 
+    # canonical (Medium) 3D surfaces kept for figures/diagnostics; 4D for the dashboard
     np.savez_compressed(
         DERIVED / "surfaces.npz",
-        density=density, share_raw=share_raw, coverage=coverage, addup=addup,
+        density=density_lvl[med_idx], share_raw=share_lvl[med_idx],
+        density_lvl=density_lvl, share_lvl=share_lvl,
+        smoothing_id=np.array([lv["id"] for lv in LEVELS]),
+        smoothing_bw=np.array([lv["bw"] for lv in LEVELS]),
+        coverage=coverage, addup=addup,
         totals_cy=totals_cy, share_grid=share_grid, kde_grid=kde_grid,
         years=np.array(years),
         countries=np.array(TOP), cover_thresholds=np.array(thresholds),
