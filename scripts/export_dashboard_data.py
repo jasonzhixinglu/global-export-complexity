@@ -31,25 +31,25 @@ COUNTRY_META = {
     "FRA": ("France", "Europe"), "KOR": ("South Korea", "Asia-Pacific"),
     "ITA": ("Italy", "Europe"), "NLD": ("Netherlands", "Europe"),
     "CAN": ("Canada", "Americas"), "GBR": ("United Kingdom", "Europe"),
-    "MEX": ("Mexico", "Americas"), "RUS": ("Russia", "Europe/CIS"),
+    "MEX": ("Mexico", "Americas"), "RUS": ("Russia", "Other"),
     "TWN": ("Taiwan", "Asia-Pacific"), "BEL": ("Belgium", "Europe"),
     "ESP": ("Spain", "Europe"), "CHE": ("Switzerland", "Europe"),
     "SGP": ("Singapore", "Asia-Pacific"), "IND": ("India", "Asia-Pacific"),
     "MYS": ("Malaysia", "Asia-Pacific"), "THA": ("Thailand", "Asia-Pacific"),
     "BRA": ("Brazil", "Americas"), "SAU": ("Saudi Arabia", "Middle East"),
-    "AUS": ("Australia", "Oceania"), "POL": ("Poland", "Europe"),
+    "AUS": ("Australia", "Other"), "POL": ("Poland", "Europe"),
     "ARE": ("UAE", "Middle East"), "VNM": ("Vietnam", "Asia-Pacific"),
     "IDN": ("Indonesia", "Asia-Pacific"), "SWE": ("Sweden", "Europe"),
     "IRL": ("Ireland", "Europe"), "AUT": ("Austria", "Europe"),
     # ranks ~31-50
     "TUR": ("Turkey", "Middle East"), "HKG": ("Hong Kong", "Asia-Pacific"),
     "CZE": ("Czechia", "Europe"), "NOR": ("Norway", "Europe"),
-    "HUN": ("Hungary", "Europe"), "ZAF": ("South Africa", "Africa"),
+    "HUN": ("Hungary", "Europe"), "ZAF": ("South Africa", "Other"),
     "DNK": ("Denmark", "Europe"), "FIN": ("Finland", "Europe"),
     "QAT": ("Qatar", "Middle East"), "PHL": ("Philippines", "Asia-Pacific"),
     "SVK": ("Slovakia", "Europe"), "CHL": ("Chile", "Americas"),
     "ARG": ("Argentina", "Americas"), "ROU": ("Romania", "Europe"),
-    "NGA": ("Nigeria", "Africa"), "PRT": ("Portugal", "Europe"),
+    "NGA": ("Nigeria", "Other"), "PRT": ("Portugal", "Europe"),
     "ISR": ("Israel", "Middle East"), "IRN": ("Iran", "Middle East"),
     "IRQ": ("Iraq", "Middle East"), "KWT": ("Kuwait", "Middle East"),
 }
@@ -103,7 +103,7 @@ def main():
     thresholds = [int(t) for t in s["cover_thresholds"]]
 
     # --- meta ---
-    regions_order = ["Asia-Pacific", "Europe", "Americas", "Middle East", "Europe/CIS", "Africa", "Oceania"]
+    regions_order = ["Asia-Pacific", "Europe", "Americas", "Middle East", "Other"]
     cmeta = []
     for c in countries:
         name, region = COUNTRY_META.get(c, (c, "Other"))
