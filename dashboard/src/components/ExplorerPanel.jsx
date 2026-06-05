@@ -31,12 +31,16 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
   // export value (continuous window, so the list shifts as you move the selector).
   const PCI_WINDOW = 0.02
   const pp = data.pciProducts
-  const prods = useMemo(() => {
+  // start at ±0.02; if fewer than 10 products fall in the window, widen until it has 10
+  // (so sparse high-PCI regions still fill), then show the 10 largest by value.
+  const { prods, win } = useMemo(() => {
     const list = pp?.byYear?.[String(year)] || []
-    return list
-      .filter(p => Math.abs(p[1] - selectedPci) <= PCI_WINDOW)
-      .sort((a, b) => b[2] - a[2]).slice(0, 10)
-      .map(p => ({ hs4: p[0], pci: p[1], val: p[2] }))
+    if (!list.length) return { prods: [], win: PCI_WINDOW }
+    let w = PCI_WINDOW
+    let cand = list.filter(p => Math.abs(p[1] - selectedPci) <= w)
+    while (cand.length < 10 && w < 1.5) { w += 0.02; cand = list.filter(p => Math.abs(p[1] - selectedPci) <= w) }
+    const prods = cand.sort((a, b) => b[2] - a[2]).slice(0, 10).map(p => ({ hs4: p[0], pci: p[1], val: p[2] }))
+    return { prods, win: w }
   }, [pp, year, selectedPci])
   const maxVal = prods.length ? Math.max(...prods.map(p => p.val)) : 1
   const onPick = (e) => { if (e && e.activeLabel != null) setSelectedPci(Number(e.activeLabel)) }
@@ -81,7 +85,7 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
 
       {/* MIDDLE — distribution chart */}
       <div className="md:col-span-2 lg:col-span-6 md:order-last lg:order-none">
-        <div className="panel p-3">
+        <div className="panel p-3 h-full">
           <div className="flex flex-wrap items-center gap-3 justify-between mb-2">
             <MeasureToggle value={measure} onChange={setMeasure} measures={MEASURES} />
             <div className="flex items-center gap-3">
@@ -101,7 +105,8 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
                 <XAxis dataKey="pci" type="number" domain={['dataMin', 'dataMax']} tickCount={11}
                   tick={{ fill: ac.tick, fontSize: 10 }} tickFormatter={fmtPci}
                   label={{ value: 'Product Complexity Index (PCI)', position: 'insideBottom', offset: -12, fill: ac.tick, fontSize: 11 }} />
-                <YAxis tick={{ fill: ac.tick, fontSize: 10 }} tickFormatter={yfmt} width={46} tickCount={9} />
+                <YAxis tick={{ fill: ac.tick, fontSize: 10 }} tickFormatter={yfmt} width={46} tickCount={9}
+                  domain={measure === 'share' ? [0, 1] : [0, 'auto']} allowDataOverflow={measure === 'share'} />
                 <ReferenceLine x={0} stroke={ac.grid} />
                 <ReferenceLine x={selectedPci} stroke="#f59e0b" strokeWidth={1.5} strokeDasharray="4 2" />
                 <Tooltip contentStyle={tooltipStyle(isDark)} labelFormatter={(p) => `PCI ${fmtPci(p)}`}
@@ -142,7 +147,7 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
           </div>
           <input type="range" min={-2.5} max={2.5} step={0.01} value={selectedPci}
             onChange={e => setSelectedPci(Number(e.target.value))} className="w-full my-1.5" />
-          <div className="text-[11px] text-slate-400 mb-2">largest exports within ±{PCI_WINDOW} PCI · drag the slider or click the chart</div>
+          <div className="text-[11px] text-slate-400 mb-2">largest exports within ±{win.toFixed(2)} PCI · drag the slider or click the chart</div>
           {prods.length === 0 ? (
             <div className="text-sm text-slate-400 py-2">No products in this bin.</div>
           ) : (
