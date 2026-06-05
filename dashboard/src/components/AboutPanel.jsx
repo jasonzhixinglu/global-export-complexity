@@ -4,7 +4,7 @@ import {
 } from 'recharts'
 import { fmtPct, fmtPci, colorFor } from '../lib/format.js'
 import { axisColors, tooltipStyle } from '../lib/chartTheme.js'
-import { YearSlider } from './Controls.jsx'
+import { YearStepper } from './Controls.jsx'
 import { useDarkMode } from '../lib/useDarkMode.jsx'
 
 export default function AboutPanel({ data, year, setYear }) {
@@ -23,7 +23,7 @@ export default function AboutPanel({ data, year, setYear }) {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
       <div className="panel p-4 space-y-3">
         <div className="label">Top-N world-export coverage by complexity · {year}</div>
-        <YearSlider years={meta.years} year={year} onChange={setYear} />
+        <YearStepper years={meta.years} year={year} onChange={setYear} />
         <ResponsiveContainer width="100%" height={260}>
           <LineChart data={rows} margin={{ top: 8, right: 16, bottom: 24, left: 8 }}>
             <CartesianGrid stroke={ac.grid} strokeDasharray="3 3" />

@@ -59,27 +59,62 @@ export function YearSlider({ years, year, onChange, playable = true }) {
   )
 }
 
+// Compact year control: play · prev · dropdown · next (replaces the long slider)
+export function YearStepper({ years, year, onChange, playable = true }) {
+  const playing = useRef(false)
+  const timer = useRef(null)
+  const stop = () => { playing.current = false; if (timer.current) clearInterval(timer.current); timer.current = null }
+  useEffect(() => stop, [])
+  const i = years.indexOf(year)
+  const go = (j) => { stop(); onChange(years[Math.max(0, Math.min(years.length - 1, j))]) }
+  const togglePlay = () => {
+    if (playing.current) { stop(); return }
+    playing.current = true
+    timer.current = setInterval(() => onChange(prev => {
+      const k = years.indexOf(prev)
+      return k >= years.length - 1 ? years[0] : years[k + 1]
+    }), 650)
+  }
+  const btn = 'w-7 h-7 flex items-center justify-center rounded border border-slate-300 dark:border-slate-600 text-slate-500 hover:text-indigo-500 hover:border-indigo-400 disabled:opacity-30 disabled:hover:text-slate-500'
+  return (
+    <div className="flex items-center gap-1.5">
+      {playable && (
+        <button onClick={togglePlay} title="Play across years"
+          className="w-7 h-7 flex items-center justify-center rounded bg-indigo-600 text-white text-xs hover:bg-indigo-500">▶</button>
+      )}
+      <button onClick={() => go(i - 1)} disabled={i <= 0} className={btn} title="Previous year">‹</button>
+      <select value={year} onChange={e => { stop(); onChange(Number(e.target.value)) }}
+        className="bg-transparent border border-slate-300 dark:border-slate-600 rounded px-2 py-1 text-sm font-mono font-semibold tabular-nums">
+        {years.map(y => <option key={y} value={y}>{y}</option>)}
+      </select>
+      <button onClick={() => go(i + 1)} disabled={i >= years.length - 1} className={btn} title="Next year">›</button>
+    </div>
+  )
+}
+
 export function CountryPicker({ countries, regionsOrder, selected, onToggle, colorByIso }) {
   const byRegion = {}
   for (const c of countries) (byRegion[c.region] ||= []).push(c)
   const regions = [...regionsOrder.filter(r => byRegion[r]),
                    ...Object.keys(byRegion).filter(r => !regionsOrder.includes(r))]
   return (
-    <div className="space-y-2">
+    <div className="space-y-2.5">
       {regions.map(region => (
-        <div key={region} className="flex flex-wrap items-center gap-1.5">
-          <span className="label w-24 shrink-0">{region}</span>
-          {byRegion[region].map(c => {
-            const on = selected.includes(c.iso3)
-            return (
-              <button key={c.iso3} onClick={() => onToggle(c.iso3)}
-                className={`chip ${on ? 'chip-on' : 'chip-off'}`}>
-                {on && <span className="inline-block w-2 h-2 rounded-full mr-1 align-middle"
-                  style={{ background: colorFor(colorByIso[c.iso3]) }} />}
-                {c.iso3}
-              </button>
-            )
-          })}
+        <div key={region} className="space-y-1">
+          <div className="label">{region}</div>
+          <div className="flex flex-wrap gap-1">
+            {byRegion[region].map(c => {
+              const on = selected.includes(c.iso3)
+              return (
+                <button key={c.iso3} onClick={() => onToggle(c.iso3)}
+                  className={`chip ${on ? 'chip-on' : 'chip-off'}`}>
+                  {on && <span className="inline-block w-2 h-2 rounded-full mr-1 align-middle"
+                    style={{ background: colorFor(colorByIso[c.iso3]) }} />}
+                  {c.iso3}
+                </button>
+              )
+            })}
+          </div>
         </div>
       ))}
     </div>
