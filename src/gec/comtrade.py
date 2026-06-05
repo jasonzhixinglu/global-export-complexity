@@ -40,7 +40,18 @@ _REF = None
 
 
 def api_key():
-    return os.environ.get("COMTRADE_API_KEY") or None
+    """COMTRADE_API_KEY from the environment, or from a git-ignored repo-root .env
+    (KEY=VALUE lines). Returns None if unset."""
+    k = os.environ.get("COMTRADE_API_KEY")
+    if k:
+        return k
+    envf = cfg.ROOT / ".env"
+    if envf.exists():
+        for line in envf.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if line and not line.startswith("#") and line.split("=", 1)[0].strip() == "COMTRADE_API_KEY":
+                return line.split("=", 1)[1].strip().strip('"').strip("'") or None
+    return None
 
 
 def reporter_maps():
@@ -64,13 +75,17 @@ def atlas_pci(year=2024) -> pd.Series:
 
 
 # --- low-level pulls -------------------------------------------------------
+MAX_RECORDS = 100000  # free-tier cap per call; getFinalData defaults to None otherwise
+
+
 def _get(key, **kw):
-    """One Comtrade call: getFinalData if key present else previewFinalData (<=500)."""
+    """One Comtrade call: getFinalData if key present (up to MAX_RECORDS) else
+    previewFinalData (<=500)."""
     base = dict(typeCode="C", freqCode="A", clCode="HS", partner2Code="0",
                 customsCode="C00", motCode="0")
     base.update(kw)
     if key:
-        return ctc.getFinalData(key, **base)
+        return ctc.getFinalData(key, maxRecords=MAX_RECORDS, **base)
     return ctc.previewFinalData(**base)
 
 
