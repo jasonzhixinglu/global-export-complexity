@@ -4,10 +4,12 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Cell,
 } from 'recharts'
 import { colorFor, fmtPct, fmtB } from '../lib/format.js'
+import { MEASURES } from '../lib/data.js'
 import { axisColors, tooltipStyle } from '../lib/chartTheme.js'
+import { MeasureToggle, YearSlider } from './Controls.jsx'
 import { useDarkMode } from '../lib/useDarkMode.jsx'
 
-export default function TechPanel({ data, year, measure }) {
+export default function TechPanel({ data, year, setYear, measure, setMeasure }) {
   const { isDark } = useDarkMode()
   const t = data.techai
   const { byIso, colorByIso } = data
@@ -19,7 +21,8 @@ export default function TechPanel({ data, year, measure }) {
   if (!t) return <div className="panel p-6 text-sm text-slate-400">Tech & AI data not available.</div>
 
   const basket = t.baskets.find(b => b.id === basketId) || t.baskets[0]
-  const y = String(year)
+  const ty = Math.min(t.years[t.years.length - 1], Math.max(t.years[0], year))  // clamp to HS12 range
+  const y = String(ty)
   const world = t.worldB[basket.id]?.[y]
 
   const metric = (iso, yr) => {
@@ -31,9 +34,9 @@ export default function TechPanel({ data, year, measure }) {
   }
 
   const ranked = useMemo(() => t.countries
-    .map(iso => ({ iso, v: metric(iso, year) }))
+    .map(iso => ({ iso, v: metric(iso, ty) }))
     .filter(d => d.v != null && d.v > 0)
-    .sort((a, b) => b.v - a.v), [t, basket.id, year, m])
+    .sort((a, b) => b.v - a.v), [t, basket.id, ty, m])
 
   const topIsos = ranked.slice(0, 6).map(d => d.iso)
   const series = useMemo(() => t.years.map(yr => {
@@ -48,27 +51,34 @@ export default function TechPanel({ data, year, measure }) {
 
   return (
     <div className="space-y-3">
-      <div className="panel p-3 flex flex-wrap items-center gap-3">
-        <span className="label">Basket</span>
-        <select value={basketId} onChange={e => setBasketId(e.target.value)}
-          className="bg-transparent border border-slate-300 dark:border-slate-600 rounded px-3 py-1.5 text-sm">
-          <option value="ai">AI compute (Fed)</option>
-          <optgroup label="Semiconductor value chain (OECD)">
-            {t.baskets.filter(b => b.id === 'semi' || b.parent === 'semi').map(b => (
-              <option key={b.id} value={b.id}>{b.label}</option>
-            ))}
-          </optgroup>
-        </select>
-        <span className="text-xs text-slate-500">
-          {basket.nCodes} HS6 codes · world {fmtB(world, 1)} ({year})
-          {m === 'share' && topShare ? ` · top-3 = ${fmtPct(topShare, 0)}` : ''}
-        </span>
+      <div className="panel p-4 space-y-3">
+        <div className="flex flex-wrap items-center gap-3 justify-between">
+          <div className="flex items-center gap-2">
+            <span className="label">Basket</span>
+            <select value={basketId} onChange={e => setBasketId(e.target.value)}
+              className="bg-transparent border border-slate-300 dark:border-slate-600 rounded px-3 py-1.5 text-sm">
+              <option value="ai">AI compute (Fed)</option>
+              <optgroup label="Semiconductor value chain (OECD)">
+                {t.baskets.filter(b => b.id === 'semi' || b.parent === 'semi').map(b => (
+                  <option key={b.id} value={b.id}>{b.label}</option>
+                ))}
+              </optgroup>
+            </select>
+          </div>
+          <MeasureToggle value={measure} onChange={setMeasure} measures={MEASURES} />
+        </div>
+        <YearSlider years={t.years} year={ty} onChange={setYear} />
+        <div className="text-xs text-slate-500">
+          {basket.nCodes} HS6 codes · world {fmtB(world, 1)} ({ty}){' '}
+          {m === 'share' && topShare ? `· top-3 = ${fmtPct(topShare, 0)}` : ''}
+          {' · '}HS2012; distribution measure shown as market share for baskets.
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         <div className="panel p-3">
           <div className="label mb-2">
-            {m === 'value' ? 'Export value' : 'World market share'} — {basket.label}, {year}
+            {m === 'value' ? 'Export value' : 'World market share'} — {basket.label}, {ty}
           </div>
           <ResponsiveContainer width="100%" height={400}>
             <BarChart data={ranked.slice(0, 14)} layout="vertical" margin={{ left: 6, right: 16 }}>

@@ -1,19 +1,18 @@
-import { useDataset, MEASURES } from './lib/data.js'
+import { useDataset } from './lib/data.js'
 import { useSessionState } from './lib/sessionState.js'
 import { useDarkMode } from './lib/useDarkMode.jsx'
-import { MeasureToggle, YearSlider } from './components/Controls.jsx'
 import ExplorerPanel from './components/ExplorerPanel.jsx'
 import TechPanel from './components/TechPanel.jsx'
 import SegmentPanel from './components/SegmentPanel.jsx'
 import CountryPanel from './components/CountryPanel.jsx'
 import AboutPanel from './components/AboutPanel.jsx'
 
-const SECTIONS = [
-  { id: 'explorer', label: 'Explorer', desc: 'Distribution of exports across product complexity' },
-  { id: 'tech', label: 'Tech & AI', desc: 'AI-compute and semiconductor value-chain exports' },
-  { id: 'segment', label: 'Segment', desc: 'A complexity band, ranked across countries' },
-  { id: 'country', label: 'Country', desc: 'Single-country deep dive' },
-  { id: 'coverage', label: 'Coverage', desc: 'Top-N coverage by complexity · methodology' },
+const TABS = [
+  { id: 'explorer', label: 'Explorer', sub: 'Distribution across complexity' },
+  { id: 'tech', label: 'Tech & AI', sub: 'AI compute · semiconductors' },
+  { id: 'segment', label: 'Segment', sub: 'A complexity band across countries' },
+  { id: 'country', label: 'Country', sub: 'Single-country deep dive' },
+  { id: 'about', label: 'Coverage · About', sub: 'Coverage · Methodology' },
 ]
 
 function SunIcon() {
@@ -23,90 +22,66 @@ function MoonIcon() {
   return (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>)
 }
 
-function scrollTo(id) {
-  const el = document.getElementById(id)
-  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-}
-
-function Section({ id, label, desc, children }) {
-  return (
-    <section id={id} className="scroll-mt-32 space-y-2">
-      <div className="flex items-baseline gap-3 border-b border-slate-200 dark:border-slate-800 pb-1.5">
-        <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100">{label}</h2>
-        <span className="text-xs text-slate-400">{desc}</span>
-      </div>
-      {children}
-    </section>
-  )
-}
-
 export default function App() {
   const { data, error } = useDataset()
   const { isDark, toggle } = useDarkMode()
+  const [tab, setTab] = useSessionState('gec-tab', 'explorer')
   const [selected, setSelected] = useSessionState('gec-selected', ['CHN', 'DEU', 'JPN', 'USA'])
   const [year, setYear] = useSessionState('gec-year', 2024)
   const [measure, setMeasure] = useSessionState('gec-measure', 'share')
 
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="sticky top-0 z-20 bg-slate-50/90 dark:bg-slate-950/90 backdrop-blur border-b border-slate-200 dark:border-slate-800">
-        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6">
-          {/* title + section nav */}
-          <div className="flex items-center justify-between gap-4 py-2.5">
-            <div className="min-w-0">
-              <h1 className="text-[15px] font-semibold leading-tight">Global Export Complexity</h1>
-              <p className="text-[11px] text-slate-500 leading-tight">Exports across the Product Complexity Index · 2000–2024 · Atlas of Economic Complexity</p>
-            </div>
-            <nav className="hidden md:flex items-center gap-1">
-              {SECTIONS.map(s => (
-                <button key={s.id} onClick={() => scrollTo(s.id)} className="tab-btn tab-btn-inactive">{s.label}</button>
+      <header className="border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-3">
+        <div className="max-w-screen-2xl mx-auto flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-base font-semibold leading-tight">Global Export Complexity</h1>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Exports across the Product Complexity Index · 2000–2024 · Atlas of Economic Complexity
+            </p>
+          </div>
+          <div className="flex items-start gap-2 flex-shrink-0">
+            <nav className="grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap">
+              {TABS.map(t => (
+                <button key={t.id} onClick={() => setTab(t.id)}
+                  className={`tab-btn text-left ${tab === t.id ? 'tab-btn-active' : 'tab-btn-inactive'}`}>
+                  <div>{t.label}</div>
+                  <div className={`text-xs mt-0.5 font-normal hidden lg:block ${tab === t.id ? 'text-indigo-200' : 'text-slate-400 dark:text-slate-600'}`}>{t.sub}</div>
+                </button>
               ))}
             </nav>
-            <button onClick={toggle} className="shrink-0 p-2 rounded text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Toggle theme">
+            <button onClick={toggle} className="shrink-0 p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Toggle theme">
               {isDark ? <SunIcon /> : <MoonIcon />}
             </button>
           </div>
-          {/* shared control bar */}
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 py-2 border-t border-slate-200/70 dark:border-slate-800/70">
-            <div className="flex items-center gap-2">
-              <span className="label">Measure</span>
-              <MeasureToggle value={measure} onChange={setMeasure} measures={MEASURES} />
-            </div>
-            <div className="flex items-center gap-2 flex-1 min-w-[260px]">
-              <YearSlider years={data?.meta.years || [2000, 2024]} year={year} onChange={setYear} />
-            </div>
-          </div>
         </div>
-      </div>
+      </header>
 
       <main className="flex-1 px-4 sm:px-6 py-5">
-        <div className="max-w-screen-2xl mx-auto space-y-8">
+        <div className="max-w-screen-2xl mx-auto">
           {error && <div className="panel p-6 text-sm text-rose-500">Failed to load data: {String(error.message || error)}</div>}
           {!data && !error && <div className="panel p-10 text-center text-slate-400">Loading data…</div>}
-          {data && (
-            <>
-              <Section {...SECTIONS[0]}>
-                <ExplorerPanel data={data} selected={selected} setSelected={setSelected} year={year} measure={measure} />
-              </Section>
-              <Section {...SECTIONS[1]}>
-                <TechPanel data={data} year={year} measure={measure} />
-              </Section>
-              <Section {...SECTIONS[2]}>
-                <SegmentPanel data={data} year={year} measure={measure} />
-              </Section>
-              <Section {...SECTIONS[3]}>
-                <CountryPanel data={data} year={year} measure={measure} />
-              </Section>
-              <Section {...SECTIONS[4]}>
-                <AboutPanel data={data} year={year} />
-              </Section>
-            </>
+          {data && tab === 'explorer' && (
+            <ExplorerPanel data={data} selected={selected} setSelected={setSelected}
+              year={year} setYear={setYear} measure={measure} setMeasure={setMeasure} />
+          )}
+          {data && tab === 'tech' && (
+            <TechPanel data={data} year={year} setYear={setYear} measure={measure} setMeasure={setMeasure} />
+          )}
+          {data && tab === 'segment' && (
+            <SegmentPanel data={data} year={year} setYear={setYear} measure={measure} setMeasure={setMeasure} />
+          )}
+          {data && tab === 'country' && (
+            <CountryPanel data={data} year={year} setYear={setYear} measure={measure} setMeasure={setMeasure} />
+          )}
+          {data && tab === 'about' && (
+            <AboutPanel data={data} year={year} setYear={setYear} />
           )}
         </div>
       </main>
 
       <footer className="border-t border-slate-200 dark:border-slate-800 px-6 py-3 text-xs text-slate-400">
-        Data: Harvard Growth Lab, Atlas of Economic Complexity (HS92 · HS12). Built from the project pipeline.
+        Data: Harvard Growth Lab, Atlas of Economic Complexity (HS92). Built from the project pipeline.
       </footer>
     </div>
   )
