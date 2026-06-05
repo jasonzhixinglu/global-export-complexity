@@ -15,15 +15,15 @@ export function fmtPci(x) {
   return (x >= 0 ? '+' : '') + x.toFixed(2)
 }
 
-// Categorical palette — saturated and vivid (not pastel), readable on dark.
-// First four are the defaults (CHN / USA / DEU / JPN): blue / red / green / amber.
+// Bright, full-spectrum categorical palette (blue→orange→green→pink→yellow→teal→
+// purple→cyan→lime…), readable on dark. First four = CHN / USA / DEU / JPN.
 export const PALETTE = [
-  '#2563eb', '#dc2626', '#16a34a', '#d97706', '#7c3aed',
-  '#0891b2', '#db2777', '#65a30d', '#ea580c', '#4f46e5',
-  '#0d9488', '#ca8a04', '#e11d48', '#0284c7', '#15803d',
-  '#9333ea', '#c2410c', '#be185d', '#047857', '#b45309',
-  '#1d4ed8', '#b91c1c', '#4d7c0f', '#a21caf', '#0369a1',
-  '#7e22ce', '#dc2626', '#059669', '#d97706', '#6d28d9',
+  '#3b82f6', '#f97316', '#22c55e', '#ec4899', '#eab308',
+  '#14b8a6', '#a855f7', '#ef4444', '#22d3ee', '#84cc16',
+  '#8b5cf6', '#fb7185', '#10b981', '#f59e0b', '#d946ef',
+  '#0ea5e9', '#f43f5e', '#4ade80', '#facc15', '#2dd4bf',
+  '#93c5fd', '#fdba74', '#86efac', '#f9a8d4', '#fde047',
+  '#5eead4', '#d8b4fe', '#a5f3fc', '#bef264', '#fda4af',
 ]
 
 export function colorFor(index) {

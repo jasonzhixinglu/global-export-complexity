@@ -5,7 +5,7 @@ import {
 } from 'recharts'
 import { colorFor, fmtPct, fmtB } from '../lib/format.js'
 import { axisColors, tooltipStyle } from '../lib/chartTheme.js'
-import { Toggle, YearSlider } from './Controls.jsx'
+import { Toggle, YearStepper } from './Controls.jsx'
 import { useDarkMode } from '../lib/useDarkMode.jsx'
 
 const METRICS = [
@@ -78,7 +78,7 @@ export default function TechPanel({ data, year, setYear }) {
           </div>
           <Toggle value={tm} onChange={setTm} options={METRICS} />
         </div>
-        <YearSlider years={t.years} year={ty} onChange={setYear} />
+        <YearStepper years={t.years} year={ty} onChange={setYear} />
         <div className="text-xs text-slate-500">
           {basket.nCodes} HS6 codes · world {fmtB(world, 1)} ({ty}){' '}
           {tm === 'share' && topShare ? `· top-3 = ${fmtPct(topShare, 0)} of world` : ''}
