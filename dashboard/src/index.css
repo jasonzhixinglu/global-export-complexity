@@ -12,7 +12,7 @@
 
 @layer components {
   .panel {
-    @apply bg-white border border-slate-300/80 rounded-md dark:bg-slate-900 dark:border-slate-700/70;
+    @apply bg-white border border-slate-200 rounded-md dark:bg-slate-900 dark:border-slate-700/70;
   }
   .card {
     @apply bg-slate-100/60 border border-slate-300/60 rounded dark:bg-slate-800/50 dark:border-slate-700/60;
@@ -38,10 +38,13 @@
   .chip-off {
     @apply bg-transparent text-slate-600 border-slate-300 hover:border-indigo-400 dark:text-slate-300 dark:border-slate-600 dark:hover:border-indigo-500;
   }
+  .seg-group {
+    @apply inline-flex rounded border border-slate-300 dark:border-slate-600 overflow-hidden;
+  }
   .seg-btn {
-    @apply text-xs px-3 py-1 rounded border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300;
+    @apply text-xs px-3 py-1 text-slate-500 dark:text-slate-300 border-r border-slate-300 dark:border-slate-600 last:border-r-0 hover:text-slate-800 dark:hover:text-white transition-colors;
   }
   .seg-btn-on {
-    @apply bg-indigo-600 text-white border-indigo-600;
+    @apply bg-indigo-600 text-white hover:text-white;
   }
 }
