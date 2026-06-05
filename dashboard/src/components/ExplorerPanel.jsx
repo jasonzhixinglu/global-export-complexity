@@ -9,7 +9,7 @@ import { axisColors, tooltipStyle } from '../lib/chartTheme.js'
 import { MeasureToggle, Toggle, YearSlider, CountryPicker, PciAxisLegend } from './Controls.jsx'
 import { useDarkMode } from '../lib/useDarkMode.jsx'
 
-export default function ExplorerPanel({ data, selected, setSelected, year, measure }) {
+export default function ExplorerPanel({ data, selected, setSelected, year, setYear, measure, setMeasure }) {
   const { isDark } = useDarkMode()
   const { meta, colorByIso, byIso } = data
   const stackable = MEASURES[measure].stack
@@ -30,14 +30,21 @@ export default function ExplorerPanel({ data, selected, setSelected, year, measu
 
   return (
     <div className="space-y-3">
-      <div className="panel p-3">
-        <div className="flex flex-wrap items-center gap-3 justify-between mb-2">
-          {stackable
-            ? <Toggle value={display} onChange={setDisplay}
+      <div className="panel p-3 space-y-2.5">
+        <div className="flex flex-wrap items-center gap-3 justify-between">
+          <div className="flex flex-wrap items-center gap-3">
+            <MeasureToggle value={measure} onChange={setMeasure} measures={MEASURES} />
+            {stackable && (
+              <Toggle value={display} onChange={setDisplay}
                 options={[{ value: 'stack', label: 'Stacked' }, { value: 'line', label: 'Lines' }]} />
-            : <span />}
-          <span className="text-xs text-slate-500">{MEASURES[measure].unit} · {year}</span>
+            )}
+          </div>
+          <span className="text-xs text-slate-500">{MEASURES[measure].unit}</span>
         </div>
+        <YearSlider years={meta.years} year={year} onChange={setYear} />
+      </div>
+
+      <div className="panel p-3">
         <ResponsiveContainer width="100%" height={440}>
           {mode === 'stack' ? (
             <AreaChart data={rows} margin={{ top: 8, right: 16, bottom: 24, left: 8 }}>

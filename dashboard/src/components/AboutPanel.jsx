@@ -7,7 +7,7 @@ import { axisColors, tooltipStyle } from '../lib/chartTheme.js'
 import { YearSlider } from './Controls.jsx'
 import { useDarkMode } from '../lib/useDarkMode.jsx'
 
-export default function AboutPanel({ data, year }) {
+export default function AboutPanel({ data, year, setYear }) {
   const { isDark } = useDarkMode()
   const { coverage, meta } = data
   const ac = axisColors(isDark)
@@ -22,7 +22,8 @@ export default function AboutPanel({ data, year }) {
   return (
     <div className="space-y-4">
       <div className="panel p-4 space-y-3">
-        <div className="label">Cumulative world-export coverage of the top-N exporters, by complexity · {year}</div>
+        <div className="label">Cumulative world-export coverage of the top-N exporters, by complexity</div>
+        <YearSlider years={meta.years} year={year} onChange={setYear} />
         <ResponsiveContainer width="100%" height={380}>
           <LineChart data={rows} margin={{ top: 8, right: 16, bottom: 24, left: 8 }}>
             <CartesianGrid stroke={ac.grid} strokeDasharray="3 3" />

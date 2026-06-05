@@ -30,7 +30,7 @@ function Stat({ label, value, sub }) {
   )
 }
 
-export default function CountryPanel({ data, year, measure }) {
+export default function CountryPanel({ data, year, setYear, measure, setMeasure }) {
   const { isDark } = useDarkMode()
   const { meta, byIso, colorByIso } = data
   const [iso, setIso] = useState(meta.countries[0]?.iso3 || 'CHN')
@@ -50,12 +50,15 @@ export default function CountryPanel({ data, year, measure }) {
 
   return (
     <div className="space-y-4">
-      <div className="panel p-3 flex flex-wrap items-center gap-2">
-        <span className="label">Country</span>
-        <select value={iso} onChange={e => setIso(e.target.value)}
-          className="bg-transparent border border-slate-300 dark:border-slate-600 rounded px-3 py-1.5 text-sm">
-          {meta.countries.map(c => <option key={c.iso3} value={c.iso3}>{c.name} ({c.iso3})</option>)}
-        </select>
+      <div className="panel p-4 flex flex-wrap items-center gap-3 justify-between">
+        <div className="flex items-center gap-3">
+          <select value={iso} onChange={e => setIso(e.target.value)}
+            className="bg-transparent border border-slate-300 dark:border-slate-600 rounded-md px-3 py-1.5 text-sm">
+            {meta.countries.map(c => <option key={c.iso3} value={c.iso3}>{c.name} ({c.iso3})</option>)}
+          </select>
+          <MeasureToggle value={measure} onChange={setMeasure} measures={MEASURES} />
+        </div>
+        <div className="min-w-[280px] flex-1"><YearSlider years={meta.years} year={year} onChange={setYear} /></div>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
