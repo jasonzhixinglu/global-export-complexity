@@ -126,7 +126,7 @@ sub-interval allocation is the irreducible, quantified smoothing trade-off.
 | `YEARS` | 2000–2024 | analysis window |
 | `N_TOP` | 30 | countries tracked for per-country panels |
 | `COVER_THRESHOLDS` | 20, 30, 50 | cumulative-coverage thresholds |
-| `BANDWIDTH` / `H_DIST` | 0.15 | kernel bandwidth (PCI units), shares / distribution |
+| `BANDWIDTH` / `H_DIST` | 0.10 | kernel bandwidth (PCI units), shares / distribution |
 | `BIN_WIDTH` | 0.25 | PCI bin width for the conservation diagnostic |
 
 Bandwidth sets the smoothness/redistribution trade-off; the *exact* properties (adding-up, total

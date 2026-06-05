@@ -28,8 +28,7 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
   const cOf = (iso) => colorOf[iso] || '#94a3b8'
 
   // PCI drill-down: within a window around the selected PCI, the 10 LARGEST products by
-  // export value (avoids surfacing tiny niche products that merely sit at the target),
-  // displayed high -> low complexity. Continuous window so the list shifts as you move it.
+  // export value (continuous window, so the list shifts as you move the selector).
   const PCI_WINDOW = 0.1
   const pp = data.pciProducts
   const prods = useMemo(() => {
@@ -38,7 +37,6 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
       .filter(p => Math.abs(p[1] - selectedPci) <= PCI_WINDOW)
       .sort((a, b) => b[2] - a[2]).slice(0, 10)
       .map(p => ({ hs4: p[0], pci: p[1], val: p[2] }))
-      .sort((a, b) => b.pci - a.pci)
   }, [pp, year, selectedPci])
   const maxVal = prods.length ? Math.max(...prods.map(p => p.val)) : 1
   const onPick = (e) => { if (e && e.activeLabel != null) setSelectedPci(Number(e.activeLabel)) }
