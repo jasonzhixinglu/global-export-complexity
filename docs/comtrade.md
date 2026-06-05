@@ -25,11 +25,21 @@ the live API — so the limits are explicit.
 
 `--mode auto` (default) tries direct, then falls back to mirror per country.
 
+## API key
+
+The **free** tier is sufficient — premium (bulk) is not needed. Register a B2C account at
+<https://comtradedeveloper.un.org/>, subscribe to the **free** product under */products* (auto-
+approved), and copy the subscription key. Free limits: **100k records/call, 500 calls/day**.
+
+Our pulls fit comfortably: direct ≈1.2k rows/country, mirror ≈60–70k rows (one call). A full
+world-denominator pull (~240k rows) exceeds 100k/call and must be chunked into ~3 calls (still
+free). Premium (shop.un.org/comtrade) is only for million-row bulk files.
+
 ## Usage
 
 ```bash
-# free registered key from https://comtradeplus.un.org/  (recommended)
-set COMTRADE_API_KEY=...                          # PowerShell: $env:COMTRADE_API_KEY="..."
+# free key from https://comtradedeveloper.un.org/  -> /products -> free
+$env:COMTRADE_API_KEY="..."                        # bash: export COMTRADE_API_KEY=...
 python scripts/fetch_comtrade.py --year 2025 --reporters top30
 python scripts/fetch_comtrade.py --year 2024 --reporters CHN,USA,DEU --mode auto
 ```
