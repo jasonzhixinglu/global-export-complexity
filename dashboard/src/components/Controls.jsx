@@ -3,7 +3,7 @@ import { colorFor, fmtPci } from '../lib/format.js'
 
 export function MeasureToggle({ value, onChange, measures }) {
   return (
-    <div className="inline-flex gap-1">
+    <div className="seg-group">
       {Object.entries(measures).map(([k, m]) => (
         <button key={k} onClick={() => onChange(k)}
           className={`seg-btn ${value === k ? 'seg-btn-on' : ''}`} title={m.unit}>
@@ -16,7 +16,7 @@ export function MeasureToggle({ value, onChange, measures }) {
 
 export function Toggle({ value, onChange, options }) {
   return (
-    <div className="inline-flex gap-1">
+    <div className="seg-group">
       {options.map(o => (
         <button key={o.value} onClick={() => onChange(o.value)}
           className={`seg-btn ${value === o.value ? 'seg-btn-on' : ''}`}>
@@ -92,31 +92,44 @@ export function YearStepper({ years, year, onChange, playable = true }) {
   )
 }
 
-export function CountryPicker({ countries, regionsOrder, selected, onToggle, colorByIso }) {
+export function CountryPicker({ countries, regionsOrder, selected, onToggle, onToggleRegion, colorOf, query = '' }) {
+  const q = query.trim().toLowerCase()
+  const match = c => !q || c.iso3.toLowerCase().includes(q) || c.name.toLowerCase().includes(q)
   const byRegion = {}
-  for (const c of countries) (byRegion[c.region] ||= []).push(c)
+  for (const c of countries) if (match(c)) (byRegion[c.region] ||= []).push(c)
   const regions = [...regionsOrder.filter(r => byRegion[r]),
                    ...Object.keys(byRegion).filter(r => !regionsOrder.includes(r))]
   return (
     <div className="space-y-2.5">
-      {regions.map(region => (
-        <div key={region} className="space-y-1">
-          <div className="label">{region}</div>
-          <div className="flex flex-wrap gap-1">
-            {byRegion[region].map(c => {
-              const on = selected.includes(c.iso3)
-              return (
-                <button key={c.iso3} onClick={() => onToggle(c.iso3)}
-                  className={`chip ${on ? 'chip-on' : 'chip-off'}`}>
-                  {on && <span className="inline-block w-2 h-2 rounded-full mr-1 align-middle"
-                    style={{ background: colorFor(colorByIso[c.iso3]) }} />}
-                  {c.iso3}
-                </button>
-              )
-            })}
+      {regions.map(region => {
+        const list = byRegion[region]
+        const sel = list.filter(c => selected.includes(c.iso3)).length
+        return (
+          <div key={region} className="space-y-1">
+            <div className="flex items-center justify-between">
+              <div className="label">{region}{' '}
+                <span className="text-slate-400 normal-case font-normal">{sel}/{list.length}</span></div>
+              {onToggleRegion && (
+                <button onClick={() => onToggleRegion(list.map(c => c.iso3), sel < list.length)}
+                  className="text-[10px] text-slate-400 hover:text-indigo-500">{sel < list.length ? 'All' : 'None'}</button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {list.map(c => {
+                const on = selected.includes(c.iso3)
+                return (
+                  <button key={c.iso3} onClick={() => onToggle(c.iso3)} title={c.name}
+                    className={`chip ${on ? 'chip-on' : 'chip-off'}`}>
+                    {on && colorOf && <span className="inline-block w-2 h-2 rounded-full mr-1 align-middle"
+                      style={{ background: colorOf(c.iso3) }} />}
+                    {c.iso3}
+                  </button>
+                )
+              })}
+            </div>
           </div>
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }

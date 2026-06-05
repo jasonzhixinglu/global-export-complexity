@@ -49,7 +49,7 @@ HS12_HS6_CSV = RAW_DIR / "hs12_country_product_year_6.csv"
 
 # --- analysis constants ----------------------------------------------------
 YEARS = list(range(2000, 2025))   # 2000-2024 inclusive
-N_TOP = 30                        # number of top exporters to track (per-country panels)
+N_TOP = 50                        # number of top exporters to track (per-country panels)
 COVER_THRESHOLDS = [20, 30, 50]   # cumulative-coverage thresholds to report
 SNAPSHOT_YEARS = [2000, 2008, 2012, 2018, 2024]
 FOCUS_COUNTRIES = ["CHN", "USA", "DEU", "JPN", "KOR", "MEX"]  # for readable line plots

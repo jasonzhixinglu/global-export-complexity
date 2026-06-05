@@ -41,6 +41,17 @@ COUNTRY_META = {
     "ARE": ("UAE", "Middle East"), "VNM": ("Vietnam", "Asia-Pacific"),
     "IDN": ("Indonesia", "Asia-Pacific"), "SWE": ("Sweden", "Europe"),
     "IRL": ("Ireland", "Europe"), "AUT": ("Austria", "Europe"),
+    # ranks ~31-50
+    "TUR": ("Turkey", "Middle East"), "HKG": ("Hong Kong", "Asia-Pacific"),
+    "CZE": ("Czechia", "Europe"), "NOR": ("Norway", "Europe"),
+    "HUN": ("Hungary", "Europe"), "ZAF": ("South Africa", "Africa"),
+    "DNK": ("Denmark", "Europe"), "FIN": ("Finland", "Europe"),
+    "QAT": ("Qatar", "Middle East"), "PHL": ("Philippines", "Asia-Pacific"),
+    "SVK": ("Slovakia", "Europe"), "CHL": ("Chile", "Americas"),
+    "ARG": ("Argentina", "Americas"), "ROU": ("Romania", "Europe"),
+    "NGA": ("Nigeria", "Africa"), "PRT": ("Portugal", "Europe"),
+    "ISR": ("Israel", "Middle East"), "IRN": ("Iran", "Middle East"),
+    "IRQ": ("Iraq", "Middle East"), "KWT": ("Kuwait", "Middle East"),
 }
 
 # HS2 chapter -> short label, for anchor product readability
@@ -92,7 +103,7 @@ def main():
     thresholds = [int(t) for t in s["cover_thresholds"]]
 
     # --- meta ---
-    regions_order = ["Asia-Pacific", "Europe", "Americas", "Middle East", "Europe/CIS", "Oceania"]
+    regions_order = ["Asia-Pacific", "Europe", "Americas", "Middle East", "Europe/CIS", "Africa", "Oceania"]
     cmeta = []
     for c in countries:
         name, region = COUNTRY_META.get(c, (c, "Other"))
