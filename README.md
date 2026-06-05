@@ -21,15 +21,17 @@ src/gec/            importable package
   data.py           load / clean / rank exporters / aggregate to product level
   estimators.py     local-linear shares, KDE, mass-conserving bins, calibration
   plotting.py       headless matplotlib helpers
+  comtrade.py       UN Comtrade pulls (direct + mirror) + Atlas-PCI proxy
 scripts/            runnable entry points
   download_data.py    fetch raw CSV from Harvard Dataverse
   compute_surfaces.py compute & cache all surfaces -> data/derived/
   make_figures.py     render figures -> results/figures/
   run_diagnostics.py  conservation & adding-up checks -> figures + results/tables/
   run_all.py          the four steps above, in order
+  fetch_comtrade.py   pull recent-year HS4 exports from UN Comtrade (see docs/comtrade.md)
 data/               git-ignored; raw/ (download) + derived/ (cached). See data/README.md
 results/            committed outputs: figures/ and tables/
-docs/               analysis.md — data, methodology, findings (single write-up)
+docs/               analysis.md (data, methodology, findings) · comtrade.md (recent-year extension)
 legacy/             the original exploratory notebook (superseded)
 ```
 
@@ -55,3 +57,11 @@ Tune the analysis in `src/gec/config.py` (e.g. `N_TOP`, `COVER_THRESHOLDS`, band
 Data provenance and the upstream harmonization that makes the accounting hold (BACI /
 Bustos–Yildirim mirror reconciliation) are documented in [`docs/analysis.md`](docs/analysis.md)
 (§2) and [`data/README.md`](data/README.md).
+
+## Recent years (UN Comtrade)
+
+The Atlas lags ~1.5 years. To peek at more recent years, `scripts/fetch_comtrade.py` pulls HS4
+exports from UN Comtrade (direct, or **mirror** from partners for late filers like China) and
+attaches an Atlas PCI proxy. Findings and limits — 2025 is partial, raw/unreconciled, no native PCI,
+served only in newer HS revisions (~97% maps to HS92) — are in [`docs/comtrade.md`](docs/comtrade.md).
+A free Comtrade API key is recommended for full pulls.
