@@ -15,14 +15,15 @@ export function fmtPci(x) {
   return (x >= 0 ? '+' : '') + x.toFixed(2)
 }
 
-// 20-colour categorical palette (distinct in light & dark)
+// Categorical palette — clean, distinct, readable on dark. First four are the defaults
+// (CHN / USA / DEU / JPN): blue / red / green / gold.
 export const PALETTE = [
-  '#ef4444', '#3b82f6', '#22c55e', '#a855f7', '#f59e0b',
-  '#06b6d4', '#ec4899', '#84cc16', '#f97316', '#8b5cf6',
-  '#14b8a6', '#eab308', '#f43f5e', '#0ea5e9', '#10b981',
-  '#d946ef', '#fb7185', '#65a30d', '#fbbf24', '#2dd4bf',
-  '#60a5fa', '#c084fc', '#4ade80', '#facc15', '#fca5a5',
-  '#34d399', '#a78bfa', '#fdba74', '#67e8f9', '#fda4af',
+  '#5B8FF9', '#E8684A', '#5AD8A6', '#F6BD16', '#9270CA',
+  '#6DC8EC', '#FF9D4D', '#FF99C3', '#269A99', '#5D7092',
+  '#3B7DD8', '#E76A3C', '#46B98E', '#E0A800', '#7E5FB0',
+  '#56AEDC', '#E08E50', '#D45B9E', '#2E8B8B', '#8694B0',
+  '#7E84F7', '#84C262', '#C76F6F', '#73C0DE', '#B58CE0',
+  '#4FB3A1', '#F2A0A0', '#9FD356', '#FBC02D', '#A0AEC0',
 ]
 
 export function colorFor(index) {

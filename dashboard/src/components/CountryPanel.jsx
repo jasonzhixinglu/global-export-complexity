@@ -73,11 +73,11 @@ export default function CountryPanel({ data, year, setYear, measure, setMeasure 
         <div className="label mb-2">{byIso[iso].name} — {MEASURES[measure].label} across complexity, {year}</div>
         <ResponsiveContainer width="100%" height={340}>
           <AreaChart data={rows} margin={{ top: 8, right: 16, bottom: 24, left: 8 }}>
-            <CartesianGrid stroke={ac.grid} strokeDasharray="3 3" />
-            <XAxis dataKey="pci" type="number" domain={['dataMin', 'dataMax']} tickFormatter={fmtPci}
-              tick={{ fill: ac.tick, fontSize: 11 }}
-              label={{ value: 'PCI', position: 'insideBottom', offset: -12, fill: ac.tick, fontSize: 12 }} />
-            <YAxis tick={{ fill: ac.tick, fontSize: 11 }} tickFormatter={yfmt} width={52} />
+            <CartesianGrid stroke={ac.grid} strokeDasharray="2 2" />
+            <XAxis dataKey="pci" type="number" domain={['dataMin', 'dataMax']} tickFormatter={fmtPci} tickCount={11}
+              tick={{ fill: ac.tick, fontSize: 10 }}
+              label={{ value: 'PCI', position: 'insideBottom', offset: -12, fill: ac.tick, fontSize: 11 }} />
+            <YAxis tick={{ fill: ac.tick, fontSize: 10 }} tickFormatter={yfmt} width={48} tickCount={9} />
             <ReferenceLine x={0} stroke={ac.grid} />
             <Tooltip contentStyle={tooltipStyle(isDark)} labelFormatter={(p) => `PCI ${fmtPci(p)}`}
               formatter={(v) => [vfmt(v), MEASURES[measure].label]} />
