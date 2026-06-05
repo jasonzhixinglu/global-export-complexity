@@ -3,7 +3,7 @@ import { colorFor, fmtPci } from '../lib/format.js'
 
 export function MeasureToggle({ value, onChange, measures }) {
   return (
-    <div className="seg">
+    <div className="inline-flex gap-1">
       {Object.entries(measures).map(([k, m]) => (
         <button key={k} onClick={() => onChange(k)}
           className={`seg-btn ${value === k ? 'seg-btn-on' : ''}`} title={m.unit}>
@@ -16,7 +16,7 @@ export function MeasureToggle({ value, onChange, measures }) {
 
 export function Toggle({ value, onChange, options }) {
   return (
-    <div className="seg">
+    <div className="inline-flex gap-1">
       {options.map(o => (
         <button key={o.value} onClick={() => onChange(o.value)}
           className={`seg-btn ${value === o.value ? 'seg-btn-on' : ''}`}>
@@ -47,16 +47,14 @@ export function YearSlider({ years, year, onChange, playable = true }) {
     <div className="flex items-center gap-3 w-full">
       {playable && (
         <button onClick={togglePlay}
-          className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-indigo-600 text-white text-xs hover:bg-indigo-500 transition-colors shadow-sm shadow-indigo-900/30"
-          title="Play / pause across years">
+          className="seg-btn seg-btn-on shrink-0 w-9 text-center" title="Play / pause across years">
           ▶
         </button>
       )}
-      <span className="label hidden sm:block">Year</span>
       <input type="range" min={years[0]} max={years[years.length - 1]} step={1} value={year}
         onChange={e => { stop(); onChange(Number(e.target.value)) }}
-        className="flex-1" />
-      <span className="font-mono text-base font-semibold w-14 text-right tabular-nums">{year}</span>
+        className="flex-1 accent-indigo-600" />
+      <span className="font-mono text-sm font-semibold w-12 text-right">{year}</span>
     </div>
   )
 }

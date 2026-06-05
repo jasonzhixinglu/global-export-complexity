@@ -6,68 +6,42 @@
 
 @layer base {
   body {
-    @apply bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100;
-  }
-  /* App background: subtle radial wash for depth */
-  body.dark, .dark body {
-    background-image: radial-gradient(900px 500px at 85% -8%, rgba(99,102,241,0.10), transparent 60%);
-    background-attachment: fixed;
+    @apply bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-white;
   }
 }
 
 @layer components {
   .panel {
-    @apply bg-white border border-slate-200 rounded-2xl shadow-sm
-           dark:bg-slate-900/70 dark:border-slate-700/60 dark:shadow-none;
-    backdrop-filter: blur(2px);
+    @apply bg-white border border-slate-300/80 rounded-xl dark:bg-slate-900 dark:border-slate-600/60;
   }
   .card {
-    @apply bg-slate-50 border border-slate-200 rounded-xl dark:bg-slate-800/50 dark:border-slate-700/50;
+    @apply bg-slate-100/60 border border-slate-300/60 rounded-lg dark:bg-slate-800/60 dark:border-slate-600/50;
   }
   .label {
-    @apply text-[11px] font-semibold tracking-wider text-slate-400 uppercase dark:text-slate-500;
+    @apply text-xs font-medium tracking-wide text-slate-500 uppercase dark:text-slate-400;
   }
   .tab-btn {
-    @apply px-3.5 py-2 text-sm font-medium rounded-lg transition-all duration-150;
+    @apply px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150;
   }
   .tab-btn-active {
-    @apply bg-indigo-600 text-white shadow-md shadow-indigo-900/30;
+    @apply bg-indigo-600 text-white shadow-lg shadow-indigo-900/40;
   }
   .tab-btn-inactive {
-    @apply text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-100 dark:hover:bg-slate-800/70;
+    @apply text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800;
   }
   .chip {
-    @apply text-xs px-2.5 py-1 rounded-full border font-medium transition-all duration-100 cursor-pointer select-none;
+    @apply text-xs px-2 py-1 rounded-md border transition-all cursor-pointer select-none;
   }
   .chip-on {
-    @apply bg-indigo-600 text-white border-indigo-600 shadow-sm shadow-indigo-900/30;
+    @apply bg-indigo-600 text-white border-indigo-600;
   }
   .chip-off {
-    @apply bg-transparent text-slate-500 border-slate-300 hover:border-indigo-400 hover:text-slate-700
-           dark:text-slate-400 dark:border-slate-700 dark:hover:border-indigo-500 dark:hover:text-slate-200;
-  }
-  .seg {
-    @apply inline-flex p-0.5 rounded-lg bg-slate-100 border border-slate-200 dark:bg-slate-800/60 dark:border-slate-700/60;
+    @apply bg-transparent text-slate-600 border-slate-300 hover:border-indigo-400 dark:text-slate-300 dark:border-slate-600 dark:hover:border-indigo-500;
   }
   .seg-btn {
-    @apply text-xs px-3 py-1.5 rounded-md font-medium text-slate-500 dark:text-slate-400 transition-all duration-100;
+    @apply text-xs px-3 py-1.5 rounded-md border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300;
   }
   .seg-btn-on {
-    @apply bg-white text-indigo-600 shadow-sm dark:bg-slate-700 dark:text-white;
+    @apply bg-indigo-600 text-white border-indigo-600;
   }
-  .panel-title {
-    @apply text-sm font-semibold text-slate-800 dark:text-slate-100;
-  }
-}
-
-/* Range slider polish */
-input[type='range'] {
-  @apply h-1.5 rounded-full appearance-none bg-slate-200 dark:bg-slate-700;
-}
-input[type='range']::-webkit-slider-thumb {
-  @apply appearance-none w-4 h-4 rounded-full bg-indigo-600 cursor-pointer;
-  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.18);
-}
-input[type='range']::-moz-range-thumb {
-  @apply w-4 h-4 rounded-full bg-indigo-600 cursor-pointer border-0;
 }
