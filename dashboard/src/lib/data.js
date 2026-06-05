@@ -34,20 +34,22 @@ export function useDataset() {
 }
 
 // Build chart rows: array over the chosen grid, each row {pci, [iso3]: value}.
-// measure: 'share' | 'value' | 'density'
-export function buildRows(data, isos, year, measure) {
+// measure: 'share' | 'value' | 'density'; level: smoothness id ('low'|'med'|'high')
+export function buildRows(data, isos, year, measure, level = 'med') {
   const { meta, series } = data
   const grid = measure === 'share' ? meta.shareGrid : meta.kdeGrid
   const y = String(year)
+  const sh = series.share[level] || series.share.med || series.share
+  const de = series.density[level] || series.density.med || series.density
   return grid.map((pci, gi) => {
     const row = { pci }
     for (const iso of isos) {
       if (measure === 'share') {
-        row[iso] = series.share[iso]?.[y]?.[gi] ?? null
+        row[iso] = sh[iso]?.[y]?.[gi] ?? null
       } else if (measure === 'density') {
-        row[iso] = series.density[iso]?.[y]?.[gi] ?? null
+        row[iso] = de[iso]?.[y]?.[gi] ?? null
       } else { // value = density * total ($B)
-        const d = series.density[iso]?.[y]?.[gi]
+        const d = de[iso]?.[y]?.[gi]
         const t = series.totalB[iso]?.[y]
         row[iso] = (d != null && t != null) ? d * t : null
       }

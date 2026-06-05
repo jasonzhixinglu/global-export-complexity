@@ -16,9 +16,11 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
   const [display, setDisplay] = useState('stack')
   const [selectedPci, setSelectedPci] = useState(1.0)
   const [q, setQ] = useState('')
+  const [level, setLevel] = useState(meta.defaultLevel || 'med')
   const mode = stackable && display === 'stack' ? 'stack' : 'line'
 
-  const rows = useMemo(() => buildRows(data, selected, year, measure), [data, selected, year, measure])
+  const rows = useMemo(() => buildRows(data, selected, year, measure, level),
+    [data, selected, year, measure, level])
   const ac = axisColors(isDark)
 
   // colour by position in the current selection (stable, no global-index collisions)
@@ -29,19 +31,19 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
 
   // PCI drill-down: within a window around the selected PCI, the 10 LARGEST products by
   // export value (continuous window, so the list shifts as you move the selector).
-  const PCI_WINDOW = 0.02
+  // window scales with the smoothness level (tight at Low, wide at High); widen adaptively
+  // until it holds ~10 products so sparse high-PCI regions still fill, then show 10 largest.
+  const baseWin = meta.smoothing?.find(s => s.id === level)?.win ?? 0.02
   const pp = data.pciProducts
-  // start at ±0.02; if fewer than 10 products fall in the window, widen until it has 10
-  // (so sparse high-PCI regions still fill), then show the 10 largest by value.
   const { prods, win } = useMemo(() => {
     const list = pp?.byYear?.[String(year)] || []
-    if (!list.length) return { prods: [], win: PCI_WINDOW }
-    let w = PCI_WINDOW
+    if (!list.length) return { prods: [], win: baseWin }
+    let w = baseWin
     let cand = list.filter(p => Math.abs(p[1] - selectedPci) <= w)
-    while (cand.length < 10 && w < 1.5) { w += 0.02; cand = list.filter(p => Math.abs(p[1] - selectedPci) <= w) }
+    while (cand.length < 10 && w < 1.5) { w += baseWin; cand = list.filter(p => Math.abs(p[1] - selectedPci) <= w) }
     const prods = cand.sort((a, b) => b[2] - a[2]).slice(0, 10).map(p => ({ hs4: p[0], pci: p[1], val: p[2] }))
     return { prods, win: w }
-  }, [pp, year, selectedPci])
+  }, [pp, year, selectedPci, baseWin])
   const maxVal = prods.length ? Math.max(...prods.map(p => p.val)) : 1
   const onPick = (e) => { if (e && e.activeLabel != null) setSelectedPci(Number(e.activeLabel)) }
 
@@ -86,9 +88,14 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
       {/* MIDDLE — distribution chart */}
       <div className="md:col-span-2 lg:col-span-6 md:order-last lg:order-none">
         <div className="panel p-3 h-full">
-          <div className="flex flex-wrap items-center gap-3 justify-between mb-2">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 justify-between mb-2">
             <MeasureToggle value={measure} onChange={setMeasure} measures={MEASURES} />
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+              <span className="inline-flex items-center gap-1.5">
+                <span className="label">Smoothness</span>
+                <Toggle value={level} onChange={setLevel}
+                  options={meta.smoothing.map(s => ({ value: s.id, label: s.label }))} />
+              </span>
               {stackable && (
                 <Toggle value={display} onChange={setDisplay}
                   options={[{ value: 'stack', label: 'Stacked' }, { value: 'line', label: 'Lines' }]} />
