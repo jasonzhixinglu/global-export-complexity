@@ -3,24 +3,25 @@
 Static React + Vite + Tailwind + Recharts dashboard for exploring exports across the Product
 Complexity Index (PCI), deployed to GitHub Pages. Templated on the nsicx-dashboard.
 
-## Views
-- **Explorer** — distribution across PCI for any set of countries; toggle market share / export
-  value / normalized distribution; lines or stacked; animate across 2000–2024.
-- **Segment** — pick a complexity band (low/mid/high), rank countries within it, and watch the
-  leaders evolve over time.
-- **Country** — single-country deep dive: profile across PCI, total exports and value-weighted
-  average complexity over time.
-- **Coverage · About** — top-N world-export coverage by complexity, plus methodology.
+## Tabs
+- **Explorer** — 3-panel: left = year + country picker (top 50 exporters, searchable); middle =
+  market-share / export-value / distribution across PCI (stacked or lines, animatable); right =
+  the largest products near a clicked/dragged PCI.
+- **Tech & AI** — AI-compute and semiconductor value-chain baskets by country and year (world
+  share / export value / share of own exports), from HS2012 data.
+- **About** — top-N coverage by complexity + an accordion of methodology, caveats, and references.
 
 ## Data
 The dashboard reads precomputed static JSON in `public/data/` (`meta`, `series`, `coverage`,
-`anchors`), generated from the project pipeline by:
+`anchors`, `techai`, `pci_products`), generated from the project pipeline:
 
 ```bash
-python scripts/export_dashboard_data.py    # run from the repo root, after compute_surfaces.py
+python scripts/export_dashboard_data.py    # meta/series/coverage/anchors (after compute_surfaces.py)
+python scripts/export_pci_products.py      # per-PCI product drill-down
+python scripts/export_tech_data.py         # AI/semiconductor baskets (HS2012)
 ```
 
-Regenerate that whenever the surfaces change, then commit the updated JSON.
+Regenerate whenever the surfaces or classifications change, then commit the updated JSON.
 
 ## Develop / build
 ```bash

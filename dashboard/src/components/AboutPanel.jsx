@@ -78,10 +78,13 @@ export default function AboutPanel({ data, year, setYear }) {
           <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
             A non-parametric view of global exports across the <strong>Product Complexity Index
             (PCI)</strong>, 2000–2024, from the Harvard Growth Lab <em>Atlas of Economic
-            Complexity</em>. The Explorer shows, for any set of countries, either their
-            <strong> market share</strong> of world exports at each complexity level or the
+            Complexity</em>. The <strong>Explorer</strong> shows, for any set of countries, either
+            their <strong>market share</strong> of world exports at each complexity level or the
             <strong> distribution of their export value</strong> across complexity; click the chart
-            (or drag the slider) to see the largest products near a chosen PCI.
+            (or drag the slider) to see the largest products near a chosen PCI. The
+            <strong> Tech &amp; AI</strong> tab tracks exports of AI-compute hardware and the
+            semiconductor value chain — by country, year, world share, and share of each country's
+            own exports.
           </p>
         </div>
 

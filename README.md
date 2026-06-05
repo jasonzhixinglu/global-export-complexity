@@ -1,67 +1,105 @@
-# global-export-complexity
+# Global Export Complexity
 
-Non-parametric analysis of global exports by **product complexity (PCI)**, country, and time,
-using Harvard Growth Lab's *Atlas of Economic Complexity* HS92 HS4 trade data (2000–2024).
+Non-parametric analysis of global exports by **product complexity (PCI)** — across country, time,
+and now technology/AI — built on the Harvard Growth Lab *Atlas of Economic Complexity*, with an
+interactive dashboard.
 
-Two estimands, each with an explicit trade-accounting property:
+### → Live dashboard: **https://jasonzhixinglu.github.io/global-export-complexity/**
 
-1. **Distribution of export dollars across complexity** (value-weighted kernel density).
-2. **A country's global market share as a function of complexity** (value-weighted *local-linear*
-   regression — chosen over Nadaraya–Watson for lower boundary bias, and because it makes shares
-   add up to exactly 100% across countries by construction).
+The dashboard answers: *how is a country's export activity distributed across the complexity
+spectrum, who dominates which complexity bands, and how is that shifting over 2000–2024?*
 
-See [`docs/analysis.md`](docs/analysis.md) for the full write-up — the core idea is how to
-reconcile non-parametric smoothing with the accounting identities trade data must satisfy.
+---
 
-## Layout
+## Dashboard
+
+A static React + Vite + Recharts app (in [`dashboard/`](dashboard/)), deployed to GitHub Pages. It
+reads only small precomputed JSON — the heavy data stays in the pipeline. Three tabs:
+
+- **Explorer** — for any set of countries (top 50 exporters), their **market share** or **export
+  value** distribution across PCI (stacked or lines), animated over years. Click the chart or drag
+  the PCI slider to drill into the **largest products** near that complexity.
+- **Tech & AI** — exports of **AI-compute hardware** (Fed definition) and the **semiconductor value
+  chain** (OECD), by country and year, as world share / export value / share of the country's own
+  exports.
+- **About** — top-N coverage by complexity, plus methodology, caveats, and references.
+
+## Methodology (one paragraph)
+
+Two estimands, each with an exact accounting property:
+
+1. **Market share as a function of complexity** — a value-weighted **local-linear** kernel
+   regression of each country's product-level share on PCI. Local-linear (over Nadaraya–Watson) has
+   lower boundary bias and *reproduces constants*, so shares across all countries sum to **100% by
+   construction**.
+2. **Distribution of export value across complexity** — a value-weighted **kernel density** over
+   PCI; total mass is conserved exactly, with only mean-zero redistribution.
+
+Full write-up — including how to reconcile non-parametric smoothing with trade-accounting
+identities — in [`docs/analysis.md`](docs/analysis.md).
+
+## Data
+
+- **Atlas of Economic Complexity** (Harvard Growth Lab), HS92 HS4 `country × product × year`,
+  2000–2024 — the core dataset. Tech/AI uses the **HS2012** vintage (codes like 8486/8542 don't
+  exist in HS92). Provenance in [`data/README.md`](data/README.md).
+- **Tech & AI baskets** — AI compute from the Fed FEDS Note (2026); semiconductor value chain from
+  OECD (2025). See [`docs/ai-semiconductor-classification.md`](docs/ai-semiconductor-classification.md).
+- **UN Comtrade** — optional puller for more recent years (raw, mirror-reconstructable for late
+  filers); see [`docs/comtrade.md`](docs/comtrade.md).
+
+## Repository layout
 
 ```
-src/gec/            importable package
-  config.py         paths + analysis constants (YEARS, N_TOP, bandwidths, thresholds)
-  data.py           load / clean / rank exporters / aggregate to product level
-  estimators.py     local-linear shares, KDE, mass-conserving bins, calibration
-  plotting.py       headless matplotlib helpers
-  comtrade.py       UN Comtrade pulls (direct + mirror) + Atlas-PCI proxy
-scripts/            runnable entry points
-  download_data.py    fetch raw CSV from Harvard Dataverse
-  compute_surfaces.py compute & cache all surfaces -> data/derived/
-  make_figures.py     render figures -> results/figures/
-  run_diagnostics.py  conservation & adding-up checks -> figures + results/tables/
-  run_all.py          the four steps above, in order
-  fetch_comtrade.py   pull recent-year HS4 exports from UN Comtrade (see docs/comtrade.md)
-data/               git-ignored; raw/ (download) + derived/ (cached). See data/README.md
-results/            committed outputs: figures/ and tables/
-docs/               analysis.md (data, methodology, findings) · comtrade.md (recent-year extension)
-legacy/             the original exploratory notebook (superseded)
+src/gec/               importable package
+  config.py            paths + constants (YEARS, N_TOP, bandwidths, dataset IDs)
+  data.py              load / clean / rank exporters / product & bilateral aggregation
+  estimators.py        local-linear shares, KDE, mass-conserving bins, calibration
+  classifications.py   AI / semiconductor HS code sets (Fed, OECD)
+  comtrade.py          UN Comtrade pulls (direct + mirror) + availability checks
+  plotting.py          headless matplotlib helpers
+scripts/
+  download_data.py        fetch raw CSVs from Harvard Dataverse (HS4, bilateral)
+  compute_surfaces.py     kernel surfaces (share / density / coverage) -> data/derived/
+  make_figures.py         static analysis figures -> results/figures/
+  run_diagnostics.py      conservation & adding-up checks -> results/tables/
+  run_all.py              download -> compute -> figures -> diagnostics
+  export_dashboard_data.py  surfaces -> dashboard/public/data (meta, series, coverage, anchors)
+  export_tech_data.py       HS12 -> AI/semiconductor basket JSON (techai.json)
+  export_pci_products.py    per-PCI product drill-down JSON (pci_products.json)
+  fetch_comtrade.py         pull recent-year HS4 exports from UN Comtrade
+  explore_bilateral_pci.py  prototype: origin x destination complexity (sizing)
+dashboard/             React/Vite/Recharts app (deployed to GitHub Pages)
+docs/                  analysis.md · comtrade.md · ai-semiconductor-classification.md
+results/               committed figures & tables
+data/                  git-ignored raw + derived (download / regenerate)
+legacy/                original exploratory notebook (superseded)
 ```
 
-## Setup & run
+## Reproduce
 
 ```bash
 pip install -r requirements.txt
-python scripts/run_all.py          # download (~430 MB) -> compute -> figures -> diagnostics
+
+# analysis pipeline (downloads ~430 MB on first run)
+python scripts/run_all.py
+
+# regenerate the dashboard's data, then build the site
+python scripts/export_dashboard_data.py
+python scripts/export_pci_products.py
+python scripts/export_tech_data.py          # needs the HS12 file (download_data --hs12*)
+cd dashboard && npm install && npm run dev    # local; `npm run build` for production
 ```
 
-Steps are independent and idempotent; after the first download, re-run any single script.
-Tune the analysis in `src/gec/config.py` (e.g. `N_TOP`, `COVER_THRESHOLDS`, bandwidths).
+Tune the analysis in [`src/gec/config.py`](src/gec/config.py) (`N_TOP`, `BANDWIDTH`, `YEARS`,
+`COVER_THRESHOLDS`). Pushing changes under `dashboard/**` auto-deploys via
+[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml).
 
-## Headline results
+## Headline findings
 
-- **Estimators respect the accounting exactly.** Shares sum to 100% to machine precision; the
-  dollar distribution conserves total mass exactly, with only mean-zero sub-range redistribution
-  (not net bias). See [`docs/analysis.md`](docs/analysis.md).
-- **Top-20 exporters cover ~72% of world trade on average**, but only ~45–50% at low complexity
-  (commodities are exported by a long tail of economies). **Top-50 reaches ~93% overall** and
-  clears 90% across nearly the whole complexity range except the extreme low tail.
-
-Data provenance and the upstream harmonization that makes the accounting hold (BACI /
-Bustos–Yildirim mirror reconciliation) are documented in [`docs/analysis.md`](docs/analysis.md)
-(§2) and [`data/README.md`](data/README.md).
-
-## Recent years (UN Comtrade)
-
-The Atlas lags ~1.5 years. To peek at more recent years, `scripts/fetch_comtrade.py` pulls HS4
-exports from UN Comtrade (direct, or **mirror** from partners for late filers like China) and
-attaches an Atlas PCI proxy. Findings and limits — 2025 is partial, raw/unreconciled, no native PCI,
-served only in newer HS revisions (~97% maps to HS92) — are in [`docs/comtrade.md`](docs/comtrade.md).
-A free Comtrade API key is recommended for full pulls.
+- Estimators respect the accounting exactly: shares sum to 100% to machine precision; the dollar
+  distribution conserves total exports with only mean-zero redistribution.
+- The **top-20 exporters cover ~72%** of world trade on average but only ~45–50% at low complexity
+  (commodities are fragmented across many economies); **top-50 reaches ~93%**.
+- China's export distribution marches up and right across the complexity spectrum over 2000–2024;
+  in AI compute and chips, a handful of East-Asian economies dominate.
