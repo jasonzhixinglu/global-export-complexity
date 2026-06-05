@@ -57,12 +57,12 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-3">
       {/* LEFT — controls: year + countries (one panel) */}
       <div className="md:col-span-1 lg:col-span-3">
-        <div className="panel p-3 space-y-3">
+        <div className="panel p-3 h-full flex flex-col gap-3">
           <div className="flex items-center justify-between gap-2">
             <span className="label">Year</span>
             <YearStepper years={meta.years} year={year} onChange={setYear} />
           </div>
-          <div className="border-t border-slate-200 dark:border-slate-800 pt-3 space-y-2">
+          <div className="border-t border-slate-200 dark:border-slate-800 pt-3 flex flex-col flex-1 min-h-0 gap-2">
             <div className="flex items-center justify-between">
               <div className="label">Countries · {selected.length}</div>
               <button onClick={() => setSelected([])} disabled={!selected.length}
@@ -70,7 +70,7 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
             </div>
             <input value={q} onChange={e => setQ(e.target.value)} placeholder="Filter countries…"
               className="w-full bg-transparent border border-slate-300 dark:border-slate-600 rounded px-2 py-1 text-sm placeholder:text-slate-400 focus:outline-none focus:border-indigo-400" />
-            <div className="max-h-[420px] overflow-y-auto pr-1 -mr-1">
+            <div className="flex-1 min-h-0 overflow-y-auto pr-1 -mr-1 max-h-[60vh] lg:max-h-none">
               <CountryPicker countries={meta.countries} regionsOrder={meta.regionsOrder}
                 selected={selected} onToggle={toggle} onToggleRegion={toggleRegion}
                 colorOf={cOf} query={q} />
