@@ -7,8 +7,8 @@ Usage:
 """
 from __future__ import annotations
 
+import subprocess
 import sys
-import urllib.request
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
@@ -20,7 +20,10 @@ def _fetch(url: str, dest: Path, force: bool) -> None:
         print(f"already present: {dest} ({dest.stat().st_size/1e9:.2f} GB). --force to re-download.")
         return
     print(f"downloading -> {dest}")
-    urllib.request.urlretrieve(url, dest)
+    # curl reliably follows the Dataverse 303 -> signed-S3 redirect (urllib gets 403 on it).
+    r = subprocess.run(["curl", "-sSL", "-o", str(dest), url])
+    if r.returncode != 0 or not dest.exists() or dest.stat().st_size == 0:
+        raise RuntimeError(f"download failed (curl exit {r.returncode}) for {url}")
     print(f"done: {dest.stat().st_size/1e9:.2f} GB")
 
 
