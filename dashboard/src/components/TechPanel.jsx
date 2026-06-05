@@ -4,19 +4,23 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Cell,
 } from 'recharts'
 import { colorFor, fmtPct, fmtB } from '../lib/format.js'
-import { MEASURES } from '../lib/data.js'
 import { axisColors, tooltipStyle } from '../lib/chartTheme.js'
-import { MeasureToggle, YearSlider } from './Controls.jsx'
+import { Toggle, YearSlider } from './Controls.jsx'
 import { useDarkMode } from '../lib/useDarkMode.jsx'
 
-export default function TechPanel({ data, year, setYear, measure, setMeasure }) {
+const METRICS = [
+  { value: 'share', label: 'World share' },
+  { value: 'value', label: 'Export value' },
+  { value: 'own', label: '% of own exports' },
+]
+
+export default function TechPanel({ data, year, setYear }) {
   const { isDark } = useDarkMode()
   const t = data.techai
   const { byIso, colorByIso } = data
   const [basketId, setBasketId] = useState('ai')
+  const [tm, setTm] = useState('share')
   const ac = axisColors(isDark)
-  // baskets only have value/share (no PCI), so map the global 'density' measure to 'share'
-  const m = measure === 'value' ? 'value' : 'share'
 
   if (!t) return <div className="panel p-6 text-sm text-slate-400">Tech & AI data not available.</div>
 
@@ -28,7 +32,11 @@ export default function TechPanel({ data, year, setYear, measure, setMeasure }) 
   const metric = (iso, yr) => {
     const v = t.valueB[basket.id]?.[iso]?.[String(yr)]
     if (v == null) return null
-    if (m === 'value') return v
+    if (tm === 'value') return v
+    if (tm === 'own') {
+      const own = t.countryTotalB?.[iso]?.[String(yr)]
+      return own ? v / own : null
+    }
     const w = t.worldB[basket.id]?.[String(yr)]
     return w ? v / w : null
   }
@@ -36,18 +44,21 @@ export default function TechPanel({ data, year, setYear, measure, setMeasure }) 
   const ranked = useMemo(() => t.countries
     .map(iso => ({ iso, v: metric(iso, ty) }))
     .filter(d => d.v != null && d.v > 0)
-    .sort((a, b) => b.v - a.v), [t, basket.id, ty, m])
+    .sort((a, b) => b.v - a.v), [t, basket.id, ty, tm])
 
   const topIsos = ranked.slice(0, 6).map(d => d.iso)
   const series = useMemo(() => t.years.map(yr => {
     const row = { year: yr }
     for (const iso of topIsos) row[iso] = metric(iso, yr)
     return row
-  }), [t, basket.id, m, topIsos])
+  }), [t, basket.id, tm, topIsos])
 
-  const vfmt = m === 'value' ? (v) => fmtB(v, 1) : (v) => fmtPct(v, 1)
-  const axfmt = m === 'value' ? (v) => `$${Math.round(v)}B` : (v) => `${Math.round(v * 100)}%`
-  const topShare = ranked.slice(0, 3).reduce((s, d) => s + (m === 'share' ? d.v : 0), 0)
+  const isPct = tm !== 'value'
+  const vfmt = isPct ? (v) => fmtPct(v, 1) : (v) => fmtB(v, 1)
+  const axfmt = isPct ? (v) => `${Math.round(v * 100)}%` : (v) => `$${Math.round(v)}B`
+  const metricLabel = tm === 'value' ? 'Export value' : tm === 'own' ? 'Share of own exports' : 'World market share'
+  const topShare = tm === 'share' ? ranked.slice(0, 3).reduce((s, d) => s + d.v, 0) : 0
+  const stacked = tm === 'share'
 
   return (
     <div className="space-y-3">
@@ -65,21 +76,20 @@ export default function TechPanel({ data, year, setYear, measure, setMeasure }) 
               </optgroup>
             </select>
           </div>
-          <MeasureToggle value={measure} onChange={setMeasure} measures={MEASURES} />
+          <Toggle value={tm} onChange={setTm} options={METRICS} />
         </div>
         <YearSlider years={t.years} year={ty} onChange={setYear} />
         <div className="text-xs text-slate-500">
           {basket.nCodes} HS6 codes · world {fmtB(world, 1)} ({ty}){' '}
-          {m === 'share' && topShare ? `· top-3 = ${fmtPct(topShare, 0)}` : ''}
-          {' · '}HS2012; distribution measure shown as market share for baskets.
+          {tm === 'share' && topShare ? `· top-3 = ${fmtPct(topShare, 0)} of world` : ''}
+          {tm === 'own' ? '· basket as a share of each country’s total exports' : ''}
+          {' · '}HS2012 data
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         <div className="panel p-3">
-          <div className="label mb-2">
-            {m === 'value' ? 'Export value' : 'World market share'} — {basket.label}, {ty}
-          </div>
+          <div className="label mb-2">{metricLabel} — {basket.label}, {ty}</div>
           <ResponsiveContainer width="100%" height={400}>
             <BarChart data={ranked.slice(0, 14)} layout="vertical" margin={{ left: 6, right: 16 }}>
               <CartesianGrid stroke={ac.grid} strokeDasharray="2 2" horizontal={false} />
@@ -94,7 +104,7 @@ export default function TechPanel({ data, year, setYear, measure, setMeasure }) 
         </div>
 
         <div className="panel p-3">
-          <div className="label mb-2">Top 6 over time {m === 'share' ? '(stacked share)' : '(value)'} — {basket.label}</div>
+          <div className="label mb-2">Top 6 over time {stacked ? '(stacked share)' : ''} — {metricLabel}</div>
           <ResponsiveContainer width="100%" height={400}>
             <AreaChart data={series} margin={{ top: 8, right: 16, bottom: 8, left: 6 }}>
               <CartesianGrid stroke={ac.grid} strokeDasharray="2 2" />
@@ -102,9 +112,9 @@ export default function TechPanel({ data, year, setYear, measure, setMeasure }) 
               <YAxis tick={{ fill: ac.tick, fontSize: 10 }} tickFormatter={axfmt} width={48} />
               <Tooltip contentStyle={tooltipStyle(isDark)} formatter={(v, n) => [vfmt(v), byIso[n]?.name || n]} />
               {topIsos.map(iso => (
-                <Area key={iso} dataKey={iso} stackId={m === 'share' ? '1' : undefined}
+                <Area key={iso} dataKey={iso} stackId={stacked ? '1' : undefined}
                   stroke={colorFor(colorByIso[iso])} fill={colorFor(colorByIso[iso])}
-                  fillOpacity={m === 'share' ? 0.7 : 0.15} strokeWidth={1.25} isAnimationActive={false} />
+                  fillOpacity={stacked ? 0.7 : 0.12} strokeWidth={1.5} isAnimationActive={false} />
               ))}
             </AreaChart>
           </ResponsiveContainer>
@@ -120,7 +130,8 @@ export default function TechPanel({ data, year, setYear, measure, setMeasure }) 
       </div>
       <p className="text-xs text-slate-400 px-1">
         AI compute = Fed FEDS Note basket (HS 847150/847180/847330). Semiconductor stages = OECD (2025)
-        value chain. HS2012 data; shares are of world exports within each basket.
+        value chain. HS2012 data. “World share” = of world exports in the basket; “% of own exports” =
+        basket value ÷ the country’s total exports.
       </p>
     </div>
   )

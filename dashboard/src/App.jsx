@@ -3,16 +3,12 @@ import { useSessionState } from './lib/sessionState.js'
 import { useDarkMode } from './lib/useDarkMode.jsx'
 import ExplorerPanel from './components/ExplorerPanel.jsx'
 import TechPanel from './components/TechPanel.jsx'
-import SegmentPanel from './components/SegmentPanel.jsx'
-import CountryPanel from './components/CountryPanel.jsx'
 import AboutPanel from './components/AboutPanel.jsx'
 
 const TABS = [
-  { id: 'explorer', label: 'Explorer', sub: 'Distribution across complexity' },
+  { id: 'explorer', label: 'Explorer', sub: 'Distribution across complexity · select a PCI' },
   { id: 'tech', label: 'Tech & AI', sub: 'AI compute · semiconductors' },
-  { id: 'segment', label: 'Segment', sub: 'A complexity band across countries' },
-  { id: 'country', label: 'Country', sub: 'Single-country deep dive' },
-  { id: 'about', label: 'Coverage · About', sub: 'Coverage · Methodology' },
+  { id: 'about', label: 'About', sub: 'Coverage · Methodology' },
 ]
 
 function SunIcon() {
@@ -67,12 +63,6 @@ export default function App() {
           )}
           {data && tab === 'tech' && (
             <TechPanel data={data} year={year} setYear={setYear} measure={measure} setMeasure={setMeasure} />
-          )}
-          {data && tab === 'segment' && (
-            <SegmentPanel data={data} year={year} setYear={setYear} measure={measure} setMeasure={setMeasure} />
-          )}
-          {data && tab === 'country' && (
-            <CountryPanel data={data} year={year} setYear={setYear} measure={measure} setMeasure={setMeasure} />
           )}
           {data && tab === 'about' && (
             <AboutPanel data={data} year={year} setYear={setYear} />
