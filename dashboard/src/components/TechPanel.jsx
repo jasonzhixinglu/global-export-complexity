@@ -18,7 +18,7 @@ export default function TechPanel({ data, year, setYear }) {
   const { isDark } = useDarkMode()
   const t = data.techai
   const { byIso, colorByIso } = data
-  const [basketId, setBasketId] = useState('semi')
+  const [basketId, setBasketId] = useState('all')
   const [tm, setTm] = useState('share')
   const ac = axisColors(isDark)
 
@@ -63,22 +63,21 @@ export default function TechPanel({ data, year, setYear }) {
   return (
     <div className="space-y-3">
       <div className="panel p-4 space-y-3">
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-          <span className="label mr-0.5">Semiconductors</span>
-          <button onClick={() => setBasketId('semi')}
-            className={`chip ${basketId === 'semi' ? 'chip-on' : 'chip-off'}`}>All</button>
-          {t.baskets.filter(b => b.parent === 'semi').map(b => (
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className="label">Year</span>
+            <YearStepper years={t.years} year={ty} onChange={setYear} />
+          </div>
+          <Toggle value={tm} onChange={setTm} options={METRICS} />
+        </div>
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 border-t border-slate-200 dark:border-slate-800 pt-3">
+          <span className="label mr-0.5">Category</span>
+          <button onClick={() => setBasketId('all')}
+            className={`chip ${basketId === 'all' ? 'chip-on' : 'chip-off'}`}>All</button>
+          {t.baskets.filter(b => b.parent === 'all').map(b => (
             <button key={b.id} onClick={() => setBasketId(b.id)}
               className={`chip ${basketId === b.id ? 'chip-on' : 'chip-off'}`}>{b.label}</button>
           ))}
-          <span className="mx-1 text-slate-300 dark:text-slate-600">·</span>
-          <span className="label mr-0.5">AI</span>
-          <button onClick={() => setBasketId('ai')}
-            className={`chip ${basketId === 'ai' ? 'chip-on' : 'chip-off'}`}>AI compute</button>
-        </div>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <Toggle value={tm} onChange={setTm} options={METRICS} />
-          <YearStepper years={t.years} year={ty} onChange={setYear} />
         </div>
         <div className="text-xs text-slate-500">
           {basket.nCodes} HS6 codes · world {fmtB(world, 1)} ({ty}){' '}

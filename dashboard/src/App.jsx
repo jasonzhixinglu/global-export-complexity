@@ -6,9 +6,9 @@ import TechPanel from './components/TechPanel.jsx'
 import AboutPanel from './components/AboutPanel.jsx'
 
 const TABS = [
-  { id: 'explorer', label: 'Explorer', sub: 'Distribution across complexity · select a PCI' },
-  { id: 'tech', label: 'Tech & AI', sub: 'AI compute · semiconductors' },
-  { id: 'about', label: 'About', sub: 'Coverage · Methodology' },
+  { id: 'explorer', label: 'Explorer', sub: 'Distribution by PCI' },
+  { id: 'tech', label: 'Tech & AI', sub: 'AI & semiconductors' },
+  { id: 'about', label: 'About', sub: 'Coverage · methodology' },
 ]
 
 function SunIcon() {

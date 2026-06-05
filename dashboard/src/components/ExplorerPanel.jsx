@@ -6,7 +6,7 @@ import {
 import { buildRows, MEASURES } from '../lib/data.js'
 import { colorFor, fmtPct, fmtB, fmtPci } from '../lib/format.js'
 import { axisColors, tooltipStyle } from '../lib/chartTheme.js'
-import { MeasureToggle, Toggle, YearStepper, CountryPicker, PciAxisLegend } from './Controls.jsx'
+import { MeasureToggle, Toggle, YearStepper, CountryPicker } from './Controls.jsx'
 import { useDarkMode } from '../lib/useDarkMode.jsx'
 
 export default function ExplorerPanel({ data, selected, setSelected, year, setYear, measure, setMeasure }) {
@@ -129,7 +129,6 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
               </button>
             ))}
           </div>
-          <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800"><PciAxisLegend anchors={data.anchors} /></div>
         </div>
       </div>
 

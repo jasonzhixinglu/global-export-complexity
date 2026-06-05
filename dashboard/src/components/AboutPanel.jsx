@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, Legend,
 } from 'recharts'
@@ -6,6 +6,32 @@ import { fmtPct, fmtPci, colorFor } from '../lib/format.js'
 import { axisColors, tooltipStyle } from '../lib/chartTheme.js'
 import { YearStepper } from './Controls.jsx'
 import { useDarkMode } from '../lib/useDarkMode.jsx'
+
+const REFS = [
+  ['Atlas of Economic Complexity — Harvard Growth Lab (trade data & PCI)', 'https://atlas.hks.harvard.edu/'],
+  ['HS92 trade data · Harvard Dataverse (doi:10.7910/DVN/T4CHWJ)', 'https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/T4CHWJ'],
+  ['HS2012 trade data · Harvard Dataverse (doi:10.7910/DVN/YAVJDF)', 'https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/YAVJDF'],
+  ['Fed — “The Global Trade Effects of the AI Infrastructure Boom” (FEDS Note, 2026-02-13)', 'https://www.federalreserve.gov/econres/notes/feds-notes/the-global-trade-effects-of-the-ai-infrastructure-boom-20260213.html'],
+  ['OECD (2025) — “Mapping the semiconductor value chain” / HS code list (doi:10.1787/4154cdbf-en)', 'https://www.oecd.org/en/publications/promoting-the-development-of-the-semiconductor-ecosystem-in-mexico_02c81dec-en/full-report/list-of-harmonized-system-hs-codes-for-semiconductor-related-products_1369575a.html'],
+  ['Hidalgo & Hausmann (2009) — “The building blocks of economic complexity”, PNAS', 'https://www.pnas.org/doi/10.1073/pnas.0900943106'],
+  ['Methods & code (this project)', 'https://github.com/jasonzhixinglu/global-export-complexity'],
+]
+
+function Acc({ title, defaultOpen = false, children }) {
+  const [open, setOpen] = useState(defaultOpen)
+  return (
+    <div className="border-b border-slate-200 dark:border-slate-800 last:border-0">
+      <button onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between py-2.5 text-left group">
+        <span className="text-sm font-medium text-slate-800 dark:text-slate-100 group-hover:text-indigo-500">{title}</span>
+        <span className="text-slate-400 text-lg leading-none w-5 text-center">{open ? '–' : '+'}</span>
+      </button>
+      {open && (
+        <div className="pb-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300 space-y-2">{children}</div>
+      )}
+    </div>
+  )
+}
 
 export default function AboutPanel({ data, year, setYear }) {
   const { isDark } = useDarkMode()
@@ -45,55 +71,76 @@ export default function AboutPanel({ data, year, setYear }) {
         </p>
       </div>
 
-      <div className="panel p-5 prose-sm max-w-none text-sm leading-relaxed text-slate-600 dark:text-slate-300 space-y-3">
-        <h2 className="text-base font-semibold text-slate-900 dark:text-white">About this dashboard</h2>
-        <p>
-          Non-parametric view of global exports across the <strong>Product Complexity Index (PCI)</strong>,
-          {' '}2000–2024, from the Harvard Growth Lab <em>Atlas of Economic Complexity</em> (HS92, HS4 level).
-          Two estimands: a country's <strong>market share</strong> of world exports at each complexity
-          (value-weighted local-linear regression) and the <strong>distribution of export value</strong>
-          {' '}across complexity (value-weighted kernel density).
-        </p>
-        <p>
-          <strong>Reading PCI:</strong> the index is standardized within each year, so compare
-          value-weighted <em>shifts</em> across years, not absolute levels. Low PCI ≈ raw materials and
-          commodities; high PCI ≈ machinery, electronics, chemicals, and instruments.
-        </p>
-        <p>
-          Shares across <em>all</em> countries sum to 100% by construction (the local-linear estimator
-          reproduces constants); the dollar distribution conserves total exports exactly, with only
-          mean-zero redistribution across complexity. Source data is reconciled upstream
-          (Bustos–Yildirim mirror reconciliation).
-        </p>
-        <p>
-          <strong>Tech &amp; AI baskets.</strong> "AI compute" follows the Federal Reserve definition
-          (HS 8471.50 / 8471.80 / 8473.30 — AI servers and accelerator/GPU cards). The semiconductor
-          value-chain categories follow the OECD's mapping. These use the Atlas <strong>HS 2012</strong>
-          vintage (2012–2024), since the relevant HS6 codes do not exist in HS92.
-        </p>
+      <div className="panel px-4 py-1">
+        <Acc title="Overview" defaultOpen>
+          <p>
+            A non-parametric view of global exports across the <strong>Product Complexity Index
+            (PCI)</strong>, 2000–2024, from the Harvard Growth Lab <em>Atlas of Economic
+            Complexity</em>. The Explorer shows, for any set of countries, either their
+            <strong> market share</strong> of world exports at each complexity level or the
+            <strong> distribution of their export value</strong> across complexity; click the chart
+            (or drag the slider) to see the largest products near a chosen PCI.
+          </p>
+        </Acc>
 
-        <h3 className="text-sm font-semibold text-slate-900 dark:text-white pt-1">Data &amp; references</h3>
-        <ul className="space-y-1.5 text-sm">
-          {[
-            ['Atlas of Economic Complexity — Harvard Growth Lab (trade data, PCI)', 'https://atlas.hks.harvard.edu/'],
-            ['HS92 trade data · Harvard Dataverse (doi:10.7910/DVN/T4CHWJ)', 'https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/T4CHWJ'],
-            ['HS2012 trade data · Harvard Dataverse (doi:10.7910/DVN/YAVJDF)', 'https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/YAVJDF'],
-            ['Fed — “The Global Trade Effects of the AI Infrastructure Boom” (FEDS Note, 2026-02-13)', 'https://www.federalreserve.gov/econres/notes/feds-notes/the-global-trade-effects-of-the-ai-infrastructure-boom-20260213.html'],
-            ['OECD — “Mapping the semiconductor value chain” / HS code list (doi:10.1787/4154cdbf-en)', 'https://www.oecd.org/en/publications/promoting-the-development-of-the-semiconductor-ecosystem-in-mexico_02c81dec-en/full-report/list-of-harmonized-system-hs-codes-for-semiconductor-related-products_1369575a.html'],
-          ].map(([label, href]) => (
-            <li key={href} className="flex gap-2">
-              <span className="text-slate-400">›</span>
-              <a href={href} target="_blank" rel="noopener noreferrer"
-                className="text-indigo-600 dark:text-indigo-400 hover:underline">{label}</a>
-            </li>
-          ))}
-        </ul>
-        <p className="text-xs text-slate-500 pt-1">{meta.source}</p>
-        <p className="text-xs text-slate-500">
-          Methods &amp; code: <a href="https://github.com/jasonzhixinglu/global-export-complexity"
-            target="_blank" rel="noopener noreferrer"
-            className="text-indigo-600 dark:text-indigo-400 hover:underline">github.com/jasonzhixinglu/global-export-complexity</a>
-        </p>
+        <Acc title="Estimation method">
+          <p>
+            <strong>Market share by complexity</strong> is a value-weighted <em>local-linear</em>
+            kernel regression of each country's product-level share on PCI (Gaussian kernel,
+            bandwidth 0.10). Local-linear is used over Nadaraya–Watson for its lower boundary bias;
+            it also reproduces constants, so shares across all countries sum to 100% by construction.
+          </p>
+          <p>
+            <strong>Export-value distribution</strong> is a value-weighted Gaussian <em>kernel
+            density</em> over PCI (same bandwidth). A lower bandwidth is used deliberately to retain
+            multi-hump structure rather than over-smooth.
+          </p>
+          <p className="text-xs text-slate-500">
+            Refs: Fan &amp; Gijbels (1996), <em>Local Polynomial Modelling</em>; Silverman (1986),
+            <em> Density Estimation</em>; Hidalgo &amp; Hausmann (2009), PNAS (ECI/PCI).
+          </p>
+        </Acc>
+
+        <Acc title="Reading the PCI axis">
+          <p>
+            PCI is standardised within each year's cross-section, so compare value-weighted
+            <em> shifts</em> across years, not absolute levels. Low PCI ≈ raw materials and
+            commodities; high PCI ≈ machinery, electronics, chemicals and instruments.
+          </p>
+        </Acc>
+
+        <Acc title="Tech & AI baskets">
+          <p>
+            <strong>AI compute</strong> follows the Fed FEDS Note (HS 8471.50 / 8471.80 / 8473.30 —
+            AI servers and accelerator/GPU cards). The <strong>semiconductor</strong> categories
+            follow the OECD value-chain mapping (chips, photosensitive devices, raw materials,
+            manufacturing equipment, foundry and wafer inputs). These use the Atlas
+            <strong> HS 2012</strong> vintage (2012–2024), since the relevant HS6 codes do not exist
+            in HS92. The two sets are disjoint, so <em>All</em> = their sum with no double-counting.
+          </p>
+        </Acc>
+
+        <Acc title="Caveats">
+          <p>
+            Source trade data is reconciled upstream (Bustos–Yildirim / BACI-style mirror
+            reconciliation). Coverage of a top-N set is genuinely lowest at low complexity, where
+            many small commodity exporters compete. Displayed shares are clipped to [0, 1]; the
+            adding-up identity holds on the unclipped estimates.
+          </p>
+        </Acc>
+
+        <Acc title="Data & references">
+          <ul className="space-y-1.5">
+            {REFS.map(([label, href]) => (
+              <li key={href} className="flex gap-2">
+                <span className="text-slate-400">›</span>
+                <a href={href} target="_blank" rel="noopener noreferrer"
+                  className="text-indigo-600 dark:text-indigo-400 hover:underline">{label}</a>
+              </li>
+            ))}
+          </ul>
+          <p className="text-xs text-slate-500 pt-1">{meta.source}</p>
+        </Acc>
       </div>
     </div>
   )
