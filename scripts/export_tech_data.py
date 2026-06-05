@@ -31,14 +31,16 @@ def main():
     ship = [c["iso3"] for c in meta["countries"]]  # per-country series we expose (tracked set)
 
     # basket definitions: AI compute, semiconductors total, and the 6 OECD sub-categories
+    # "All" = OECD semiconductor value chain + Fed AI compute (disjoint, no double-count).
+    # Sub-categories = the 6 OECD stages + AI compute.
+    all_codes = list(cl.semiconductor_hs6()) + list(cl.AI_COMPUTE_FED)
     baskets = [
-        {"id": "ai", "label": "AI compute (Fed)", "parent": None, "codes": list(cl.AI_COMPUTE_FED)},
-        {"id": "semi", "label": "Semiconductors — all (OECD)", "parent": None,
-         "codes": list(cl.semiconductor_hs6())},
+        {"id": "all", "label": "All (semiconductors + AI)", "parent": None, "codes": all_codes},
     ]
     for group, codes in cl.SEMICONDUCTOR_OECD.items():
         slug = "semi_" + group.lower().split()[0]
-        baskets.append({"id": slug, "label": group, "parent": "semi", "codes": list(codes)})
+        baskets.append({"id": slug, "label": group, "parent": "all", "codes": list(codes)})
+    baskets.append({"id": "ai", "label": "AI compute", "parent": "all", "codes": list(cl.AI_COMPUTE_FED)})
 
     union = sorted({c for b in baskets for c in b["codes"]})
     union_set = set(union)
