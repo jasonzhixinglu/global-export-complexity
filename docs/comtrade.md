@@ -58,6 +58,19 @@ Our pulls fit comfortably: direct ≈1.2k rows/country, mirror ≈60–70k rows 
 world-denominator pull (~240k rows) exceeds 100k/call and must be chunked into ~3 calls (still
 free). Premium (shop.un.org/comtrade) is only for million-row bulk files.
 
+The key is read from `COMTRADE_API_KEY` (env var) or, if unset, from a git-ignored repo-root
+`.env` file (`COMTRADE_API_KEY=...`). Never commit `.env`; rotate the key if it leaks.
+
+## When does a reference year become available?
+
+- **UN Comtrade** is rolling. China files annually each **April–June of the following year**
+  (measured from `/getDA` `firstReleased`: 2022→2023-04, 2023→2024-04, 2024→2025-06). So China's
+  *year Y* lands ~April–June of *Y+1*; other majors (US/DEU/JPN/KOR) are typically earlier.
+  Monitor with `fetch_comtrade.py --year <Y> --reporters CHN --check`.
+- **Harvard Atlas** (reconciled + native PCI) runs an annual April–June cadence and lags ~1.3–1.5
+  years: v18 covering through 2024 released 2026-04-22, so a 2025-covering vintage is expected
+  ~spring 2027. Update `DATAVERSE_FILE_ID` in `src/gec/config.py` and re-run when it drops.
+
 ## Usage
 
 ```bash
