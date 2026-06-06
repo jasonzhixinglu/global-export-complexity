@@ -64,7 +64,7 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-3">
       {/* LEFT — controls: year + countries (one panel) */}
-      <div className="md:col-span-1 lg:col-span-3">
+      <div className="md:col-span-1 lg:col-span-3 min-w-0">
         <div className="panel p-3 h-full flex flex-col gap-3">
           <div className="flex items-center justify-between gap-2">
             <span className="label">Year</span>
@@ -88,10 +88,10 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
       </div>
 
       {/* MIDDLE — distribution chart */}
-      <div className="md:col-span-2 lg:col-span-6 md:order-last lg:order-none">
+      <div className="md:col-span-2 lg:col-span-6 md:order-last lg:order-none min-w-0">
         <div className="panel p-3 h-full">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2 justify-between mb-2">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <Toggle value={flow} onChange={setFlow}
                 options={[{ value: 'export', label: 'Exports' }, { value: 'import', label: 'Imports' }]} />
               <MeasureToggle value={measure} onChange={setMeasure} measures={MEASURES} />
@@ -151,7 +151,7 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
       </div>
 
       {/* RIGHT — top products near the selected PCI */}
-      <div className="md:col-span-1 lg:col-span-3">
+      <div className="md:col-span-1 lg:col-span-3 min-w-0">
         <div className="panel p-3 h-full">
           <div className="text-[11px] text-slate-400 uppercase tracking-wide">Top global {isImp ? 'imports' : 'exports'} near</div>
           <div className="flex items-baseline gap-2">

@@ -29,7 +29,7 @@ export default function App() {
   const [flow, setFlow] = useSessionState('gec-flow', qp.get('flow') || 'export')
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen overflow-x-hidden">
       <header className="border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-3">
         <div className="max-w-screen-2xl mx-auto flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
           <div className="min-w-0">

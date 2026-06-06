@@ -39,10 +39,10 @@
     @apply bg-transparent text-slate-600 border-slate-300 hover:border-indigo-400 dark:text-slate-300 dark:border-slate-600 dark:hover:border-indigo-500;
   }
   .seg-group {
-    @apply inline-flex rounded border border-slate-300 dark:border-slate-600 overflow-hidden;
+    @apply inline-flex shrink-0 rounded border border-slate-300 dark:border-slate-600 overflow-hidden;
   }
   .seg-btn {
-    @apply text-xs px-3 py-1 text-slate-500 dark:text-slate-300 border-r border-slate-300 dark:border-slate-600 last:border-r-0 hover:text-slate-800 dark:hover:text-white transition-colors;
+    @apply text-xs px-3 py-1 whitespace-nowrap text-slate-500 dark:text-slate-300 border-r border-slate-300 dark:border-slate-600 last:border-r-0 hover:text-slate-800 dark:hover:text-white transition-colors;
   }
   .seg-btn-on {
     @apply bg-indigo-600 text-white hover:text-white;
