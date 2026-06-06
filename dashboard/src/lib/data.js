@@ -71,7 +71,11 @@ export function buildRows(data, isos, year, measure, level = 'med', flow = 'expo
     })
   }
 
-  // density / value: reconstruct each country's curve from its Gaussian mixture
+  // density / value: reconstruct each country's curve from its Gaussian mixture.
+  // The mixture is analytic, so render on a FINE grid (decoupled from any stored grid)
+  // for a genuinely smooth curve -- evaluating a handful of Gaussians is cheap.
+  const lo = grid[0], hi = grid[grid.length - 1], N = 400
+  const fine = Array.from({ length: N }, (_, i) => lo + (hi - lo) * i / (N - 1))
   const totF = series.totalB[flow] || series.totalB.export || series.totalB
   const mixF = gmm?.mix?.[flow] || gmm?.mix?.export || {}
   const b = gmm?.blur?.[level] ?? gmm?.blur?.med ?? 0.10
@@ -79,7 +83,7 @@ export function buildRows(data, isos, year, measure, level = 'med', flow = 'expo
   for (const iso of isos) {
     const params = mixF[iso]?.[y]
     if (!params) { curves[iso] = null; continue }
-    const dens = mixtureDensity(params, b, grid)          // shape, integrates to ~1
+    const dens = mixtureDensity(params, b, fine)          // shape, integrates to ~1
     if (measure === 'value') {
       const t = totF[iso]?.[y]
       curves[iso] = (t != null) ? dens.map(d => d * t) : null   // $B per PCI unit
@@ -87,7 +91,7 @@ export function buildRows(data, isos, year, measure, level = 'med', flow = 'expo
       curves[iso] = dens
     }
   }
-  return grid.map((pci, gi) => {
+  return fine.map((pci, gi) => {
     const row = { pci }
     for (const iso of isos) row[iso] = curves[iso] ? curves[iso][gi] : null
     return row
