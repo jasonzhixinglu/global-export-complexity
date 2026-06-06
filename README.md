@@ -36,7 +36,10 @@ Two estimands, each with an exact accounting property:
    lower boundary bias and *reproduces constants*, so shares across all countries sum to **100% by
    construction**.
 2. **Distribution of trade value across complexity** — a value-weighted **kernel density** over
-   PCI; total mass is conserved exactly, with only mean-zero redistribution.
+   PCI; total mass is conserved exactly, with only mean-zero redistribution. For the dashboard
+   each country-year distribution is stored as a small **Gaussian mixture** (K chosen per country
+   by fidelity to the raw data, K≈2–8) and reconstructed in the browser — smoothness becomes a
+   render-time blur (`σ → √(σ²+b²)`), shrinking that payload ~36× while staying smooth.
 
 Both estimands run on either flow (the same estimators applied to `import_value`), exposed via the
 Exports / Imports toggle.
@@ -71,7 +74,8 @@ scripts/
   make_figures.py         static analysis figures -> results/figures/
   run_diagnostics.py      conservation & adding-up checks -> results/tables/
   run_all.py              download -> compute -> figures -> diagnostics
-  export_dashboard_data.py  surfaces -> dashboard/public/data (meta, series, coverage, anchors)
+  export_dashboard_data.py  surfaces -> dashboard/public/data (meta, share series, coverage, anchors)
+  export_gmm_data.py        per-country PCI distribution as a Gaussian mixture (gmm.json)
   export_tech_data.py       HS12 -> AI/semiconductor basket JSON (techai.json)
   export_pci_products.py    per-PCI product drill-down JSON (pci_products.json)
   fetch_comtrade.py         pull recent-year HS4 exports from UN Comtrade
@@ -93,6 +97,7 @@ python scripts/run_all.py
 
 # regenerate the dashboard's data, then build the site
 python scripts/export_dashboard_data.py
+python scripts/export_gmm_data.py           # distribution curves as Gaussian mixtures (gmm.json)
 python scripts/export_pci_products.py
 python scripts/export_tech_data.py          # needs the HS12 file: python scripts/download_data.py --hs12
 cd dashboard && npm install && npm run dev    # local; `npm run build` for production

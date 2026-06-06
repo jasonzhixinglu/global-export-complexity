@@ -128,21 +128,22 @@ def main():
     }
     (OUT / "meta.json").write_text(json.dumps(meta))
 
-    # --- per-country series per FLOW per smoothness level: share, density (+ totals) ---
-    share_lvl, dens_lvl, totals = s["share_lvl"], s["density_lvl"], s["totals_cy_flow"]
+    # --- per-country series per FLOW per smoothness level: share (+ totals) ---
+    # The per-country DENSITY/distribution is no longer shipped here: it is encoded as a
+    # Gaussian mixture in gmm.json (scripts/export_gmm_data.py) and reconstructed in the
+    # browser (one mixture -> all smoothness levels via a render-time sigma blur), which
+    # shrinks that payload ~36x.  Share (the local-linear market-share curves) stays.
+    share_lvl, totals = s["share_lvl"], s["totals_cy_flow"]
     ser_share = {fl: {lid: {} for lid in levels} for fl in flows}
-    ser_dens = {fl: {lid: {} for lid in levels} for fl in flows}
     ser_tot = {fl: {} for fl in flows}
     for fi, fl in enumerate(flows):
         for ci, c in enumerate(countries):
             for li, lid in enumerate(levels):
                 ser_share[fl][lid][c] = {str(years[yi]): [r(max(0.0, v), 4) for v in np.clip(share_lvl[fi, li, ci, yi], 0, 1)]
                                          for yi in range(len(years))}
-                ser_dens[fl][lid][c] = {str(years[yi]): [r(dens_lvl[fi, li, ci, yi][k], 6) for k in kde_idx]
-                                        for yi in range(len(years))}
             ser_tot[fl][c] = {str(years[yi]): r(totals[fi, ci, yi] / 1e9, 2) for yi in range(len(years))}  # $B
     (OUT / "series.json").write_text(json.dumps(
-        {"levels": levels, "flows": list(flows), "share": ser_share, "density": ser_dens, "totalB": ser_tot}))
+        {"levels": levels, "flows": list(flows), "share": ser_share, "totalB": ser_tot}))
 
     # --- coverage per flow ---
     cov = s["coverage_flow"]  # (nFlow, nThresh, nY, grid)
