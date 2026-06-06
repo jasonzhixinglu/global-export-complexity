@@ -126,11 +126,11 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
                   formatter={(v, n) => [vfmt(v), byIso[n]?.name || n]} />
                 {mode === 'stack'
                   ? selected.map(iso => (
-                    <Area key={iso} dataKey={iso} stackId="1" stroke={cOf(iso)}
+                    <Area key={iso} type="monotone" dataKey={iso} stackId="1" stroke={cOf(iso)}
                       fill={cOf(iso)} fillOpacity={0.7} strokeWidth={1} isAnimationActive={false} />
                   ))
                   : selected.map(iso => (
-                    <Line key={iso} dataKey={iso} stroke={cOf(iso)}
+                    <Line key={iso} type="monotone" dataKey={iso} stroke={cOf(iso)}
                       dot={false} strokeWidth={2} isAnimationActive={false} />
                   ))}
               </ChartInner>
