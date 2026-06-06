@@ -21,11 +21,12 @@ function MoonIcon() {
 export default function App() {
   const { data, error } = useDataset()
   const { isDark, toggle } = useDarkMode()
-  const [tab, setTab] = useSessionState('gec-tab', 'explorer')
+  const qp = new URLSearchParams(window.location.search)  // deep-link seeds: ?tab=&flow=&measure=
+  const [tab, setTab] = useSessionState('gec-tab', qp.get('tab') || 'explorer')
   const [selected, setSelected] = useSessionState('gec-selected', ['CHN', 'DEU', 'JPN', 'USA'])
   const [year, setYear] = useSessionState('gec-year', 2024)
-  const [measure, setMeasure] = useSessionState('gec-measure', 'share')
-  const [flow, setFlow] = useSessionState('gec-flow', 'export')
+  const [measure, setMeasure] = useSessionState('gec-measure', qp.get('measure') || 'share')
+  const [flow, setFlow] = useSessionState('gec-flow', qp.get('flow') || 'export')
 
   return (
     <div className="flex flex-col min-h-screen">

@@ -140,8 +140,8 @@ export default function TechPanel({ data, year, setYear, flow, setFlow }) {
       </div>
       <p className="text-xs text-slate-400 px-1">
         AI compute = Fed FEDS Note basket (HS 847150/847180/847330). Semiconductor stages = OECD (2025)
-        value chain. HS2012 data. “World share” = of world exports in the basket; “% of own exports” =
-        basket value ÷ the country’s total exports.
+        value chain. HS2012 data. “World share” = of world {flowWord} in the basket; “% of own {flowWord}” =
+        basket value ÷ the country’s total {flowWord}.
       </p>
     </div>
   )
