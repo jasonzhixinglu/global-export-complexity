@@ -8,55 +8,61 @@ import { axisColors, tooltipStyle } from '../lib/chartTheme.js'
 import { Toggle, YearStepper } from './Controls.jsx'
 import { useDarkMode } from '../lib/useDarkMode.jsx'
 
-const METRICS = [
-  { value: 'share', label: 'World share' },
-  { value: 'value', label: 'Export value' },
-  { value: 'own', label: '% of own exports' },
-]
-
-export default function TechPanel({ data, year, setYear }) {
+export default function TechPanel({ data, year, setYear, flow, setFlow }) {
   const { isDark } = useDarkMode()
   const t = data.techai
   const { byIso, colorByIso } = data
   const [basketId, setBasketId] = useState('all')
   const [tm, setTm] = useState('share')
   const ac = axisColors(isDark)
+  const fl = flow === 'import' ? 'import' : 'export'
+  const flowWord = fl === 'import' ? 'imports' : 'exports'
 
   if (!t) return <div className="panel p-6 text-sm text-slate-400">Tech & AI data not available.</div>
+
+  const METRICS = [
+    { value: 'share', label: 'World share' },
+    { value: 'value', label: fl === 'import' ? 'Import value' : 'Export value' },
+    { value: 'own', label: `% of own ${flowWord}` },
+  ]
+  const valueB = t.valueB[fl] || t.valueB.export || t.valueB
+  const worldBF = t.worldB[fl] || t.worldB.export || t.worldB
+  const ownTotalF = (t.countryTotalB[fl] || t.countryTotalB.export || t.countryTotalB)
 
   const basket = t.baskets.find(b => b.id === basketId) || t.baskets[0]
   const ty = Math.min(t.years[t.years.length - 1], Math.max(t.years[0], year))  // clamp to HS12 range
   const y = String(ty)
-  const world = t.worldB[basket.id]?.[y]
+  const world = worldBF[basket.id]?.[y]
 
   const metric = (iso, yr) => {
-    const v = t.valueB[basket.id]?.[iso]?.[String(yr)]
+    const v = valueB[basket.id]?.[iso]?.[String(yr)]
     if (v == null) return null
     if (tm === 'value') return v
     if (tm === 'own') {
-      const own = t.countryTotalB?.[iso]?.[String(yr)]
+      const own = ownTotalF?.[iso]?.[String(yr)]
       return own ? v / own : null
     }
-    const w = t.worldB[basket.id]?.[String(yr)]
+    const w = worldBF[basket.id]?.[String(yr)]
     return w ? v / w : null
   }
 
   const ranked = useMemo(() => t.countries
     .map(iso => ({ iso, v: metric(iso, ty) }))
     .filter(d => d.v != null && d.v > 0)
-    .sort((a, b) => b.v - a.v), [t, basket.id, ty, tm])
+    .sort((a, b) => b.v - a.v), [t, basket.id, ty, tm, fl])
 
   const topIsos = ranked.slice(0, 6).map(d => d.iso)
   const series = useMemo(() => t.years.map(yr => {
     const row = { year: yr }
     for (const iso of topIsos) row[iso] = metric(iso, yr)
     return row
-  }), [t, basket.id, tm, topIsos])
+  }), [t, basket.id, tm, topIsos, fl])
 
   const isPct = tm !== 'value'
   const vfmt = isPct ? (v) => fmtPct(v, 1) : (v) => fmtB(v, 1)
   const axfmt = isPct ? (v) => `${Math.round(v * 100)}%` : (v) => `$${Math.round(v)}B`
-  const metricLabel = tm === 'value' ? 'Export value' : tm === 'own' ? 'Share of own exports' : 'World market share'
+  const metricLabel = tm === 'value' ? (fl === 'import' ? 'Import value' : 'Export value')
+    : tm === 'own' ? `Share of own ${flowWord}` : 'World market share'
   const topShare = tm === 'share' ? ranked.slice(0, 3).reduce((s, d) => s + d.v, 0) : 0
   const stacked = tm !== 'own'  // share and value are additive across countries; "% of own" is not
 
@@ -68,7 +74,11 @@ export default function TechPanel({ data, year, setYear }) {
             <span className="label">Year</span>
             <YearStepper years={t.years} year={ty} onChange={setYear} />
           </div>
-          <Toggle value={tm} onChange={setTm} options={METRICS} />
+          <div className="flex items-center gap-2">
+            <Toggle value={fl} onChange={setFlow}
+              options={[{ value: 'export', label: 'Exports' }, { value: 'import', label: 'Imports' }]} />
+            <Toggle value={tm} onChange={setTm} options={METRICS} />
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 border-t border-slate-200 dark:border-slate-800 pt-3">
           <span className="label mr-0.5">Category</span>
@@ -82,7 +92,7 @@ export default function TechPanel({ data, year, setYear }) {
         <div className="text-xs text-slate-500">
           {basket.nCodes} HS6 codes · world {fmtB(world, 1)} ({ty}){' '}
           {tm === 'share' && topShare ? `· top-3 = ${fmtPct(topShare, 0)} of world` : ''}
-          {tm === 'own' ? '· basket as a share of each country’s total exports' : ''}
+          {tm === 'own' ? `· basket as a share of each country’s total ${flowWord}` : ''}
           {' · '}HS2012 data
         </div>
       </div>

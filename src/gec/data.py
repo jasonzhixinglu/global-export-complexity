@@ -12,11 +12,14 @@ import pandas as pd
 
 from . import config as cfg
 
-USECOLS = ["country_iso3_code", "product_hs92_code", "year", "export_value", "pci"]
+USECOLS = ["country_iso3_code", "product_hs92_code", "year", "export_value", "import_value", "pci"]
 
 
 def load_clean(path=None, years=None) -> pd.DataFrame:
-    """Read the raw CSV, coerce types, filter years, drop unusable rows."""
+    """Read the raw CSV, coerce types, filter years, drop unusable rows.
+
+    Keeps both export_value and import_value (for the export/import flows). Rows need a
+    valid PCI and at least one non-zero value; missing values are filled with 0."""
     path = path or cfg.RAW_CSV
     years = years or cfg.YEARS
     df = pd.read_csv(
@@ -25,12 +28,14 @@ def load_clean(path=None, years=None) -> pd.DataFrame:
         dtype={"country_iso3_code": str, "product_hs92_code": str},
     )
     df["year"] = df["year"].astype(int)
-    df["export_value"] = pd.to_numeric(df["export_value"], errors="coerce")
+    for col in ("export_value", "import_value"):
+        df[col] = pd.to_numeric(df[col], errors="coerce")
     df["pci"] = pd.to_numeric(df["pci"], errors="coerce")
     df = df.replace([np.inf, -np.inf], np.nan)
     df = df[df["year"].between(min(years), max(years))]
-    df = df.dropna(subset=["pci", "export_value"])
-    df = df[df["export_value"] >= 0]
+    df = df.dropna(subset=["pci"])
+    df[["export_value", "import_value"]] = df[["export_value", "import_value"]].fillna(0.0).clip(lower=0)
+    df = df[(df["export_value"] > 0) | (df["import_value"] > 0)]
     return df.reset_index(drop=True)
 
 
@@ -52,13 +57,13 @@ def top_exporters(df: pd.DataFrame, n=None) -> list[str]:
 
 
 def product_table(df_year: pd.DataFrame, pci_lo=None, pci_hi=None) -> pd.DataFrame:
-    """Aggregate one year to product level: pci (constant within product-year) and
-    world export value W = sum over all countries."""
+    """Aggregate one year to product level: pci (constant within product-year) and the
+    world export value (W) and world import value (W_imp) = sums over all countries."""
     pci_lo = cfg.PCI_LO if pci_lo is None else pci_lo
     pci_hi = cfg.PCI_HI if pci_hi is None else pci_hi
     prod = (
         df_year.groupby("product_hs92_code")
-        .agg(pci=("pci", "first"), W=("export_value", "sum"))
+        .agg(pci=("pci", "first"), W=("export_value", "sum"), W_imp=("import_value", "sum"))
         .reset_index()
     )
     return prod[prod["pci"].between(pci_lo, pci_hi)].reset_index(drop=True)
@@ -120,14 +125,15 @@ def load_bilateral(year_ranges=("2020_2024",), origins=None, dests=None, years=N
                        as_index=False)["export_value"].sum()
 
 
-def country_value_vectors(df_year, products, countries) -> dict[str, np.ndarray]:
-    """For a year, return {country: array of its export value aligned to `products`}."""
+def country_value_vectors(df_year, products, countries, value_col="export_value") -> dict[str, np.ndarray]:
+    """For a year, return {country: array of `value_col` aligned to `products`}.
+    value_col is 'export_value' or 'import_value'."""
     idx = pd.Index(products)
     out = {}
     for c in countries:
         cv = (
             df_year[df_year["country_iso3_code"] == c]
-            .groupby("product_hs92_code")["export_value"]
+            .groupby("product_hs92_code")[value_col]
             .sum()
         )
         out[c] = cv.reindex(idx).fillna(0.0).to_numpy()

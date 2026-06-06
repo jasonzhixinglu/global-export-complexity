@@ -9,7 +9,7 @@ import { axisColors, tooltipStyle } from '../lib/chartTheme.js'
 import { MeasureToggle, Toggle, YearStepper, CountryPicker } from './Controls.jsx'
 import { useDarkMode } from '../lib/useDarkMode.jsx'
 
-export default function ExplorerPanel({ data, selected, setSelected, year, setYear, measure, setMeasure }) {
+export default function ExplorerPanel({ data, selected, setSelected, year, setYear, measure, setMeasure, flow, setFlow }) {
   const { isDark } = useDarkMode()
   const { meta, byIso } = data
   const stackable = MEASURES[measure].stack
@@ -18,9 +18,11 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
   const [q, setQ] = useState('')
   const [level, setLevel] = useState(meta.defaultLevel || 'med')
   const mode = stackable && display === 'stack' ? 'stack' : 'line'
+  const isImp = flow === 'import'
+  const vIdx = isImp ? 3 : 2  // pci_products row = [hs4, pci, exportB, importB]
 
-  const rows = useMemo(() => buildRows(data, selected, year, measure, level),
-    [data, selected, year, measure, level])
+  const rows = useMemo(() => buildRows(data, selected, year, measure, level, flow),
+    [data, selected, year, measure, level, flow])
   const ac = axisColors(isDark)
 
   // colour by position in the current selection (stable, no global-index collisions)
@@ -41,9 +43,9 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
     let w = baseWin
     let cand = list.filter(p => Math.abs(p[1] - selectedPci) <= w)
     while (cand.length < 10 && w < 1.5) { w += baseWin; cand = list.filter(p => Math.abs(p[1] - selectedPci) <= w) }
-    const prods = cand.sort((a, b) => b[2] - a[2]).slice(0, 10).map(p => ({ hs4: p[0], pci: p[1], val: p[2] }))
+    const prods = cand.sort((a, b) => b[vIdx] - a[vIdx]).slice(0, 10).map(p => ({ hs4: p[0], pci: p[1], val: p[vIdx] }))
     return { prods, win: w }
-  }, [pp, year, selectedPci, baseWin])
+  }, [pp, year, selectedPci, baseWin, vIdx])
   const maxVal = prods.length ? Math.max(...prods.map(p => p.val)) : 1
   const onPick = (e) => { if (e && e.activeLabel != null) setSelectedPci(Number(e.activeLabel)) }
 
@@ -89,7 +91,11 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
       <div className="md:col-span-2 lg:col-span-6 md:order-last lg:order-none">
         <div className="panel p-3 h-full">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2 justify-between mb-2">
-            <MeasureToggle value={measure} onChange={setMeasure} measures={MEASURES} />
+            <div className="flex items-center gap-2">
+              <Toggle value={flow} onChange={setFlow}
+                options={[{ value: 'export', label: 'Exports' }, { value: 'import', label: 'Imports' }]} />
+              <MeasureToggle value={measure} onChange={setMeasure} measures={MEASURES} />
+            </div>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
               <span className="inline-flex items-center gap-1.5">
                 <span className="label">Smoothness</span>
@@ -147,14 +153,14 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
       {/* RIGHT — top products near the selected PCI */}
       <div className="md:col-span-1 lg:col-span-3">
         <div className="panel p-3 h-full">
-          <div className="text-[11px] text-slate-400 uppercase tracking-wide">Top global exports near</div>
+          <div className="text-[11px] text-slate-400 uppercase tracking-wide">Top global {isImp ? 'imports' : 'exports'} near</div>
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-bold font-mono text-amber-500">PCI {fmtPci(selectedPci)}</span>
             <span className="text-xs text-slate-400">{year}</span>
           </div>
           <input type="range" min={-2.5} max={2.5} step={0.01} value={selectedPci}
             onChange={e => setSelectedPci(Number(e.target.value))} className="w-full my-1.5" />
-          <div className="text-[11px] text-slate-400 mb-2">largest exports within ±{win.toFixed(2)} PCI · drag the slider or click the chart</div>
+          <div className="text-[11px] text-slate-400 mb-2">largest {isImp ? 'imports' : 'exports'} within ±{win.toFixed(2)} PCI · drag the slider or click the chart</div>
           {prods.length === 0 ? (
             <div className="text-sm text-slate-400 py-2">No products in this bin.</div>
           ) : (

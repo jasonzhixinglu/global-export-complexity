@@ -25,6 +25,7 @@ export default function App() {
   const [selected, setSelected] = useSessionState('gec-selected', ['CHN', 'DEU', 'JPN', 'USA'])
   const [year, setYear] = useSessionState('gec-year', 2024)
   const [measure, setMeasure] = useSessionState('gec-measure', 'share')
+  const [flow, setFlow] = useSessionState('gec-flow', 'export')
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -59,13 +60,15 @@ export default function App() {
           {!data && !error && <div className="panel p-10 text-center text-slate-400">Loading data…</div>}
           {data && tab === 'explorer' && (
             <ExplorerPanel data={data} selected={selected} setSelected={setSelected}
-              year={year} setYear={setYear} measure={measure} setMeasure={setMeasure} />
+              year={year} setYear={setYear} measure={measure} setMeasure={setMeasure}
+              flow={flow} setFlow={setFlow} />
           )}
           {data && tab === 'tech' && (
-            <TechPanel data={data} year={year} setYear={setYear} measure={measure} setMeasure={setMeasure} />
+            <TechPanel data={data} year={year} setYear={setYear} measure={measure} setMeasure={setMeasure}
+              flow={flow} setFlow={setFlow} />
           )}
           {data && tab === 'about' && (
-            <AboutPanel data={data} year={year} setYear={setYear} />
+            <AboutPanel data={data} year={year} setYear={setYear} flow={flow} setFlow={setFlow} />
           )}
         </div>
       </main>

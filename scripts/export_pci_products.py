@@ -30,25 +30,27 @@ def main():
     name_of = dict(zip(cls["product_hs92_code"].str.zfill(4), cls["product_name"]))
 
     df = pd.read_csv(cfg.RAW_CSV,
-                     usecols=["product_hs92_code", "year", "export_value", "pci"],
+                     usecols=["product_hs92_code", "year", "export_value", "import_value", "pci"],
                      dtype={"product_hs92_code": str})
     df["year"] = df["year"].astype(int)
     df = df[df["year"].between(2000, 2024)]
-    df["export_value"] = pd.to_numeric(df["export_value"], errors="coerce")
+    for c in ("export_value", "import_value"):
+        df[c] = pd.to_numeric(df[c], errors="coerce")
     df["pci"] = pd.to_numeric(df["pci"], errors="coerce")
-    df = df.dropna(subset=["pci", "export_value"])
+    df = df.dropna(subset=["pci"])
 
     years = list(range(2000, 2025))
     by_year, used = {}, set()
     for yr in years:
         dy = df[df["year"] == yr]
-        prod = dy.groupby("product_hs92_code").agg(pci=("pci", "first"),
-                                                   val=("export_value", "sum")).reset_index()
+        prod = dy.groupby("product_hs92_code").agg(
+            pci=("pci", "first"), val=("export_value", "sum"), imp=("import_value", "sum")).reset_index()
         prod["hs4"] = prod["product_hs92_code"].str.zfill(4)
-        prod = prod[(prod["pci"].between(LO, HI)) & (prod["val"] > 0)].sort_values("pci")
-        rows = [[r.hs4, round(float(r.pci), 2), round(r.val / 1e9, 2)] for r in prod.itertuples()]
+        prod = prod[(prod["pci"].between(LO, HI)) & ((prod["val"] > 0) | (prod["imp"] > 0))].sort_values("pci")
+        rows = [[r.hs4, round(float(r.pci), 2), round(r.val / 1e9, 2), round(r.imp / 1e9, 2)]
+                for r in prod.itertuples()]
         used.update(r[0] for r in rows)
-        by_year[str(yr)] = rows  # [hs4, pci, valueB], sorted by pci ascending
+        by_year[str(yr)] = rows  # [hs4, pci, exportB, importB], sorted by pci ascending
 
     out = {
         "lo": LO, "hi": HI, "years": years,

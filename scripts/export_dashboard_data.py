@@ -105,6 +105,7 @@ def main():
     kde_idx = list(range(0, len(s["kde_grid"]), KSTEP))
     kde_grid = [r(s["kde_grid"][i], 4) for i in kde_idx]
     levels = [lv["id"] for lv in cfg.SMOOTHING]
+    flows = [str(f) for f in s["flows"]]
 
     # --- meta ---
     regions_order = ["Asia-Pacific", "Europe", "Americas", "Middle East", "Other"]
@@ -122,30 +123,32 @@ def main():
         "bandwidth": cfg.BANDWIDTH,
         "smoothing": [{"id": lv["id"], "label": lv["label"], "win": lv["win"]} for lv in cfg.SMOOTHING],
         "defaultLevel": "med",
+        "flows": list(flows),
         "source": "Harvard Growth Lab, Atlas of Economic Complexity (HS92 HS4), 2000-2024",
     }
     (OUT / "meta.json").write_text(json.dumps(meta))
 
-    # --- per-country series at each smoothness level: share, density (+ shared total) ---
-    share_lvl, dens_lvl, totals = s["share_lvl"], s["density_lvl"], s["totals_cy"]
-    ser_share = {lid: {} for lid in levels}
-    ser_dens = {lid: {} for lid in levels}
-    ser_tot = {}
-    for ci, c in enumerate(countries):
-        for li, lid in enumerate(levels):
-            ser_share[lid][c] = {str(years[yi]): [r(max(0.0, v), 4) for v in np.clip(share_lvl[li, ci, yi], 0, 1)]
-                                 for yi in range(len(years))}
-            ser_dens[lid][c] = {str(years[yi]): [r(dens_lvl[li, ci, yi][k], 6) for k in kde_idx]
-                                for yi in range(len(years))}
-        ser_tot[c] = {str(years[yi]): r(totals[ci, yi] / 1e9, 2) for yi in range(len(years))}  # $B
+    # --- per-country series per FLOW per smoothness level: share, density (+ totals) ---
+    share_lvl, dens_lvl, totals = s["share_lvl"], s["density_lvl"], s["totals_cy_flow"]
+    ser_share = {fl: {lid: {} for lid in levels} for fl in flows}
+    ser_dens = {fl: {lid: {} for lid in levels} for fl in flows}
+    ser_tot = {fl: {} for fl in flows}
+    for fi, fl in enumerate(flows):
+        for ci, c in enumerate(countries):
+            for li, lid in enumerate(levels):
+                ser_share[fl][lid][c] = {str(years[yi]): [r(max(0.0, v), 4) for v in np.clip(share_lvl[fi, li, ci, yi], 0, 1)]
+                                         for yi in range(len(years))}
+                ser_dens[fl][lid][c] = {str(years[yi]): [r(dens_lvl[fi, li, ci, yi][k], 6) for k in kde_idx]
+                                        for yi in range(len(years))}
+            ser_tot[fl][c] = {str(years[yi]): r(totals[fi, ci, yi] / 1e9, 2) for yi in range(len(years))}  # $B
     (OUT / "series.json").write_text(json.dumps(
-        {"levels": levels, "share": ser_share, "density": ser_dens, "totalB": ser_tot}))
+        {"levels": levels, "flows": list(flows), "share": ser_share, "density": ser_dens, "totalB": ser_tot}))
 
-    # --- coverage ---
-    cov = s["coverage"]  # (nThresh, nY, grid)
-    coverage = {"thresholds": thresholds, "grid": share_grid, "years": years,
-                "coverage": [[[r(v, 4) for v in cov[ti, yi]] for yi in range(len(years))]
-                             for ti in range(len(thresholds))]}
+    # --- coverage per flow ---
+    cov = s["coverage_flow"]  # (nFlow, nThresh, nY, grid)
+    coverage = {"thresholds": thresholds, "grid": share_grid, "years": years, "flows": list(flows),
+                "coverage": {fl: [[[r(v, 4) for v in cov[fi, ti, yi]] for yi in range(len(years))]
+                                  for ti in range(len(thresholds))] for fi, fl in enumerate(flows)}}
     (OUT / "coverage.json").write_text(json.dumps(coverage))
 
     # --- anchors: top-value HS4 per PCI bin (latest year) ---

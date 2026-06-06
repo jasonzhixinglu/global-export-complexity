@@ -4,7 +4,7 @@ import {
 } from 'recharts'
 import { fmtPct, fmtPci, colorFor } from '../lib/format.js'
 import { axisColors, tooltipStyle } from '../lib/chartTheme.js'
-import { YearStepper } from './Controls.jsx'
+import { YearStepper, Toggle } from './Controls.jsx'
 import { useDarkMode } from '../lib/useDarkMode.jsx'
 
 const REFS = [
@@ -32,24 +32,31 @@ function Acc({ title, open, onToggle, children }) {
   )
 }
 
-export default function AboutPanel({ data, year, setYear }) {
+export default function AboutPanel({ data, year, setYear, flow, setFlow }) {
   const { isDark } = useDarkMode()
   const { coverage, meta } = data
   const ac = axisColors(isDark)
   const yi = coverage.years.indexOf(year)
+  const fl = flow === 'import' ? 'import' : 'export'
+  const flowWord = fl === 'import' ? 'importers' : 'exporters'
+  const cov = (coverage.coverage[fl] || coverage.coverage.export || coverage.coverage)
   const [open, setOpen] = useState(null)  // Overview is always shown; the rest are single-open
   const sec = (title) => ({ open: open === title, onToggle: () => setOpen(s => (s === title ? null : title)) })
 
   const rows = useMemo(() => coverage.grid.map((pci, gi) => {
     const row = { pci }
-    coverage.thresholds.forEach((t, ti) => { row[`top${t}`] = coverage.coverage[ti][yi]?.[gi] })
+    coverage.thresholds.forEach((t, ti) => { row[`top${t}`] = cov[ti][yi]?.[gi] })
     return row
-  }), [coverage, yi])
+  }), [coverage, yi, cov])
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
       <div className="panel p-4 space-y-3">
-        <div className="label">Top-N world-export coverage by complexity · {year}</div>
+        <div className="flex items-center justify-between gap-2">
+          <div className="label">Top-N world-{fl} coverage by complexity · {year}</div>
+          <Toggle value={fl} onChange={setFlow}
+            options={[{ value: 'export', label: 'Exports' }, { value: 'import', label: 'Imports' }]} />
+        </div>
         <YearStepper years={meta.years} year={year} onChange={setYear} />
         <ResponsiveContainer width="100%" height={260}>
           <LineChart data={rows} margin={{ top: 4, right: 16, bottom: 4, left: 8 }}>
@@ -67,8 +74,9 @@ export default function AboutPanel({ data, year, setYear }) {
         </ResponsiveContainer>
         <div className="text-[11px] text-slate-400 text-center -mt-1">PCI (Product Complexity Index)</div>
         <p className="text-xs text-slate-500">
-          Coverage is lowest at the low-complexity (commodity) end, where exporters are fragmented,
-          and highest in mid/high complexity. The top-20 average ~72% of world trade; top-50 ~93%.
+          Cumulative share of world {fl} held by the top-N {flowWord}, by complexity. Coverage is
+          lowest at the low-complexity (commodity) end, where {flowWord} are fragmented, and highest
+          in mid/high complexity.
         </p>
       </div>
 
