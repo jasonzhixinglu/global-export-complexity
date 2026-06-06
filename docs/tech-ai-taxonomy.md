@@ -125,3 +125,63 @@ Implement **Tier B** as a new, separately-labeled basket group ("AI / data-cente
 in `classifications.py` → `techai.json`, alongside (not merged into) the Fed and OECD sets. Leave
 **Tier C** out of the AI baskets (optionally expose as a clearly-marked "broad ICT/energy" overlay).
 This keeps the silicon signal clean while adding the genuinely AI-driven infrastructure layer.
+
+---
+
+## Sourcing current *monthly* data (the Comtrade gap, national sources, Haver)
+
+The dashboard runs on the reconciled **annual** Atlas (HS92 HS4). For a timely read, UN Comtrade
+has **monthly** HS6 — but for these codes only ~32 of the 50 tracked economies report a current
+(2026) month, and crucially **the biggest chip/AI hubs are missing or lagged: Taiwan, China,
+Singapore, Vietnam** (Comtrade frontier ≈ Mar-2026; China/Taiwan absent). National customs sources
+fill the gap, with very different accessibility (probed 2026-06):
+
+| hub (source) | anti-bot? | HS6 detail public & free? | verdict |
+|---|---|---|---|
+| **Taiwan — MOF/DGoC** ([portal.sw.nat.gov.tw](https://portal.sw.nat.gov.tw/APGA/GA30E)) | none | **yes** — HS 2/4/6/8/11, USD, English, fast (~10-day lag) | **easiest; dashboard-grade** |
+| **China — GACC** ([stats.customs.gov.cn](http://stats.customs.gov.cn/)) | **yes (瑞数 WAF; HTTP 412 on every endpoint)** | exists at HS8 but **walled** | manual-in-browser only; automation hard/fragile/ToS-gray. English site = aggregates only |
+| **Vietnam — GDVC/GSO** ([customs.gov.vn](https://www.customs.gov.vn/)) | none (HTTP 200) | **no** — only a broad "electronics" group free; HS8 in VN-language reports | easy to reach, but **coarse**; HS6 is a manual dig |
+
+Difficulty is set by the **gateway, not the code count** — scraping a few HS6 from GACC is no easier
+than many (the 瑞数 challenge gates all requests). For a handful of codes, GACC is trivial *manually*
+(real browser → query China's HS8, first 6 = our HS6 → export Excel) but not worth automating;
+Taiwan is the clean programmatic win; Vietnam is open but its free data stops at "electronics."
+
+### Haver series tracked (in the `haver-data` pipeline, not this repo)
+
+Haver's `emergepr` database carries these hubs' trade as **curated national aggregates** — timely
+(**Apr-2026** for TW/CN/SG, **May-2026** for KR via flash releases — *ahead of Comtrade*). Added
+2026-06-05 to `haver-data` (`config/series.yaml`); refreshed daily. **`code@emergepr`:**
+
+| code | series (units) |
+|---|---|
+| `n528ievs` / `n528invs` / `n528invr` | Taiwan Exports ICs / Imports ICs / Imports Semiconductor Equipment (Mil US$) |
+| `n924ie7f` / `n924in5l` / `n924in3p` | China Exports IC / Imports IC / Imports Semiconductor Mfg Equip (Mil USD) |
+| `n542ixvr` / `n542imvr` | South Korea Exports / Imports Semiconductors (Thous US$) |
+| `n576invs` | Singapore NODX: Integrated Circuits (**Mil S$** — local currency) |
+| `n582ixe` / `n582ime` | Vietnam Exports / Imports: Computers, Electronic Products & Parts (Mil US$) |
+
+**Why these are *not* dashboard-grade** (monitoring only): mixed units (USD / Thous US$ / local S$),
+mixed concepts ("Integrated Circuits" vs broad "Semiconductors" vs "Computers/electronics"), and
+curated aggregates rather than the HS6 basket structure. Taiwan is the exception — `emergepr` even
+splits IC / DRAM / semiconductor-equipment / chemical-wafer **bilaterally by partner** (finer than HS6).
+
+### Do the Haver aggregates map to HS6? — Vietnam check
+
+To test whether a Haver national aggregate is a recognizable HS6 sum, we compared Vietnam's Haver
+"Computers, Electronic Products & Parts" (2024 annual) against Harvard HS6 sums for Vietnam 2024:
+
+| basket (Harvard HS6, VNM 2024) | export $B | vs Haver $72.6B | import $B | vs Haver $107.1B |
+|---|---|---|---|---|
+| `8471`+`8473`+`8541`+`8542` (computers, parts, semis, ICs) | 82.7 | **114%** | 70.3 | 66% |
+| + broad electronics, **excl. phones** | 116.9 | 161% | 87.4 | 82% |
+| + `8517` (incl. phones/telecom) | 178.8 | 246% | 105.0 | 98% |
+
+**Finding:** yes — it is a recognizable HS6 electronics aggregate that **excludes mobile phones**
+(`8517`, $61.9B, which Vietnam reports as a separate "phones & parts" category; including it
+overshoots exports to 246%). On exports it tracks the **computers + ICs + semiconductors + parts**
+set (`8471/8473/8541/8542`), Haver ≈ 88% of that basket. The match is only approximate (~15–35%)
+because Haver is **Vietnam's own customs** while Harvard is **Atlas mirror-reconstructed** (its VNM
+total runs high at ~$429B vs Vietnam's reported ~$405B), and the category's exact HS boundaries
+differ. Takeaway: Haver aggregates are *interpretable* as HS-code groups for sanity/monitoring, but
+the source and boundary differences are why they aren't a clean substitute for the HS6 baskets.
