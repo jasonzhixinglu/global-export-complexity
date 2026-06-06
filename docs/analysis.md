@@ -10,6 +10,11 @@ estimates respect the trade-accounting identities the data already satisfies.
 - **Code:** `src/gec/` (package) + `scripts/` (pipeline). Reproduce everything with
   `python scripts/run_all.py`. All figures below regenerate into `results/figures/`.
 
+> **Exports and imports.** This write-up and the figures use **exports** for concreteness, but every
+> estimand below is symmetric: the dashboard runs the identical estimators on `import_value` and
+> exposes an **Exports / Imports** toggle. "Market share" then reads as share of world *imports*,
+> the distribution as a country's *import* value across complexity, and coverage by top *importers*.
+
 ---
 
 ## 1. The core problem: smoothing vs. accounting

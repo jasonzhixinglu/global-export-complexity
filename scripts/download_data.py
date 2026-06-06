@@ -2,6 +2,7 @@
 
 Usage:
   python scripts/download_data.py [--force]                # the HS4 origin file (default)
+  python scripts/download_data.py --hs12                   # HS2012 HS6 file (~463 MB; tech/AI baskets)
   python scripts/download_data.py --bilateral 2020_2024    # one bilateral HS6 file (~2.9 GB)
   python scripts/download_data.py --bilateral all          # all bilateral files (~15 GB)
 """
@@ -30,6 +31,10 @@ def _fetch(url: str, dest: Path, force: bool) -> None:
 def main(argv) -> None:
     cfg.ensure_dirs()
     force = "--force" in argv
+
+    if "--hs12" in argv:
+        _fetch(cfg.datafile_url(cfg.HS12_HS6_FILE_ID), cfg.HS12_HS6_CSV, force)
+        return
 
     if "--bilateral" in argv:
         i = argv.index("--bilateral")

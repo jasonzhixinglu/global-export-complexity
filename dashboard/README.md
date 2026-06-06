@@ -1,15 +1,17 @@
-# Global Export Complexity — dashboard
+# Global Trade Complexity — dashboard
 
-Static React + Vite + Tailwind + Recharts dashboard for exploring exports across the Product
-Complexity Index (PCI), deployed to GitHub Pages. Templated on the nsicx-dashboard.
+Static React + Vite + Tailwind + Recharts dashboard for exploring global trade (exports **and**
+imports) across the Product Complexity Index (PCI), deployed to GitHub Pages. Templated on the
+nsicx-dashboard. A global **Exports / Imports** toggle drives every tab.
 
 ## Tabs
-- **Explorer** — 3-panel: left = year + country picker (top 50 exporters, searchable); middle =
-  market-share / export-value / distribution across PCI (stacked or lines, animatable); right =
-  the largest products near a clicked/dragged PCI.
+- **Explorer** — 3-panel: left = year + country picker (top 50, searchable); middle =
+  market-share / value / distribution across PCI (stacked or lines, 3 smoothness levels,
+  animatable); right = the largest products (export or import) near a clicked/dragged PCI.
 - **Tech & AI** — AI-compute and semiconductor value-chain baskets by country and year (world
-  share / export value / share of own exports), from HS2012 data.
-- **About** — top-N coverage by complexity + an accordion of methodology, caveats, and references.
+  share / value / share of own trade), exports or imports, from HS2012 data.
+- **About** — top-N coverage by complexity (top exporters or importers) + an accordion of
+  methodology, caveats, and references.
 
 ## Data
 The dashboard reads precomputed static JSON in `public/data/` (`meta`, `series`, `coverage`,
