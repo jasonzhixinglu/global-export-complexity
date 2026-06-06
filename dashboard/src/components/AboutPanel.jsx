@@ -51,8 +51,8 @@ export default function AboutPanel({ data, year, setYear, flow, setFlow }) {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-      <div className="panel p-4 space-y-3">
-        <div className="flex items-center justify-between gap-2">
+      <div className="panel p-4 space-y-3 min-w-0">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="label">Top-N world-{fl} coverage by complexity · {year}</div>
           <Toggle value={fl} onChange={setFlow}
             options={[{ value: 'export', label: 'Exports' }, { value: 'import', label: 'Imports' }]} />
@@ -80,7 +80,7 @@ export default function AboutPanel({ data, year, setYear, flow, setFlow }) {
         </p>
       </div>
 
-      <div className="panel px-4 py-1">
+      <div className="panel px-4 py-1 min-w-0">
         <div className="border-b border-slate-200 dark:border-slate-800 py-2.5">
           <div className="text-sm font-medium text-slate-800 dark:text-slate-100 mb-1.5">Overview</div>
           <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">

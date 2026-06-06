@@ -80,7 +80,7 @@ export default function TechPanel({ data, year, setYear, flow, setFlow }) {
             <span className="label">Year</span>
             <YearStepper years={t.years} year={ty} onChange={setYear} />
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Toggle value={fl} onChange={setFlow}
               options={[{ value: 'export', label: 'Exports' }, { value: 'import', label: 'Imports' }]} />
             <Toggle value={tm} onChange={setTm} options={METRICS} />
@@ -104,7 +104,7 @@ export default function TechPanel({ data, year, setYear, flow, setFlow }) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-        <div className="panel p-3">
+        <div className="panel p-3 min-w-0">
           <div className="label mb-2">{metricLabel} — {basket.label}, {ty}</div>
           <ResponsiveContainer width="100%" height={400}>
             <BarChart data={ranked.slice(0, 14)} layout="vertical" margin={{ left: 6, right: 16 }}>
@@ -119,7 +119,7 @@ export default function TechPanel({ data, year, setYear, flow, setFlow }) {
           </ResponsiveContainer>
         </div>
 
-        <div className="panel p-3">
+        <div className="panel p-3 min-w-0">
           <div className="label mb-2">Top 6 over time {stacked ? '(stacked share)' : ''} — {metricLabel}</div>
           <ResponsiveContainer width="100%" height={400}>
             <AreaChart data={series} margin={{ top: 8, right: 16, bottom: 8, left: 6 }}>
