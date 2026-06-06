@@ -11,7 +11,7 @@ import { useDarkMode } from '../lib/useDarkMode.jsx'
 export default function TechPanel({ data, year, setYear, flow, setFlow }) {
   const { isDark } = useDarkMode()
   const t = data.techai
-  const { byIso, colorByIso } = data
+  const { byIso } = data
   const [basketId, setBasketId] = useState('all')
   const [tm, setTm] = useState('share')
   const ac = axisColors(isDark)
@@ -50,6 +50,12 @@ export default function TechPanel({ data, year, setYear, flow, setFlow }) {
     .map(iso => ({ iso, v: metric(iso, ty) }))
     .filter(d => d.v != null && d.v > 0)
     .sort((a, b) => b.v - a.v), [t, basket.id, ty, tm, fl])
+
+  // colour by rank in the current list (distinct across the shown bars/lines; no global-index wrap)
+  const colorByRank = useMemo(() => {
+    const m = {}; ranked.forEach((d, i) => { m[d.iso] = colorFor(i) }); return m
+  }, [ranked])
+  const cOf = (iso) => colorByRank[iso] || '#94a3b8'
 
   const topIsos = ranked.slice(0, 6).map(d => d.iso)
   const series = useMemo(() => t.years.map(yr => {
@@ -107,7 +113,7 @@ export default function TechPanel({ data, year, setYear, flow, setFlow }) {
               <YAxis type="category" dataKey="iso" width={42} tick={{ fill: ac.tick, fontSize: 10 }} />
               <Tooltip contentStyle={tooltipStyle(isDark)} formatter={(v, _n, p) => [vfmt(v), byIso[p.payload.iso]?.name]} />
               <Bar dataKey="v" isAnimationActive={false}>
-                {ranked.slice(0, 14).map(d => <Cell key={d.iso} fill={colorFor(colorByIso[d.iso])} />)}
+                {ranked.slice(0, 14).map(d => <Cell key={d.iso} fill={cOf(d.iso)} />)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -123,7 +129,7 @@ export default function TechPanel({ data, year, setYear, flow, setFlow }) {
               <Tooltip contentStyle={tooltipStyle(isDark)} formatter={(v, n) => [vfmt(v), byIso[n]?.name || n]} />
               {topIsos.map(iso => (
                 <Area key={iso} dataKey={iso} stackId={stacked ? '1' : undefined}
-                  stroke={colorFor(colorByIso[iso])} fill={colorFor(colorByIso[iso])}
+                  stroke={cOf(iso)} fill={cOf(iso)}
                   fillOpacity={stacked ? 0.7 : 0.12} strokeWidth={1.5} isAnimationActive={false} />
               ))}
             </AreaChart>
@@ -131,7 +137,7 @@ export default function TechPanel({ data, year, setYear, flow, setFlow }) {
           <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2">
             {topIsos.map(iso => (
               <span key={iso} className="inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-300">
-                <span className="w-2 h-2 rounded-full" style={{ background: colorFor(colorByIso[iso]) }} />
+                <span className="w-2 h-2 rounded-full" style={{ background: cOf(iso) }} />
                 {byIso[iso]?.name || iso}
               </span>
             ))}

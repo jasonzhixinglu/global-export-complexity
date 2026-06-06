@@ -33,9 +33,9 @@ export default function App() {
       <header className="border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-3">
         <div className="max-w-screen-2xl mx-auto flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="text-base font-semibold leading-tight">Global Export Complexity</h1>
+            <h1 className="text-base font-semibold leading-tight">Global Trade Complexity</h1>
             <p className="text-xs text-slate-500 mt-0.5">
-              Exports across the Product Complexity Index · 2000–2024 · Atlas of Economic Complexity
+              Exports &amp; imports across the Product Complexity Index · 2000–2024 · Atlas of Economic Complexity
             </p>
           </div>
           <div className="flex items-start gap-2 flex-shrink-0">
