@@ -113,19 +113,53 @@ export function fineGrid(data, n = 400) {
   return Array.from({ length: n }, (_, i) => lo + (hi - lo) * i / (n - 1))
 }
 
-// Build chart rows from a list of mixture `series` = [{ name, params, total }].
-// measure 'value' scales each shape by its total ($B per PCI unit); else the normalized shape.
-export function buildMixtureRows(data, series, measure, level = 'med') {
+export const ANCHOR_KEY = '__anchor__'
+
+// Aggregate several corridors into one mixture (a destination/origin BLOC, e.g. all of Europe):
+// the value-weighted sum of mixtures is a mixture — component weights scale by each corridor's
+// total, so the combined shape integrates to 1 and `total` is the bloc's summed value.
+export function aggregateCorridors(data, anchor, members, year, role = 'origin') {
+  const params = []
+  let total = 0
+  for (const m of members) {
+    const { params: p, total: t } = corridorOf(data, anchor, m, year, role)
+    if (!p || t == null) continue
+    for (const [w, mu, sd] of p) params.push([w * t, mu, sd])
+    total += t
+  }
+  return params.length ? { params, total } : { params: null, total: null }
+}
+
+// Build corridor chart rows for one anchor vs several pre-resolved `partySeries` = [{name,params,total}].
+// Each party may be a single corridor or an aggregated bloc (see aggregateCorridors).
+//   measure 'density' -> each party's normalized shape (lines), + anchor total shape (ref)
+//   measure 'value'   -> shape x party total ($B per PCI), + anchor total value (ref)
+//   measure 'share'   -> party value density / anchor total value density (% of the anchor's flow by PCI)
+// role 'origin' => anchor exports (export distribution is the denominator); 'dest' => imports.
+export function buildCorridorRows(data, anchor, role, year, partySeries, measure, level = 'med') {
   const grid = fineGrid(data)
   const b = (data.gmmBilateral?.blur || data.gmm?.blur || {})[level] ?? 0.10
-  const curves = series.map(s => {
-    if (!s.params) return { name: s.name, vals: null }
-    const dens = mixtureDensity(s.params, b, grid)
-    return { name: s.name, vals: measure === 'value' && s.total != null ? dens.map(d => d * s.total) : dens }
-  })
+  const y = String(year)
+  const cflow = role === 'origin' ? 'export' : 'import'
+  const aParams = data.gmm?.mix?.[cflow]?.[anchor]?.[y]
+  const aTotal = data.series?.totalB?.[cflow]?.[anchor]?.[y]
+  const aShape = aParams ? mixtureDensity(aParams, b, grid) : null
+  const aValue = (aShape && aTotal != null) ? aShape.map(d => d * aTotal) : null
+
+  const cur = {}
+  for (const s of partySeries) {
+    if (!s.params) { cur[s.name] = null; continue }
+    const shape = mixtureDensity(s.params, b, grid)
+    if (measure === 'value') cur[s.name] = s.total != null ? shape.map(d => d * s.total) : null
+    else if (measure === 'share') cur[s.name] = (s.total != null && aValue)
+      ? shape.map((d, i) => aValue[i] > 1e-9 ? Math.min(1, (d * s.total) / aValue[i]) : 0) : null
+    else cur[s.name] = shape
+  }
   return grid.map((pci, gi) => {
     const row = { pci }
-    for (const c of curves) row[c.name] = c.vals ? c.vals[gi] : null
+    for (const s of partySeries) row[s.name] = cur[s.name] ? cur[s.name][gi] : null
+    if (measure === 'value') row[ANCHOR_KEY] = aValue ? aValue[gi] : null
+    else if (measure === 'density') row[ANCHOR_KEY] = aShape ? aShape[gi] : null
     return row
   })
 }
@@ -155,6 +189,7 @@ export function corridorCounterparties(data, anchor, year, role = 'origin') {
 }
 
 export const CORRIDOR_MEASURES = {
+  share:   { label: 'Share', stack: true },        // % of anchor's flow to each counterparty, by PCI
+  value:   { label: 'Value ($B)', stack: true },
   density: { label: 'Distribution', stack: false },
-  value:   { label: 'Value ($B)',   stack: true },
 }
