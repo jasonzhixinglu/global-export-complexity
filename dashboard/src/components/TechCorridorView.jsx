@@ -9,7 +9,7 @@ import { Toggle, YearStepper } from './Controls.jsx'
 import { useDarkMode } from '../lib/useDarkMode.jsx'
 
 // Bilateral trade network for a tech product group: where an anchor's flow goes, by partner
-// (countries or region blocs), as value or share, over time + ranked for the selected year.
+// country, as value or share, over time + ranked for the selected year.
 export default function TechCorridorView({ data, year, setYear }) {
   const { isDark } = useDarkMode()
   const { byIso } = data

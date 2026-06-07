@@ -36,11 +36,11 @@ def main():
     all_codes = list(cl.semiconductor_hs6()) + list(cl.AI_COMPUTE_FED)
     baskets = [
         {"id": "all", "label": "All (semiconductors + AI)", "parent": None, "codes": all_codes},
+        {"id": "ai", "label": "AI compute", "parent": "all", "codes": list(cl.AI_COMPUTE_FED)},
     ]
-    for group, codes in cl.SEMICONDUCTOR_OECD.items():
+    for group, codes in cl.SEMICONDUCTOR_OECD.items():  # AI compute leads, then the OECD stages
         slug = "semi_" + group.lower().split()[0]
         baskets.append({"id": slug, "label": group, "parent": "all", "codes": list(codes)})
-    baskets.append({"id": "ai", "label": "AI compute", "parent": "all", "codes": list(cl.AI_COMPUTE_FED)})
 
     union = sorted({c for b in baskets for c in b["codes"]})
     union_set = set(union)
