@@ -78,6 +78,8 @@ scripts/
   run_all.py              download -> compute -> figures -> diagnostics
   export_dashboard_data.py  surfaces -> dashboard/public/data (meta, share series, coverage, anchors)
   export_gmm_data.py        per-country PCI distribution as a Gaussian mixture (gmm.json)
+  export_gmm_bilateral.py   origin->destination corridor distributions as mixtures (gmm_bilateral.json)
+  validate_bilateral.py     corridor checks: marginal adding-up + recomposition vs country GMMs
   export_tech_data.py       HS12 -> AI/semiconductor basket JSON (techai.json)
   export_pci_products.py    per-PCI product drill-down JSON (pci_products.json)
   fetch_comtrade.py         pull recent-year HS4 exports from UN Comtrade
