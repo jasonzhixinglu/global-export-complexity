@@ -90,15 +90,16 @@ export default function BilateralPanel({ data, year, setYear }) {
   const baseWin = meta.smoothing?.find(s => s.id === level)?.win ?? 0.05
   const vIdx = role === 'origin' ? 2 : 3   // pci_products row = [hs4, pci, exportB, importB]
   const { prods, win, src } = useMemo(() => {
-    const MAXD = 0.3   // don't surface the anchor's categories that sit far from the clicked PCI
+    const MAXD = 0.3   // prefer the anchor's categories within +/-0.3 of the clicked PCI
     const cp = data.countryProducts?.products?.[cflow]?.[anchor]?.[y]
     if (cp && cp.length) {
-      const near = cp.map(([hs4, pci, val]) => ({ hs4, pci, val }))
-        .filter(p => Math.abs(p.pci - selectedPci) <= MAXD)
+      const byDist = cp.map(([hs4, pci, val]) => ({ hs4, pci, val }))
         .sort((a, b) => Math.abs(a.pci - selectedPci) - Math.abs(b.pci - selectedPci))
-        .slice(0, 10)
+      let near = byDist.filter(p => Math.abs(p.pci - selectedPci) <= MAXD).slice(0, 10)
+      if (!near.length) near = byDist.slice(0, 5)   // fallback: nearest categories so it's never empty
+      const w = near.length ? Math.max(...near.map(p => Math.abs(p.pci - selectedPci))) : MAXD
       near.sort((a, b) => b.val - a.val)
-      return { prods: near, win: MAXD, src: 'country' }
+      return { prods: near, win: w, src: 'country' }
     }
     const list = pp?.byYear?.[y] || []          // fallback: global products window
     if (!list.length) return { prods: [], win: baseWin, src: 'global' }
@@ -115,6 +116,8 @@ export default function BilateralPanel({ data, year, setYear }) {
       : (v) => v.toFixed(2)
   const vfmt = measure === 'share' ? (v) => fmtPct(v, 1)
     : measure === 'value' ? (v) => fmtB(v, 1) : (v) => v?.toFixed(4)
+  // product values: $B for sizeable categories, $M for the small tail ones (avoids "$0.0B")
+  const fmtVal = (v) => v >= 0.1 ? fmtB(v, 1) : v > 0 ? `$${Math.max(1, Math.round(v * 1000))}M` : '$0'
 
   const toggle = (iso) => setParties(prev => prev.includes(iso) ? prev.filter(x => x !== iso) : [...prev, iso])
   const toggleRegion = (isos, addAll) => setParties(prev =>
@@ -283,7 +286,7 @@ export default function BilateralPanel({ data, year, setYear }) {
                     <div className="text-sm leading-tight truncate" title={pp?.names?.[hs4]}>{pp?.names?.[hs4] || hs4}</div>
                     <div className="text-[11px] text-slate-400 font-mono">{hs4}</div>
                   </div>
-                  <span className="relative font-semibold tabular-nums text-sm whitespace-nowrap">{fmtB(val, 1)}</span>
+                  <span className="relative font-semibold tabular-nums text-sm whitespace-nowrap">{fmtVal(val)}</span>
                 </div>
               ))}
             </div>

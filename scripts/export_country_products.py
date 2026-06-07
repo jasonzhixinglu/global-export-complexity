@@ -22,7 +22,23 @@ from gec import data as gdata
 
 OUT = cfg.ROOT / "dashboard" / "public" / "data"
 DERIVED = cfg.DATA_DIR / "derived"
-TOPN = 50
+TOPN = 50         # significant categories by value
+BINW = 0.25       # PCI coverage: a few categories per 0.25-wide bin so no band is empty
+BIN_N = 3         # top-by-value kept per interior bin
+TAIL_N = 10       # kept in the lowest- and highest-PCI occupied bins (sparse tails)
+
+
+def pick(g):
+    """Union of: top-N by value (significance) + per-0.25-PCI-bin top-few (spread) +
+    extra in the two extreme occupied bins (tails). Guarantees PCI coverage so the
+    drill-down is never empty within the country's actual export range."""
+    keep = set(g.nlargest(TOPN, "val")["hs4"])
+    g = g.assign(_b=np.floor((g["pci"] - cfg.PCI_LO) / BINW).astype(int))
+    occ = sorted(g["_b"].unique())
+    lo, hi = occ[0], occ[-1]
+    for bb, gb in g.groupby("_b"):
+        keep.update(gb.nlargest(TAIL_N if bb in (lo, hi) else BIN_N, "val")["hs4"])
+    return g[g["hs4"].isin(keep)]
 
 
 def main():
@@ -43,11 +59,9 @@ def main():
         # one product row per (country, year, hs4); pci is constant within (hs4, year)
         agg = (sub.groupby(["country_iso3_code", "year", "hs4"])
                .agg(val=(col, "sum"), pci=("pci", "first")).reset_index())
-        agg["rank"] = agg.groupby(["country_iso3_code", "year"])["val"].rank(ascending=False, method="first")
-        agg = agg[agg["rank"] <= TOPN]
         for (iso, yr), g in agg.groupby(["country_iso3_code", "year"]):
-            g = g.sort_values("val", ascending=False)
-            rows = [[r.hs4, round(float(r.pci), 2), round(float(r.val) / 1e9, 3)] for r in g.itertuples()]
+            sel = pick(g).sort_values("val", ascending=False)
+            rows = [[r.hs4, round(float(r.pci), 2), round(float(r.val) / 1e9, 3)] for r in sel.itertuples()]
             products[fl].setdefault(iso, {})[str(int(yr))] = rows
             nrows += len(rows)
 
