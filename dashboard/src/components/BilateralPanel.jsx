@@ -23,6 +23,7 @@ export default function BilateralPanel({ data, year, setYear }) {
   const [level, setLevel] = useState(meta.defaultLevel || 'med')
   const [display, setDisplay] = useState('stack')
   const [q, setQ] = useState('')
+  const [pickerOpen, setPickerOpen] = useState(false)   // mobile: counterparty list collapsed by default
   const [selectedPci, setSelectedPci] = useState(1.0)
   const ac = axisColors(isDark)
 
@@ -70,7 +71,8 @@ export default function BilateralPanel({ data, year, setYear }) {
     : parties.map(p => ({ name: p, ...corridorOf(data, anchor, p, Number(y), role) })),
     [group, parties, data, anchor, regionMembers, y, role])
 
-  const stack = measure === 'share' || (measure === 'value' && display === 'stack')
+  const stackable = CORRIDOR_MEASURES[measure].stack
+  const stack = stackable && display === 'stack'
   const rows = useMemo(() => buildCorridorRows(data, anchor, role, Number(y), partySeries, measure, level),
     [data, anchor, role, y, partySeries, measure, level])
 
@@ -164,15 +166,19 @@ export default function BilateralPanel({ data, year, setYear }) {
               </div>
             ) : (
               <>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-end gap-2">
+                  <button onClick={() => setPickerOpen(o => !o)}
+                    className="lg:hidden text-[11px] text-indigo-500 hover:text-indigo-400">{pickerOpen ? 'Hide' : 'Edit'}</button>
                   <button onClick={() => setParties([])} disabled={!parties.length}
                     className="text-[11px] text-slate-400 hover:text-rose-500 disabled:opacity-40">Clear</button>
                 </div>
-                <input value={q} onChange={e => setQ(e.target.value)} placeholder={`Filter ${otherWord}…`}
-                  className="w-full bg-transparent border border-slate-300 dark:border-slate-600 rounded px-2 py-1 text-sm placeholder:text-slate-400 focus:outline-none focus:border-indigo-400" />
-                <div className="flex-1 min-h-0 overflow-y-auto pr-1 -mr-1 max-h-[42vh] lg:max-h-none">
-                  <CountryPicker countries={corrCountries} regionsOrder={regionsOrder}
-                    selected={parties} onToggle={toggle} onToggleRegion={toggleRegion} colorOf={cOf} query={q} />
+                <div className={`${pickerOpen ? 'flex' : 'hidden'} lg:flex flex-col flex-1 min-h-0 gap-2`}>
+                  <input value={q} onChange={e => setQ(e.target.value)} placeholder={`Filter ${otherWord}…`}
+                    className="w-full bg-transparent border border-slate-300 dark:border-slate-600 rounded px-2 py-1 text-sm placeholder:text-slate-400 focus:outline-none focus:border-indigo-400" />
+                  <div className="flex-1 min-h-0 overflow-y-auto pr-1 -mr-1 max-h-[42vh] lg:max-h-none">
+                    <CountryPicker countries={corrCountries} regionsOrder={regionsOrder}
+                      selected={parties} onToggle={toggle} onToggleRegion={toggleRegion} colorOf={cOf} query={q} />
+                  </div>
                 </div>
               </>
             )}
@@ -192,7 +198,7 @@ export default function BilateralPanel({ data, year, setYear }) {
                 <Toggle value={level} onChange={setLevel}
                   options={meta.smoothing.map(s => ({ value: s.id, label: s.label }))} />
               </span>
-              {measure === 'value' && (
+              {stackable && (
                 <Toggle value={display} onChange={setDisplay}
                   options={[{ value: 'stack', label: 'Stacked' }, { value: 'lines', label: 'Lines' }]} />
               )}
