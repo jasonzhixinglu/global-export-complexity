@@ -107,11 +107,61 @@ is the whole reason to tier: Tier B is worth showing as its own lens ("what fill
 besides the chips"), but folding it into the OECD/Fed sets would turn a clean *semiconductor* signal
 into a noisy *ICT hardware* one.
 
+## What the bilateral data shows (HS6 corridors, 2012–2024)
+
+The dashboard's Tech & AI **Corridors** view is built from the HS2012 *bilateral*
+(`origin × destination × HS6`) files, filtered to the baskets above and aggregated to top-50 + ROW
+(`scripts/export_tech_bilateral.py` → `techai_bilateral.json`). Headline read for **2024** (gross
+flows; Hong Kong / Singapore inflated by entrepôt re-export):
+
+**Scale and stage mix.** The whole basket is **$1.66T**, dominated by one stage:
+
+| stage | world 2024 | share of chain | lead exporter |
+|---|---|---|---|
+| Chips (ICs, diodes, parts) | $926B | **56%** | Taiwan 19% |
+| AI compute (Fed: servers/GPUs) | $345B | 21% | Taiwan 24% |
+| Manufacturing equipment | $249B | 15% | Japan 14% |
+| Photosensitive / inputs / materials | ~$143B | ~9% | mixed |
+
+**The chain is role-segmented — who makes ≠ who buys, and it differs by stage:**
+
+- **Chips** — supplied by East/SE Asia (Taiwan 19%, China 17%, Korea 14%, Singapore 10%, Malaysia 9%),
+  absorbed by the China sphere (Hong Kong 22% + China 21% ≈ **43%** of world demand). Largest
+  corridors: China→HK $72B (entrepôt), **Taiwan→China $52B, Korea→China $45B**.
+- **AI compute** — supplied by Taiwan 24% / China 17% / US 13% / Mexico 9%, but **imported
+  overwhelmingly by the US (31%)**: corridors **Taiwan→US $47B** and **Mexico→US $29B** (nearshored
+  assembly). This is the clearest AI-infrastructure-boom signal in the data — the US is the sink for
+  the world's AI hardware.
+- **Manufacturing equipment** — supplied by the advanced bloc (Japan 14%, US 13%, **Netherlands 10%
+  = ASML**, Germany 8%), **imported by China (23%)**: Japan→China $16B, Netherlands→China $9B.
+
+**Geographic specialization (fragmentation).** No country spans the chain: tools & upstream =
+Japan / Netherlands / US (and **Japan = 34% of wafer inputs**); midstream chips = Taiwan + Korea;
+downstream assembly / AI hardware = Taiwan→US, Mexico→US, China; consumption sinks = China (chips),
+US (AI compute).
+
+**Concentration — the chokepoints are upstream, not in the headline flows.** The big segments are
+only moderately concentrated (chips top-3 = 50%, HHI 0.11; equipment top-3 = 41%, HHI 0.09 — several
+suppliers each). The *small* upstream segments are the single-country chokepoints: **wafer inputs
+HHI 0.17** (Japan 34%), **photosensitive HHI 0.24** (China 47%) — low trade value, high concentration,
+high strategic fragility. Import-side concentration ≈ export-side, but in *different* geographies.
+
+**Trend 2012 → 2024.** Chip trade more than doubled ($420B → $926B); East-Asian supply consolidated
+(Taiwan 15%→19%, Korea 10%→14% of chip exports, China flat at ~16–17%); demand shifted toward
+mainland-China-direct (import share 18%→21%) as Hong Kong's entrepôt share eased (25%→22%).
+
+One-line synthesis: **East Asia supplies the chips, advanced economies supply the tools, China
+absorbs both, and the US is now the dominant sink for AI compute** — with the genuine chokepoints in
+small, highly-concentrated upstream segments (wafers, photosensitive, equipment).
+
 ## Caveats
 
 - **HS revision.** Codes are HS2017 (OECD) / recent (Fed); the dashboard reads them against the
   HS2012 HS6 file. Most headings are revision-stable at HS6; `281212` has no HS2012 match (noted in
   `techai.json.missingCodes`).
+- **Bilateral = gross flows over 2012–2024.** The Corridors view uses the HS2012 *bilateral* files
+  (so it starts in 2012). Hong Kong and Singapore are inflated by entrepôt re-export — their import
+  shares are largely pass-through, not final consumption.
 - **No double-counting across tiers/baskets.** AI compute (8471/8473) is disjoint from the OECD set;
   Tier B headings (8517/8504/8534/…) are disjoint from both. A finished AI server (847150) and the
   chips inside it (854232) are *different HS lines* — complementary layers, not subsets.
