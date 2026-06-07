@@ -16,7 +16,6 @@ export default function BilateralPanel({ data, year, setYear }) {
   const { isDark } = useDarkMode()
   const { meta, byIso, gmmBilateral: bil, pciProducts: pp } = data
   const [role, setRole] = useState('origin')          // 'origin' = exports from; 'dest' = imports to
-  const [group, setGroup] = useState('country')        // 'country' or 'region' (bloc) counterparties
   const [anchor, setAnchor] = useState('CHN')
   const [parties, setParties] = useState([])
   const [measure, setMeasure] = useState('share')
@@ -31,7 +30,7 @@ export default function BilateralPanel({ data, year, setYear }) {
 
   const y = String(Math.min(bil.years[bil.years.length - 1], Math.max(bil.years[0], year)))
   const nameOf = (iso) => iso === 'ROW' ? 'Rest of world' : (byIso[iso]?.name || iso)
-  const labelOf = (p) => group === 'region' ? p : nameOf(p)
+  const labelOf = (p) => p[0] === '@' ? p.slice(1) : nameOf(p)   // '@Region' bloc vs country
   const cflow = role === 'origin' ? 'export' : 'import'
   const flowWord = role === 'origin' ? 'exports' : 'imports'
   const otherWord = role === 'origin' ? 'destinations' : 'origins'
@@ -52,24 +51,23 @@ export default function BilateralPanel({ data, year, setYear }) {
   const ranked = useMemo(() => corridorCounterparties(data, anchor, Number(y), role),
     [data, anchor, y, role])
 
-  // default selection when anchor / perspective / grouping changes
+  // default selection when anchor / perspective changes: the region blocs (a clean 100% split)
   useEffect(() => {
-    if (group === 'region') { setParties(regionList); return }
-    const top = ranked.slice(0, 4).map(d => d.iso)
-    if (ranked.some(d => d.iso === 'ROW') && !top.includes('ROW')) top.push('ROW')
-    setParties(top)
-  }, [anchor, role, group])  // eslint-disable-line react-hooks/exhaustive-deps
+    setParties(regionList.map(r => '@' + r))
+  }, [anchor, role])  // eslint-disable-line react-hooks/exhaustive-deps
 
   const colorOf = useMemo(() => {
     const m = {}; parties.forEach((p, i) => { m[p] = colorFor(i) }); return m
   }, [parties])
   const cOf = (iso) => colorOf[iso] || '#94a3b8'
 
-  // resolve each selected counterparty (country corridor or aggregated region bloc) -> {name,params,total}
-  const partySeries = useMemo(() => group === 'region'
-    ? parties.map(r => ({ name: r, ...aggregateCorridors(data, anchor, regionMembers[r] || [], Number(y), role) }))
-    : parties.map(p => ({ name: p, ...corridorOf(data, anchor, p, Number(y), role) })),
-    [group, parties, data, anchor, regionMembers, y, role])
+  // resolve each selected counterparty -> {name, params, total}. A '@Region' bloc aggregates its
+  // members EXCLUDING any individually-selected ones, so blocs and countries can be mixed safely.
+  const selIsos = parties.filter(p => p[0] !== '@')
+  const partySeries = useMemo(() => parties.map(p => p[0] === '@'
+    ? { name: p, ...aggregateCorridors(data, anchor, (regionMembers[p.slice(1)] || []).filter(m => !selIsos.includes(m)), Number(y), role) }
+    : { name: p, ...corridorOf(data, anchor, p, Number(y), role) }),
+    [parties, data, anchor, regionMembers, y, role])  // eslint-disable-line react-hooks/exhaustive-deps
 
   const stackable = CORRIDOR_MEASURES[measure].stack
   const stack = stackable && display === 'stack'
@@ -119,9 +117,8 @@ export default function BilateralPanel({ data, year, setYear }) {
   // product values: $B for sizeable categories, $M for the small tail ones (avoids "$0.0B")
   const fmtVal = (v) => v >= 0.1 ? fmtB(v, 1) : v > 0 ? `$${Math.max(1, Math.round(v * 1000))}M` : '$0'
 
-  const toggle = (iso) => setParties(prev => prev.includes(iso) ? prev.filter(x => x !== iso) : [...prev, iso])
-  const toggleRegion = (isos, addAll) => setParties(prev =>
-    addAll ? [...new Set([...prev, ...isos])] : prev.filter(x => !isos.includes(x)))
+  const toggle = (key) => setParties(prev => prev.includes(key) ? prev.filter(x => x !== key) : [...prev, key])
+  const onBloc = (region) => toggle('@' + region)
 
   const corrCountries = bil.blocs.map(b => b === 'ROW'
     ? { iso3: 'ROW', name: 'Rest of world', region: 'Rest of world' }
@@ -152,39 +149,21 @@ export default function BilateralPanel({ data, year, setYear }) {
           <div className="border-t border-slate-200 dark:border-slate-800 pt-2 flex flex-col flex-1 min-h-0 gap-2">
             <div className="flex items-center justify-between gap-2">
               <div className="label">{otherWord} · {parties.length}</div>
-              <Toggle value={group} onChange={setGroup}
-                options={[{ value: 'country', label: 'Countries' }, { value: 'region', label: 'Regions' }]} />
-            </div>
-            {group === 'region' ? (
-              <div className="flex flex-wrap gap-1.5">
-                {regionList.map(r => {
-                  const on = parties.includes(r)
-                  return (
-                    <button key={r} onClick={() => toggle(r)} className={`chip ${on ? 'chip-on' : 'chip-off'}`}>
-                      {on && <span className="inline-block w-2 h-2 rounded-full mr-1 align-middle" style={{ background: cOf(r) }} />}
-                      {r}
-                    </button>
-                  )
-                })}
+              <div className="flex items-center gap-2">
+                <button onClick={() => setPickerOpen(o => !o)}
+                  className="lg:hidden text-[11px] text-indigo-500 hover:text-indigo-400">{pickerOpen ? 'Hide' : 'Edit'}</button>
+                <button onClick={() => setParties([])} disabled={!parties.length}
+                  className="text-[11px] text-slate-400 hover:text-rose-500 disabled:opacity-40">Clear</button>
               </div>
-            ) : (
-              <>
-                <div className="flex items-center justify-end gap-2">
-                  <button onClick={() => setPickerOpen(o => !o)}
-                    className="lg:hidden text-[11px] text-indigo-500 hover:text-indigo-400">{pickerOpen ? 'Hide' : 'Edit'}</button>
-                  <button onClick={() => setParties([])} disabled={!parties.length}
-                    className="text-[11px] text-slate-400 hover:text-rose-500 disabled:opacity-40">Clear</button>
-                </div>
-                <div className={`${pickerOpen ? 'flex' : 'hidden'} lg:flex flex-col flex-1 min-h-0 gap-2`}>
-                  <input value={q} onChange={e => setQ(e.target.value)} placeholder={`Filter ${otherWord}…`}
-                    className="w-full bg-transparent border border-slate-300 dark:border-slate-600 rounded px-2 py-1 text-sm placeholder:text-slate-400 focus:outline-none focus:border-indigo-400" />
-                  <div className="flex-1 min-h-0 overflow-y-auto pr-1 -mr-1 max-h-[42vh] lg:max-h-none">
-                    <CountryPicker countries={corrCountries} regionsOrder={regionsOrder}
-                      selected={parties} onToggle={toggle} onToggleRegion={toggleRegion} colorOf={cOf} query={q} />
-                  </div>
-                </div>
-              </>
-            )}
+            </div>
+            <div className={`${pickerOpen ? 'flex' : 'hidden'} lg:flex flex-col flex-1 min-h-0 gap-2`}>
+              <input value={q} onChange={e => setQ(e.target.value)} placeholder={`Filter ${otherWord}… (or use "bloc")`}
+                className="w-full bg-transparent border border-slate-300 dark:border-slate-600 rounded px-2 py-1 text-sm placeholder:text-slate-400 focus:outline-none focus:border-indigo-400" />
+              <div className="flex-1 min-h-0 overflow-y-auto pr-1 -mr-1 max-h-[42vh] lg:max-h-none">
+                <CountryPicker countries={corrCountries} regionsOrder={regionsOrder}
+                  selected={parties} onToggle={toggle} onBloc={onBloc} colorOf={cOf} query={q} />
+              </div>
+            </div>
           </div>
         </div>
       </div>

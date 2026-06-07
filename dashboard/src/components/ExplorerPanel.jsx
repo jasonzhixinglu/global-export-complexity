@@ -31,6 +31,7 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
     const m = {}; selected.forEach((iso, i) => { m[iso] = colorFor(i) }); return m
   }, [selected])
   const cOf = (iso) => colorOf[iso] || '#94a3b8'
+  const labelOf = (k) => k[0] === '@' ? k.slice(1) : (byIso[k]?.name || k)
 
   // PCI drill-down: within a window around the selected PCI, the 10 LARGEST products by
   // export value (continuous window, so the list shifts as you move the selector).
@@ -56,10 +57,9 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
   const vfmt = measure === 'share' ? (v) => fmtPct(v, 2)
     : measure === 'value' ? (v) => fmtB(v, 1) : (v) => v?.toFixed(4)
 
-  const toggle = (iso) => setSelected(prev =>
-    prev.includes(iso) ? prev.filter(x => x !== iso) : [...prev, iso])
-  const toggleRegion = (isos, addAll) => setSelected(prev =>
-    addAll ? [...new Set([...prev, ...isos])] : prev.filter(x => !isos.includes(x)))
+  const toggle = (key) => setSelected(prev =>
+    prev.includes(key) ? prev.filter(x => x !== key) : [...prev, key])
+  const onBloc = (region) => toggle('@' + region)
 
   const ChartInner = mode === 'stack' ? AreaChart : LineChart
   return (
@@ -86,7 +86,7 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
                 className="w-full bg-transparent border border-slate-300 dark:border-slate-600 rounded px-2 py-1 text-sm placeholder:text-slate-400 focus:outline-none focus:border-indigo-400" />
               <div className="flex-1 min-h-0 overflow-y-auto pr-1 -mr-1 max-h-[60vh] lg:max-h-none">
                 <CountryPicker countries={meta.countries} regionsOrder={meta.regionsOrder}
-                  selected={selected} onToggle={toggle} onToggleRegion={toggleRegion}
+                  selected={selected} onToggle={toggle} onBloc={onBloc}
                   colorOf={cOf} query={q} />
               </div>
             </div>
@@ -130,7 +130,7 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
                 <ReferenceLine x={0} stroke={ac.grid} />
                 <ReferenceLine x={selectedPci} stroke="#f59e0b" strokeWidth={1.5} strokeDasharray="4 2" />
                 <Tooltip contentStyle={tooltipStyle(isDark)} labelFormatter={(p) => `PCI ${fmtPci(p)}`}
-                  formatter={(v, n) => [vfmt(v), byIso[n]?.name || n]} />
+                  formatter={(v, n) => [vfmt(v), labelOf(n)]} />
                 {mode === 'stack'
                   ? selected.map(iso => (
                     <Area key={iso} type="monotone" dataKey={iso} stackId="1" stroke={cOf(iso)}
@@ -149,7 +149,7 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
               <button key={iso} onClick={() => toggle(iso)} title="Remove"
                 className="inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-300 hover:text-rose-500 group">
                 <span className="w-2 h-2 rounded-full" style={{ background: cOf(iso) }} />
-                {byIso[iso]?.name || iso}
+                {labelOf(iso)}
                 <span className="opacity-0 group-hover:opacity-100 text-rose-500">×</span>
               </button>
             ))}

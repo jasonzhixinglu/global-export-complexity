@@ -92,7 +92,10 @@ export function YearStepper({ years, year, onChange, playable = true }) {
   )
 }
 
-export function CountryPicker({ countries, regionsOrder, selected, onToggle, onToggleRegion, colorOf, query = '' }) {
+// `onBloc(region)` toggles a single regional-aggregate series ('@<Region>') in `selected`,
+// replacing the old "select all members individually" — individual chips can still be mixed in
+// (the bloc then excludes them, so nothing is double-counted).
+export function CountryPicker({ countries, regionsOrder, selected, onToggle, onBloc, colorOf, query = '' }) {
   const q = query.trim().toLowerCase()
   const match = c => !q || c.iso3.toLowerCase().includes(q) || c.name.toLowerCase().includes(q)
   const byRegion = {}
@@ -104,14 +107,20 @@ export function CountryPicker({ countries, regionsOrder, selected, onToggle, onT
       {regions.map(region => {
         const list = byRegion[region]
         const sel = list.filter(c => selected.includes(c.iso3)).length
+        const blocOn = selected.includes('@' + region)
         return (
           <div key={region} className="space-y-1">
-            <div className="flex items-center justify-between">
-              <div className="label">{region}{' '}
+            <div className="flex items-center justify-between gap-2">
+              <div className="label truncate">{region}{' '}
                 <span className="text-slate-400 normal-case font-normal">{sel}/{list.length}</span></div>
-              {onToggleRegion && (
-                <button onClick={() => onToggleRegion(list.map(c => c.iso3), sel < list.length)}
-                  className="text-[10px] text-slate-400 hover:text-indigo-500">{sel < list.length ? 'All' : 'None'}</button>
+              {onBloc && (
+                <button onClick={() => onBloc(region)} title={`Aggregate ${region} into one bloc`}
+                  className={`shrink-0 text-[10px] px-1.5 py-0.5 rounded border inline-flex items-center gap-1 ${blocOn
+                    ? 'bg-indigo-600 text-white border-indigo-600'
+                    : 'text-slate-400 border-slate-400/40 hover:border-indigo-400 hover:text-indigo-400'}`}>
+                  {blocOn && colorOf && <span className="w-1.5 h-1.5 rounded-full" style={{ background: colorOf('@' + region) }} />}
+                  bloc
+                </button>
               )}
             </div>
             <div className="flex flex-wrap gap-1">
@@ -119,7 +128,7 @@ export function CountryPicker({ countries, regionsOrder, selected, onToggle, onT
                 const on = selected.includes(c.iso3)
                 return (
                   <button key={c.iso3} onClick={() => onToggle(c.iso3)} title={c.name}
-                    className={`chip ${on ? 'chip-on' : 'chip-off'}`}>
+                    className={`chip ${on ? 'chip-on' : 'chip-off'} ${blocOn && !on ? 'opacity-50' : ''}`}>
                     {on && colorOf && <span className="inline-block w-2 h-2 rounded-full mr-1 align-middle"
                       style={{ background: colorOf(c.iso3) }} />}
                     {c.iso3}
