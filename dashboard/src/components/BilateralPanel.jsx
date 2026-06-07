@@ -29,7 +29,14 @@ export default function BilateralPanel({ data, year, setYear }) {
 
   const y = String(Math.min(bil.years[bil.years.length - 1], Math.max(bil.years[0], year)))
   const nameOf = (iso) => iso === 'ROW' ? 'Rest of world' : (byIso[iso]?.name || iso)
-  const labelOf = (p) => p[0] === '@' ? p.slice(1) : nameOf(p)   // '@Region' bloc vs country
+  // '@Region' bloc vs country; a bloc reads "(rest)" when some members are picked individually
+  // (the bloc is then that region minus those members, so nothing double-counts).
+  const labelOf = (p) => {
+    if (p[0] !== '@') return nameOf(p)
+    const region = p.slice(1)
+    const partial = (regionMembers[region] || []).some(m => selIsos.includes(m))
+    return region + (partial ? ' (rest)' : '')
+  }
   const cflow = role === 'origin' ? 'export' : 'import'
   const flowWord = role === 'origin' ? 'exports' : 'imports'
   const otherWord = role === 'origin' ? 'destinations' : 'origins'
