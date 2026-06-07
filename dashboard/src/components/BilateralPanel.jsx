@@ -21,7 +21,6 @@ export default function BilateralPanel({ data, year, setYear }) {
   const [measure, setMeasure] = useState('share')
   const [level, setLevel] = useState(meta.defaultLevel || 'med')
   const [display, setDisplay] = useState('stack')
-  const [q, setQ] = useState('')
   const [pickerOpen, setPickerOpen] = useState(false)   // mobile: counterparty list collapsed by default
   const [selectedPci, setSelectedPci] = useState(1.0)
   const ac = axisColors(isDark)
@@ -130,15 +129,12 @@ export default function BilateralPanel({ data, year, setYear }) {
       {/* LEFT — perspective, anchor, counterparties */}
       <div className="md:col-span-1 lg:col-span-3 min-w-0">
         <div className="panel p-3 h-full flex flex-col gap-3">
-          <div>
-            <div className="label mb-1">Perspective</div>
+          {/* perspective + anchor on one row: reads "Exports · China" (= China's exports) */}
+          <div className="flex items-center gap-2">
             <Toggle value={role} onChange={setRole}
-              options={[{ value: 'origin', label: 'Exports from' }, { value: 'dest', label: 'Imports to' }]} />
-          </div>
-          <div>
-            <div className="label mb-1">{role === 'origin' ? 'Exporter' : 'Importer'}</div>
+              options={[{ value: 'origin', label: 'Exports' }, { value: 'dest', label: 'Imports' }]} />
             <select value={anchor} onChange={e => setAnchor(e.target.value)}
-              className="w-full bg-transparent border border-slate-300 dark:border-slate-600 rounded px-2 py-1 text-sm">
+              className="flex-1 min-w-0 bg-transparent border border-slate-300 dark:border-slate-600 rounded px-2 py-1 text-sm">
               {bil.blocs.map(b => <option key={b} value={b}>{nameOf(b)}</option>)}
             </select>
           </div>
@@ -157,11 +153,9 @@ export default function BilateralPanel({ data, year, setYear }) {
               </div>
             </div>
             <div className={`${pickerOpen ? 'flex' : 'hidden'} lg:flex flex-col flex-1 min-h-0 gap-2`}>
-              <input value={q} onChange={e => setQ(e.target.value)} placeholder={`Filter ${otherWord}… (or use "bloc")`}
-                className="w-full bg-transparent border border-slate-300 dark:border-slate-600 rounded px-2 py-1 text-sm placeholder:text-slate-400 focus:outline-none focus:border-indigo-400" />
-              <div className="flex-1 min-h-0 overflow-y-auto pr-1 -mr-1 max-h-[42vh] lg:max-h-none">
+              <div className="flex-1 min-h-0 overflow-y-auto pr-1 -mr-1 max-h-[46vh] lg:max-h-none">
                 <CountryPicker countries={corrCountries} regionsOrder={regionsOrder}
-                  selected={parties} onToggle={toggle} onBloc={onBloc} colorOf={cOf} query={q} />
+                  selected={parties} onToggle={toggle} onBloc={onBloc} colorOf={cOf} />
               </div>
             </div>
           </div>

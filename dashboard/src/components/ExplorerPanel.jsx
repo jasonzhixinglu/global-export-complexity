@@ -15,7 +15,6 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
   const stackable = MEASURES[measure].stack
   const [display, setDisplay] = useState('stack')
   const [selectedPci, setSelectedPci] = useState(1.0)
-  const [q, setQ] = useState('')
   const [pickerOpen, setPickerOpen] = useState(false)   // mobile: country list collapsed by default
   const [level, setLevel] = useState(meta.defaultLevel || 'med')
   const mode = stackable && display === 'stack' ? 'stack' : 'line'
@@ -82,12 +81,9 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
               </div>
             </div>
             <div className={`${pickerOpen ? 'flex' : 'hidden'} lg:flex flex-col flex-1 min-h-0 gap-2`}>
-              <input value={q} onChange={e => setQ(e.target.value)} placeholder="Filter countries…"
-                className="w-full bg-transparent border border-slate-300 dark:border-slate-600 rounded px-2 py-1 text-sm placeholder:text-slate-400 focus:outline-none focus:border-indigo-400" />
-              <div className="flex-1 min-h-0 overflow-y-auto pr-1 -mr-1 max-h-[60vh] lg:max-h-none">
+              <div className="flex-1 min-h-0 overflow-y-auto pr-1 -mr-1 max-h-[62vh] lg:max-h-none">
                 <CountryPicker countries={meta.countries} regionsOrder={meta.regionsOrder}
-                  selected={selected} onToggle={toggle} onBloc={onBloc}
-                  colorOf={cOf} query={q} />
+                  selected={selected} onToggle={toggle} onBloc={onBloc} colorOf={cOf} />
               </div>
             </div>
           </div>
