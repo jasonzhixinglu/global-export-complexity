@@ -3,7 +3,7 @@ import {
   ResponsiveContainer, BarChart, Bar, AreaChart, Area,
   XAxis, YAxis, CartesianGrid, Tooltip, Cell,
 } from 'recharts'
-import { colorFor, fmtPct, fmtB } from '../lib/format.js'
+import { distinctColor, fmtPct, fmtB } from '../lib/format.js'
 import { axisColors, tooltipStyle } from '../lib/chartTheme.js'
 import { Toggle, YearStepper } from './Controls.jsx'
 import { useDarkMode } from '../lib/useDarkMode.jsx'
@@ -12,7 +12,7 @@ import TechCorridorView from './TechCorridorView.jsx'
 export default function TechPanel({ data, year, setYear, flow, setFlow }) {
   const { isDark } = useDarkMode()
   const t = data.techai
-  const { byIso } = data
+  const { byIso, colorByIso } = data
   const [mode, setMode] = useState('totals')   // 'totals' = by country · 'corridors' = bilateral network
   const [basketId, setBasketId] = useState('all')
   const [tm, setTm] = useState('share')
@@ -54,10 +54,9 @@ export default function TechPanel({ data, year, setYear, flow, setFlow }) {
     .sort((a, b) => b.v - a.v), [t, basket.id, ty, tm, fl])
 
   // colour by rank in the current list (distinct across the shown bars/lines; no global-index wrap)
-  const colorByRank = useMemo(() => {
-    const m = {}; ranked.forEach((d, i) => { m[d.iso] = colorFor(i) }); return m
-  }, [ranked])
-  const cOf = (iso) => colorByRank[iso] || '#94a3b8'
+  // persistent per-country colour (stable index) so a country keeps its colour across years and
+  // when ranks swap -- not colour-by-rank. Distinct across the ~50 tracked economies.
+  const cOf = (iso) => distinctColor(colorByIso[iso] ?? 63)
 
   const topIsos = ranked.slice(0, 6).map(d => d.iso)
   const series = useMemo(() => t.years.map(yr => {
