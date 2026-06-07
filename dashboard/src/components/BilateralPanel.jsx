@@ -4,80 +4,110 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine,
 } from 'recharts'
 import {
-  buildMixtureRows, corridorOf, corridorCounterparties, CORRIDOR_MEASURES,
+  buildCorridorRows, corridorOf, aggregateCorridors, corridorCounterparties,
+  CORRIDOR_MEASURES, ANCHOR_KEY,
 } from '../lib/data.js'
-import { colorFor, fmtB, fmtPci } from '../lib/format.js'
+import { colorFor, fmtB, fmtPct, fmtPci } from '../lib/format.js'
 import { axisColors, tooltipStyle } from '../lib/chartTheme.js'
 import { Toggle, YearStepper, CountryPicker } from './Controls.jsx'
 import { useDarkMode } from '../lib/useDarkMode.jsx'
 
-const ANCHOR_KEY = '__anchor__'
-
 export default function BilateralPanel({ data, year, setYear }) {
   const { isDark } = useDarkMode()
-  const { meta, byIso, gmmBilateral: bil } = data
+  const { meta, byIso, gmmBilateral: bil, pciProducts: pp } = data
   const [role, setRole] = useState('origin')          // 'origin' = exports from; 'dest' = imports to
+  const [group, setGroup] = useState('country')        // 'country' or 'region' (bloc) counterparties
   const [anchor, setAnchor] = useState('CHN')
   const [parties, setParties] = useState([])
-  const [measure, setMeasure] = useState('value')
+  const [measure, setMeasure] = useState('share')
   const [level, setLevel] = useState(meta.defaultLevel || 'med')
   const [display, setDisplay] = useState('stack')
   const [q, setQ] = useState('')
+  const [selectedPci, setSelectedPci] = useState(1.0)
   const ac = axisColors(isDark)
 
   if (!bil) return <div className="panel p-6 text-sm text-slate-400">Bilateral corridor data not available.</div>
 
   const y = String(Math.min(bil.years[bil.years.length - 1], Math.max(bil.years[0], year)))
   const nameOf = (iso) => iso === 'ROW' ? 'Rest of world' : (byIso[iso]?.name || iso)
+  const labelOf = (p) => group === 'region' ? p : nameOf(p)
   const cflow = role === 'origin' ? 'export' : 'import'
+  const flowWord = role === 'origin' ? 'exports' : 'imports'
   const otherWord = role === 'origin' ? 'destinations' : 'origins'
+  const regionsOrder = [...meta.regionsOrder, 'Rest of world']
 
-  // counterparties available for this anchor/year/role, ranked by corridor value
+  // region blocs: group the anchor's counterparties (top-50 members + ROW) by region
+  const regionMembers = useMemo(() => {
+    const m = {}
+    for (const b of bil.blocs) {
+      if (b === anchor) continue
+      const r = b === 'ROW' ? 'Rest of world' : (byIso[b]?.region || 'Other')
+      ;(m[r] ||= []).push(b)
+    }
+    return m
+  }, [bil.blocs, anchor, byIso])
+  const regionList = useMemo(() => regionsOrder.filter(r => regionMembers[r]?.length), [regionMembers]) // eslint-disable-line
+
   const ranked = useMemo(() => corridorCounterparties(data, anchor, Number(y), role),
     [data, anchor, y, role])
 
-  // when the anchor or perspective changes, default to its top counterparties (+ ROW)
+  // default selection when anchor / perspective / grouping changes
   useEffect(() => {
+    if (group === 'region') { setParties(regionList); return }
     const top = ranked.slice(0, 4).map(d => d.iso)
     if (ranked.some(d => d.iso === 'ROW') && !top.includes('ROW')) top.push('ROW')
     setParties(top)
-  }, [anchor, role])  // eslint-disable-line react-hooks/exhaustive-deps
+  }, [anchor, role, group])  // eslint-disable-line react-hooks/exhaustive-deps
 
   const colorOf = useMemo(() => {
     const m = {}; parties.forEach((p, i) => { m[p] = colorFor(i) }); return m
   }, [parties])
   const cOf = (iso) => colorOf[iso] || '#94a3b8'
 
-  const stack = measure === 'value' && display === 'stack'
+  // resolve each selected counterparty (country corridor or aggregated region bloc) -> {name,params,total}
+  const partySeries = useMemo(() => group === 'region'
+    ? parties.map(r => ({ name: r, ...aggregateCorridors(data, anchor, regionMembers[r] || [], Number(y), role) }))
+    : parties.map(p => ({ name: p, ...corridorOf(data, anchor, p, Number(y), role) })),
+    [group, parties, data, anchor, regionMembers, y, role])
 
-  // chart series: each selected corridor + the anchor's own country-level distribution (reference)
-  const rows = useMemo(() => {
-    const series = parties.map(p => ({ name: p, ...corridorOf(data, anchor, p, Number(y), role) }))
-    const aParams = data.gmm?.mix?.[cflow]?.[anchor]?.[y]
-    const aTotal = data.series?.totalB?.[cflow]?.[anchor]?.[y]
-    series.push({ name: ANCHOR_KEY, params: aParams || null, total: aTotal ?? null })
-    return buildMixtureRows(data, series, measure, level)
-  }, [data, parties, anchor, y, role, measure, level])
+  const stack = measure === 'share' || (measure === 'value' && display === 'stack')
+  const rows = useMemo(() => buildCorridorRows(data, anchor, role, Number(y), partySeries, measure, level),
+    [data, anchor, role, y, partySeries, measure, level])
 
-  // coverage caption: selected share of corridor total, and corridor coverage of reported total
+  // coverage caption
   const totalCorr = ranked.reduce((s, d) => s + d.valueB, 0)
-  const selSum = parties.reduce((s, p) => s + (corridorOf(data, anchor, p, Number(y), role).total || 0), 0)
+  const selSum = partySeries.reduce((s, ps) => s + (ps.total || 0), 0)
   const countryTot = data.series?.totalB?.[cflow]?.[anchor]?.[y]
   const selShare = totalCorr ? selSum / totalCorr : null
   const cov = countryTot ? totalCorr / countryTot : null
 
-  const yfmt = measure === 'value' ? (v) => `$${v >= 1000 ? (v / 1000).toFixed(1) + 'T' : Math.round(v) + 'B'}` : (v) => v.toFixed(2)
-  const vfmt = measure === 'value' ? (v) => fmtB(v, 1) : (v) => v?.toFixed(4)
+  // PCI product drill-down (global products near the selected PCI; no per-corridor product detail)
+  const baseWin = meta.smoothing?.find(s => s.id === level)?.win ?? 0.05
+  const vIdx = role === 'origin' ? 2 : 3   // pci_products row = [hs4, pci, exportB, importB]
+  const { prods, win } = useMemo(() => {
+    const list = pp?.byYear?.[y] || []
+    if (!list.length) return { prods: [], win: baseWin }
+    let w = baseWin, cand = list.filter(p => Math.abs(p[1] - selectedPci) <= w)
+    while (cand.length < 10 && w < 1.5) { w += baseWin; cand = list.filter(p => Math.abs(p[1] - selectedPci) <= w) }
+    const prods = cand.sort((a, b) => b[vIdx] - a[vIdx]).slice(0, 10).map(p => ({ hs4: p[0], pci: p[1], val: p[vIdx] }))
+    return { prods, win: w }
+  }, [pp, y, selectedPci, baseWin, vIdx])
+  const maxVal = prods.length ? Math.max(...prods.map(p => p.val)) : 1
+  const onPick = (e) => { if (e && e.activeLabel != null) setSelectedPci(Number(e.activeLabel)) }
+
+  const yfmt = measure === 'share' ? (v) => `${Math.round(v * 100)}%`
+    : measure === 'value' ? (v) => `$${v >= 1000 ? (v / 1000).toFixed(1) + 'T' : Math.round(v) + 'B'}`
+      : (v) => v.toFixed(2)
+  const vfmt = measure === 'share' ? (v) => fmtPct(v, 1)
+    : measure === 'value' ? (v) => fmtB(v, 1) : (v) => v?.toFixed(4)
 
   const toggle = (iso) => setParties(prev => prev.includes(iso) ? prev.filter(x => x !== iso) : [...prev, iso])
   const toggleRegion = (isos, addAll) => setParties(prev =>
     addAll ? [...new Set([...prev, ...isos])] : prev.filter(x => !isos.includes(x)))
 
-  // country list for the picker = the bilateral blocs (top-N + ROW), mapped to name/region
   const corrCountries = bil.blocs.map(b => b === 'ROW'
     ? { iso3: 'ROW', name: 'Rest of world', region: 'Rest of world' }
     : (byIso[b] || { iso3: b, name: b, region: 'Other' }))
-  const regionsOrder = [...meta.regionsOrder, 'Rest of world']
 
   const ChartInner = stack ? AreaChart : LineChart
   return (
@@ -102,22 +132,42 @@ export default function BilateralPanel({ data, year, setYear }) {
             <YearStepper years={bil.years} year={Number(y)} onChange={setYear} />
           </div>
           <div className="border-t border-slate-200 dark:border-slate-800 pt-2 flex flex-col flex-1 min-h-0 gap-2">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2">
               <div className="label">{otherWord} · {parties.length}</div>
-              <button onClick={() => setParties([])} disabled={!parties.length}
-                className="text-[11px] text-slate-400 hover:text-rose-500 disabled:opacity-40">Clear</button>
+              <Toggle value={group} onChange={setGroup}
+                options={[{ value: 'country', label: 'Countries' }, { value: 'region', label: 'Regions' }]} />
             </div>
-            <input value={q} onChange={e => setQ(e.target.value)} placeholder={`Filter ${otherWord}…`}
-              className="w-full bg-transparent border border-slate-300 dark:border-slate-600 rounded px-2 py-1 text-sm placeholder:text-slate-400 focus:outline-none focus:border-indigo-400" />
-            <div className="flex-1 min-h-0 overflow-y-auto pr-1 -mr-1 max-h-[50vh] lg:max-h-none">
-              <CountryPicker countries={corrCountries} regionsOrder={regionsOrder}
-                selected={parties} onToggle={toggle} onToggleRegion={toggleRegion} colorOf={cOf} query={q} />
-            </div>
+            {group === 'region' ? (
+              <div className="flex flex-wrap gap-1.5">
+                {regionList.map(r => {
+                  const on = parties.includes(r)
+                  return (
+                    <button key={r} onClick={() => toggle(r)} className={`chip ${on ? 'chip-on' : 'chip-off'}`}>
+                      {on && <span className="inline-block w-2 h-2 rounded-full mr-1 align-middle" style={{ background: cOf(r) }} />}
+                      {r}
+                    </button>
+                  )
+                })}
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center justify-between">
+                  <button onClick={() => setParties([])} disabled={!parties.length}
+                    className="text-[11px] text-slate-400 hover:text-rose-500 disabled:opacity-40">Clear</button>
+                </div>
+                <input value={q} onChange={e => setQ(e.target.value)} placeholder={`Filter ${otherWord}…`}
+                  className="w-full bg-transparent border border-slate-300 dark:border-slate-600 rounded px-2 py-1 text-sm placeholder:text-slate-400 focus:outline-none focus:border-indigo-400" />
+                <div className="flex-1 min-h-0 overflow-y-auto pr-1 -mr-1 max-h-[42vh] lg:max-h-none">
+                  <CountryPicker countries={corrCountries} regionsOrder={regionsOrder}
+                    selected={parties} onToggle={toggle} onToggleRegion={toggleRegion} colorOf={cOf} query={q} />
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
 
-      {/* MIDDLE — corridor distributions */}
+      {/* MIDDLE — corridor distributions / shares */}
       <div className="md:col-span-2 lg:col-span-6 md:order-last lg:order-none min-w-0">
         <div className="panel p-3 h-full">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2 justify-between mb-2">
@@ -133,85 +183,100 @@ export default function BilateralPanel({ data, year, setYear }) {
                 <Toggle value={display} onChange={setDisplay}
                   options={[{ value: 'stack', label: 'Stacked' }, { value: 'lines', label: 'Lines' }]} />
               )}
+              <span className="text-[11px] text-amber-500/90 inline-flex items-center gap-1">
+                <span className="inline-block w-3 border-t border-dashed border-amber-500" /> click to inspect
+              </span>
             </div>
           </div>
           <div className="text-[11px] text-slate-400 mb-1">
-            {role === 'origin' ? `${nameOf(anchor)} → ` : `→ ${nameOf(anchor)}`}{otherWord}, {y} ·
-            {' '}dashed = {nameOf(anchor)}’s total {cflow} distribution
+            {role === 'origin' ? `${nameOf(anchor)} ${flowWord} → ${otherWord}` : `${otherWord} → ${nameOf(anchor)} ${flowWord}`}, {y}
+            {measure === 'share' ? ` · share of ${nameOf(anchor)}’s ${flowWord} by complexity`
+              : ` · dashed = ${nameOf(anchor)}’s total`}
           </div>
-          <ResponsiveContainer width="100%" height={430}>
-            <ChartInner data={rows} margin={{ top: 8, right: 12, bottom: 24, left: 4 }}>
-              <CartesianGrid stroke={ac.grid} strokeDasharray="2 2" />
-              <XAxis dataKey="pci" type="number" domain={['dataMin', 'dataMax']} tickCount={11}
-                tick={{ fill: ac.tick, fontSize: 10 }} tickFormatter={fmtPci}
-                label={{ value: 'Product Complexity Index (PCI)', position: 'insideBottom', offset: -12, fill: ac.tick, fontSize: 11 }} />
-              <YAxis tick={{ fill: ac.tick, fontSize: 10 }} tickFormatter={yfmt} width={46} />
-              <ReferenceLine x={0} stroke={ac.grid} />
-              <Tooltip contentStyle={tooltipStyle(isDark)} labelFormatter={(p) => `PCI ${fmtPci(p)}`}
-                formatter={(v, n) => [vfmt(v), n === ANCHOR_KEY ? `${nameOf(anchor)} (total)` : nameOf(n)]} />
-              {stack
-                ? parties.map(p => (
-                  <Area key={p} type="monotone" dataKey={p} stackId="1" stroke={cOf(p)}
-                    fill={cOf(p)} fillOpacity={0.7} strokeWidth={1} isAnimationActive={false} />
-                ))
-                : parties.map(p => (
-                  <Line key={p} type="monotone" dataKey={p} stroke={cOf(p)}
-                    dot={false} strokeWidth={2} isAnimationActive={false} />
-                ))}
-              <Line type="monotone" dataKey={ANCHOR_KEY} stroke="#94a3b8" strokeDasharray="5 3"
-                dot={false} strokeWidth={1.5} isAnimationActive={false} />
-            </ChartInner>
-          </ResponsiveContainer>
+          <div className="cursor-crosshair">
+            <ResponsiveContainer width="100%" height={420}>
+              <ChartInner data={rows} margin={{ top: 8, right: 12, bottom: 24, left: 4 }} onClick={onPick}>
+                <CartesianGrid stroke={ac.grid} strokeDasharray="2 2" />
+                <XAxis dataKey="pci" type="number" domain={['dataMin', 'dataMax']} tickCount={11}
+                  tick={{ fill: ac.tick, fontSize: 10 }} tickFormatter={fmtPci}
+                  label={{ value: 'Product Complexity Index (PCI)', position: 'insideBottom', offset: -12, fill: ac.tick, fontSize: 11 }} />
+                <YAxis tick={{ fill: ac.tick, fontSize: 10 }} tickFormatter={yfmt} width={46}
+                  domain={measure === 'share' ? [0, 1] : [0, 'auto']} allowDataOverflow={measure === 'share'} />
+                <ReferenceLine x={0} stroke={ac.grid} />
+                <ReferenceLine x={selectedPci} stroke="#f59e0b" strokeWidth={1.5} strokeDasharray="4 2" />
+                <Tooltip contentStyle={tooltipStyle(isDark)} labelFormatter={(p) => `PCI ${fmtPci(p)}`}
+                  formatter={(v, n) => [vfmt(v), n === ANCHOR_KEY ? `${nameOf(anchor)} (total)` : labelOf(n)]} />
+                {stack
+                  ? parties.map(p => (
+                    <Area key={p} type="monotone" dataKey={p} stackId="1" stroke={cOf(p)}
+                      fill={cOf(p)} fillOpacity={0.7} strokeWidth={1} isAnimationActive={false} />
+                  ))
+                  : parties.map(p => (
+                    <Line key={p} type="monotone" dataKey={p} stroke={cOf(p)}
+                      dot={false} strokeWidth={2} isAnimationActive={false} />
+                  ))}
+                {measure !== 'share' && (
+                  <Line type="monotone" dataKey={ANCHOR_KEY} stroke="#94a3b8" strokeDasharray="5 3"
+                    dot={false} strokeWidth={1.5} isAnimationActive={false} />
+                )}
+              </ChartInner>
+            </ResponsiveContainer>
+          </div>
           <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2">
             {parties.map(p => (
               <button key={p} onClick={() => toggle(p)} title="Remove"
                 className="inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-300 hover:text-rose-500 group">
                 <span className="w-2 h-2 rounded-full" style={{ background: cOf(p) }} />
-                {nameOf(p)}<span className="opacity-0 group-hover:opacity-100 text-rose-500">×</span>
+                {labelOf(p)}<span className="opacity-0 group-hover:opacity-100 text-rose-500">×</span>
               </button>
             ))}
           </div>
         </div>
       </div>
 
-      {/* RIGHT — ranked counterparties by corridor value */}
+      {/* RIGHT — products near the selected PCI (what sits at this complexity) */}
       <div className="md:col-span-1 lg:col-span-3 min-w-0">
-        <div className="panel p-3 h-full flex flex-col">
-          <div className="text-[11px] text-slate-400 uppercase tracking-wide">
-            Top {otherWord} · {nameOf(anchor)} · {y}
+        <div className="panel p-3 h-full">
+          <div className="text-[11px] text-slate-400 uppercase tracking-wide">Top global {flowWord} near</div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-2xl font-bold font-mono text-amber-500">PCI {fmtPci(selectedPci)}</span>
+            <span className="text-xs text-slate-400">{y}</span>
           </div>
-          {selShare != null && (
-            <div className="text-[11px] text-slate-400 mt-1 mb-2">
-              selected = {(100 * selShare).toFixed(0)}% of these corridors
-              {cov != null && cov < 0.97 && (
-                <span className="text-amber-500"> · corridors cover {(100 * cov).toFixed(0)}% of reported total (rest unallocated)</span>
-              )}
+          <input type="range" min={-2.5} max={2.5} step={0.01} value={selectedPci}
+            onChange={e => setSelectedPci(Number(e.target.value))} className="w-full my-1.5" />
+          <div className="text-[11px] text-slate-400 mb-2">
+            largest products within ±{win.toFixed(2)} PCI · drag or click the chart
+            {selShare != null && <> · selected = {(100 * selShare).toFixed(0)}% of {nameOf(anchor)}’s corridors</>}
+            {cov != null && cov < 0.97 && <span className="text-amber-500"> · corridors cover {(100 * cov).toFixed(0)}% of reported total</span>}
+          </div>
+          {prods.length === 0 ? (
+            <div className="text-sm text-slate-400 py-2">No product data for this year.</div>
+          ) : (
+            <div className="space-y-0.5">
+              {prods.map(({ hs4, val, pci }) => (
+                <div key={hs4} className="relative flex items-center gap-2 py-1 border-b border-slate-100 dark:border-slate-800/60">
+                  <div className="absolute inset-y-0 left-0 rounded-sm bg-amber-500/10" style={{ width: `${Math.max(3, (val / maxVal) * 100)}%` }} />
+                  <span className="relative font-mono text-xs text-amber-600 dark:text-amber-400 w-10">{fmtPci(pci)}</span>
+                  <div className="relative flex-1 min-w-0">
+                    <div className="text-sm leading-tight truncate" title={pp?.names?.[hs4]}>{pp?.names?.[hs4] || hs4}</div>
+                    <div className="text-[11px] text-slate-400 font-mono">{hs4}</div>
+                  </div>
+                  <span className="relative font-semibold tabular-nums text-sm whitespace-nowrap">{fmtB(val, 1)}</span>
+                </div>
+              ))}
             </div>
           )}
-          <div className="space-y-0.5 overflow-y-auto pr-1 -mr-1 flex-1 min-h-0 max-h-[55vh] lg:max-h-none mt-1">
-            {ranked.slice(0, 20).map(({ iso, valueB }) => {
-              const on = parties.includes(iso)
-              const max = ranked[0]?.valueB || 1
-              return (
-                <button key={iso} onClick={() => toggle(iso)}
-                  className="relative w-full flex items-center gap-2 py-1 text-left border-b border-slate-100 dark:border-slate-800/60">
-                  <span className="absolute inset-y-0 left-0 rounded-sm" style={{ width: `${Math.max(3, (valueB / max) * 100)}%`, background: on ? cOf(iso) + '33' : '#94a3b822' }} />
-                  <span className="relative w-2 h-2 rounded-full shrink-0" style={{ background: on ? cOf(iso) : 'transparent', border: on ? 'none' : '1px solid #94a3b8' }} />
-                  <span className="relative flex-1 min-w-0 truncate text-sm">{nameOf(iso)}</span>
-                  <span className="relative tabular-nums text-xs text-slate-500">{fmtB(valueB, 1)}</span>
-                </button>
-              )
-            })}
-          </div>
         </div>
       </div>
 
       <p className="lg:col-span-12 text-xs text-slate-400 px-1">
         Bilateral value is one flow — {nameOf(anchor)}’s exports to a partner are that partner’s imports
         from {nameOf(anchor)} — so the “Exports from / Imports to” toggle reads the same matrix two ways.
-        Each curve is a Gaussian-mixture reconstruction of the corridor’s value distribution over PCI;
-        stacked Value should track the dashed country total (the recomposition check). Corridors of
-        commodity exporters may under-sum their reported total when exports route to unallocated partners.
+        Counterparties can be individual countries or <b>region blocs</b> (a region’s curve is the
+        value-weighted sum of its member corridors). <b>Share</b> = each counterparty’s % of
+        {' '}{nameOf(anchor)}’s {flowWord} at each complexity (stacks toward 100%; the gap is unselected
+        {' '}{otherWord} + unallocated flow). The product list is the largest <i>global</i> {flowWord}
+        {' '}near the selected PCI — corridor-level product detail isn’t stored.
       </p>
     </div>
   )
