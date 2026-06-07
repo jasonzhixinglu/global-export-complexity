@@ -115,7 +115,70 @@ The smooth curve undershoots China's sharp electronics peak (~PCI 0.85) and over
 shoulders; the residuals (bottom) sum to zero. **When exact interval dollars are needed, the
 weighted histogram is ground truth** — we never read precise interval values off the smooth curve.
 
-### 3.3 Where this sits in the literature
+### 3.3 Compact dashboard representation: Gaussian mixtures
+
+The dashboard does **not** ship the smoothed density grid. Each country–year–flow distribution over
+PCI is stored as a small **Gaussian mixture** (weights, means, σ) and the curve is reconstructed in
+the browser. This is not a different estimator — the value-weighted KDE *is* a Gaussian mixture (one
+component per product); we store a reduced K-component version fit to the raw product-level
+distribution (`scripts/export_gmm_data.py`).
+
+- **Adaptive K (2–8), per country–flow.** K is chosen by fidelity to the raw distribution (smallest K
+  within 0.5 pp KS of the best) and held fixed across years. Commodity exporters land at K≈2, broad or
+  bimodal economies at K≈7–8.
+- **Temporal stability.** Years are fit sequentially, warm-started from the previous year, so
+  components track smoothly instead of swapping. Cold (independent) fitting moves the reconstructed
+  curve ~3.8× more frame-to-frame than the truth actually moves; warm-starting brings that to ~0.95×.
+- **Smoothness is a render-time blur.** Smoothing a mixture by bandwidth `b` maps `σ_k → √(σ_k²+b²)`,
+  so one stored mixture yields the whole Low/Med/High continuum (no per-level storage), and the curve
+  is analytic — evaluated on as fine a grid as we like, so it never looks piecewise-linear.
+- **Size.** The per-country density payload drops from **3.6 MB → 0.1 MB gzipped (~36×)**.
+
+Market-share-by-complexity is *not* derived this way — it stays the stored local-linear curves
+(§3.1). Market share equals the ratio of value densities (the Nadaraya–Watson estimator), and that
+ratio matches local-linear to ~0.02 pp; but reconstructing it from the *ratio of two
+independently-fit mixtures* is unstable in the thin tails (Gaussian tails don't cancel, the ratio
+blows up) and smooths away real fine structure, so the share curves are kept explicit.
+
+#### What the fit error means: KS vs Wasserstein
+
+We measure mixture fidelity against the **raw** product-level distribution (not the smoothed curve),
+with two complementary metrics:
+
+- **KS** = max gap between the fitted and empirical CDFs (worst single point) — the *share of value
+  misplaced* along PCI.
+- **W1** (Wasserstein-1) = `∫|F_fit − F_emp| dPCI` — the transport distance, *how far mass must move*
+  (in PCI units).
+
+For the country distributions, median KS is **6.1%** — actually *below* the 6.7% of the KDE curve it
+replaced, so on the median country-year the mixture is **more faithful to the raw data** than what we
+displayed before. The cost is the worst case: KS p95 ≈ 24%, concentrated on **near-discrete
+distributions**. A flow dominated by a single product (e.g. mostly gold or crude oil) is almost a
+point mass, and *no* smooth curve — KDE included — can match a vertical CDF step; the mixture diffuses
+the spike into a bump.
+
+KS, a sup-norm, is deliberately pessimistic for these cases: the disagreement is a thin band around
+the spike, so the **W1 / transport error stays small** — the mass sits in the right place, only
+smeared. The economic reading ("this flow concentrates at low/high complexity") survives; what is
+lost is the sharpness and the ability to read off the single dominant product.
+
+This is the governing trade-off for the planned **bilateral (origin→destination) view**, where many
+corridors are thin and single-product. The same mixture method applies, and the error is driven by
+**concentration** (a few products carrying most of the value), not product count. Measured on the
+top-30 × top-30 corridors (2022), split by the largest single product's value share:
+
+| top-1 product share | corridors | KS median | KS p95 | W1 median | W1 p95 |
+|---|---|---|---|---|---|
+| 0–15% (diversified) | 314 | 5.0% | 7.3% | 0.031 | 0.051 |
+| 15–30% | 281 | 8.8% | 14.3% | 0.039 | 0.079 |
+| 30–50% | 176 | 14.9% | 22.9% | 0.039 | 0.089 |
+| 50–100% (single-product) | 99 | 26.8% | 48.1% | 0.036 | 0.105 |
+
+As concentration rises, KS climbs from 5% to 27% but **W1 stays flat at ~0.03–0.04 PCI — the same as
+the country-level distributions** (KS 6.7% / W1 0.03). The mixture's *location* of a corridor on the
+complexity axis is reliable everywhere; only the *peakedness* of single-product corridors is lost.
+
+### 3.4 Where this sits in the literature
 
 The general task — make a model/smoothed estimate respect a known aggregate — is **calibration /
 benchmarking** in official statistics: *raking/ratio calibration* (Deville–Särndal), *small-area
@@ -124,7 +187,7 @@ benchmarking* (sub-totals must sum to a trusted national total), *time-series be
 the **distribution**, calibration pins the *total* exactly (`estimators.calibrate_total`) and the
 sub-interval allocation is the irreducible, quantified smoothing trade-off.
 
-### 3.4 Settings (`src/gec/config.py`)
+### 3.5 Settings (`src/gec/config.py`)
 
 | setting | value | meaning |
 |---|---|---|
@@ -209,6 +272,9 @@ Mean cumulative world-export coverage by PCI band (`results/tables/coverage_by_p
 - This Atlas vintage re-estimates PCI / rescales `cog`, so values differ slightly from the legacy
   notebook in `legacy/`.
 - The extreme high-PCI tail is sparse; stacked/individual curves there are the least reliable.
+- The dashboard distribution curves are Gaussian-mixture reconstructions (§3.3), not the raw KDE
+  grid. They are faithful in *location* (W1 ≈ 0.03 PCI) but smooth over sharp single-product spikes;
+  for exact interval dollars or the dominant product, use the underlying product data, not the curve.
 
 ## Sources
 

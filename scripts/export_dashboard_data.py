@@ -100,7 +100,8 @@ def main():
     years = [int(y) for y in s["years"]]
     share_grid = [r(x, 4) for x in s["share_grid"]]
     thresholds = [int(t) for t in s["cover_thresholds"]]
-    # subsample the density grid (every 2nd point) to keep the 3-level payload small
+    # kdeGrid is shipped only to set the PCI endpoints for the client-side mixture
+    # reconstruction (gmm.json); the density itself is no longer stored here.
     KSTEP = 2
     kde_idx = list(range(0, len(s["kde_grid"]), KSTEP))
     kde_grid = [r(s["kde_grid"][i], 4) for i in kde_idx]

@@ -39,7 +39,9 @@ Two estimands, each with an exact accounting property:
    PCI; total mass is conserved exactly, with only mean-zero redistribution. For the dashboard
    each country-year distribution is stored as a small **Gaussian mixture** (K chosen per country
    by fidelity to the raw data, K≈2–8) and reconstructed in the browser — smoothness becomes a
-   render-time blur (`σ → √(σ²+b²)`), shrinking that payload ~36× while staying smooth.
+   render-time blur (`σ → √(σ²+b²)`), shrinking that payload ~36× while staying smooth. The mixture
+   is faithful in *location* (median KS 6.1%, beating the KDE it replaced; transport error W1 ≈ 0.03
+   PCI); it only smooths over sharp single-product spikes — see [`docs/analysis.md`](docs/analysis.md) §3.3.
 
 Both estimands run on either flow (the same estimators applied to `import_value`), exposed via the
 Exports / Imports toggle.
