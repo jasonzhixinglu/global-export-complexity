@@ -88,14 +88,15 @@ export default function BilateralPanel({ data, year, setYear }) {
   const baseWin = meta.smoothing?.find(s => s.id === level)?.win ?? 0.05
   const vIdx = role === 'origin' ? 2 : 3   // pci_products row = [hs4, pci, exportB, importB]
   const { prods, win, src } = useMemo(() => {
+    const MAXD = 0.3   // don't surface the anchor's categories that sit far from the clicked PCI
     const cp = data.countryProducts?.products?.[cflow]?.[anchor]?.[y]
     if (cp && cp.length) {
-      const arr = cp.map(([hs4, pci, val]) => ({ hs4, pci, val }))
+      const near = cp.map(([hs4, pci, val]) => ({ hs4, pci, val }))
+        .filter(p => Math.abs(p.pci - selectedPci) <= MAXD)
         .sort((a, b) => Math.abs(a.pci - selectedPci) - Math.abs(b.pci - selectedPci))
-      const near = arr.slice(0, 10)
-      const w = near.length ? Math.max(...near.map(p => Math.abs(p.pci - selectedPci))) : baseWin
+        .slice(0, 10)
       near.sort((a, b) => b.val - a.val)
-      return { prods: near, win: w, src: 'country' }
+      return { prods: near, win: MAXD, src: 'country' }
     }
     const list = pp?.byYear?.[y] || []          // fallback: global products window
     if (!list.length) return { prods: [], win: baseWin, src: 'global' }
@@ -259,13 +260,13 @@ export default function BilateralPanel({ data, year, setYear }) {
           <input type="range" min={-2.5} max={2.5} step={0.01} value={selectedPci}
             onChange={e => setSelectedPci(Number(e.target.value))} className="w-full my-1.5" />
           <div className="text-[11px] text-slate-400 mb-2">
-            {src === 'country' ? `10 nearest of ${nameOf(anchor)}’s top-50 categories (±${win.toFixed(2)} PCI)`
+            {src === 'country' ? `${nameOf(anchor)}’s top categories within ±${win.toFixed(2)} PCI`
               : `largest global products within ±${win.toFixed(2)} PCI`} · drag or click the chart
             {selShare != null && <> · selected = {(100 * selShare).toFixed(0)}% of {nameOf(anchor)}’s corridors</>}
             {cov != null && cov < 0.97 && <span className="text-amber-500"> · corridors cover {(100 * cov).toFixed(0)}% of reported total</span>}
           </div>
           {prods.length === 0 ? (
-            <div className="text-sm text-slate-400 py-2">No product data for this year.</div>
+            <div className="text-sm text-slate-400 py-2">No major categories within ±{win.toFixed(2)} of this PCI.</div>
           ) : (
             <div className="space-y-0.5">
               {prods.map(({ hs4, val, pci }) => (
