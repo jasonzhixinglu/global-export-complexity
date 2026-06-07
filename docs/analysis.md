@@ -178,6 +178,20 @@ As concentration rises, KS climbs from 5% to 27% but **W1 stays flat at ~0.03–
 the country-level distributions** (KS 6.7% / W1 0.03). The mixture's *location* of a corridor on the
 complexity axis is reliable everywhere; only the *peakedness* of single-product corridors is lost.
 
+The bilateral corridors (top-50 + ROW, 2000–2024) are encoded by `scripts/export_gmm_bilateral.py`
+and validated by `scripts/validate_bilateral.py` against the country-level GMMs three ways:
+
+1. **Marginal adding-up** — summing a country's corridor totals over all destinations (incl. ROW)
+   recovers its total exports; over all origins, its total imports. Median residual ≈ 0.1%. The tail
+   (p95 ~50%) is **commodity exporters with unallocated/confidential partners** (crude oil, minerals):
+   the country total counts the flow but the bilateral file cannot attribute it to a destination, so
+   the corridor sum understates the *total* (the *shape* is unaffected).
+2. **Export–import symmetry** — the inbound corridors of B (column sum over origins) reproduce B's
+   independently-reported import distribution at KS ≈ 4%.
+3. **Recomposition** — a value-weighted sum of a country's corridor mixtures reproduces its
+   country-level distribution at KS ≈ 4% (median), anchoring the corridors to the raw-validated
+   country curves.
+
 ### 3.4 Where this sits in the literature
 
 The general task — make a model/smoothed estimate respect a known aggregate — is **calibration /
