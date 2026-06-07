@@ -38,9 +38,9 @@ for gid, glabel in GROUPS:
 for c in cls.AI_COMPUTE_FED:
     CODE_BASKET[c] = "ai"
 ALL_CODES = set(CODE_BASKET)
-BASKET_META = ([{"id": "all", "label": "All", "parent": None}]
-               + [{"id": gid, "label": lbl, "parent": "all"} for gid, lbl in GROUPS]
-               + [{"id": "ai", "label": "AI compute", "parent": "all"}])
+BASKET_META = ([{"id": "all", "label": "All", "parent": None},
+                {"id": "ai", "label": "AI compute", "parent": "all"}]
+               + [{"id": gid, "label": lbl, "parent": "all"} for gid, lbl in GROUPS])
 
 
 def read_range(yr_range, top, chunksize=2_000_000):

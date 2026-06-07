@@ -30,7 +30,7 @@ toggle drives the country views; the tabs are:
   (OECD), by country and year, as world share / value / share of the country's own trade — exports
   or imports (e.g. who *ships* chips vs who *buys* them). A **Corridors** sub-view shows the
   bilateral *trade network* for the same HS6 baskets (HS2012 bilateral, 2012–2024): where an
-  exporter's chips go, by partner or region bloc, over time.
+  exporter's chips / AI hardware go, by partner country, over time.
 - **About** — top-N coverage by complexity (top exporters or importers), plus methodology, caveats,
   and references.
 
