@@ -14,11 +14,10 @@ export default function TechCorridorView({ data, year, setYear }) {
   const { isDark } = useDarkMode()
   const { byIso } = data
   const tb = data.techaiBilateral
-  const [basketId, setBasketId] = useState('chips')
+  const [basketId, setBasketId] = useState('ai')
   const [anchor, setAnchor] = useState('TWN')
   const [role, setRole] = useState('origin')      // exports from / imports to
   const [metric, setMetric] = useState('share')    // share of anchor's flow / value $B
-  const [grouping, setGrouping] = useState('region')
   const ac = axisColors(isDark)
 
   if (!tb) return <div className="panel p-6 text-sm text-slate-400">Tech corridor data not available.</div>
@@ -35,16 +34,15 @@ export default function TechCorridorView({ data, year, setYear }) {
   const partnersAll = role === 'origin'
     ? Object.keys(V[anchor] || {})
     : Object.keys(V).filter(o => V[o]?.[anchor])
-  const gkey = (p) => grouping === 'region'
-    ? (p === 'ROW' ? 'Rest of world' : (byIso[p]?.region || 'Other')) : p
-  const labelOf = (g) => grouping === 'region' ? g : nameOf(g)
+  const labelOf = (g) => nameOf(g)
 
-  // per-group value (and anchor total) for a year
+  // per-partner value (and anchor total) for a year — partners are countries (+ ROW), not regions:
+  // for tech the interesting counterparties are specific economies (China vs Taiwan vs US).
   const groupVals = (yr) => {
     const gv = {}; let tot = 0
     for (const p of partnersAll) {
       const v = cell(p, yr); if (!v) continue
-      tot += v; const g = gkey(p); gv[g] = (gv[g] || 0) + v
+      tot += v; gv[p] = (gv[p] || 0) + v
     }
     return { gv, tot }
   }
@@ -52,7 +50,7 @@ export default function TechCorridorView({ data, year, setYear }) {
   const rankedYear = useMemo(() => {
     const { gv } = groupVals(ty)
     return Object.entries(gv).map(([g, v]) => ({ g, v })).sort((a, b) => b.v - a.v)
-  }, [tb, basket.id, anchor, role, grouping, ty])
+  }, [tb, basket.id, anchor, role, ty])
 
   const topGroups = rankedYear.slice(0, 7).map(r => r.g)
   const colorByGroup = useMemo(() => {
@@ -68,7 +66,7 @@ export default function TechCorridorView({ data, year, setYear }) {
       row[g] = metric === 'share' ? (tot ? v / tot : 0) : v
     }
     return row
-  }), [tb, basket.id, anchor, role, grouping, metric, topGroups])
+  }), [tb, basket.id, anchor, role, metric, topGroups])
 
   const totY = rankedYear.reduce((s, r) => s + r.v, 0)
   const isPct = metric === 'share'
@@ -102,8 +100,6 @@ export default function TechCorridorView({ data, year, setYear }) {
           <span className="mx-1 w-px self-stretch bg-slate-200 dark:bg-slate-700" />
           <Toggle value={metric} onChange={setMetric}
             options={[{ value: 'share', label: 'Share' }, { value: 'value', label: 'Value ($B)' }]} />
-          <Toggle value={grouping} onChange={setGrouping}
-            options={[{ value: 'region', label: 'Regions' }, { value: 'country', label: 'Countries' }]} />
         </div>
         <div className="text-xs text-slate-500">
           {role === 'origin' ? `${nameOf(anchor)}’s ${basket.label} exports by ${otherWord}`
@@ -119,8 +115,7 @@ export default function TechCorridorView({ data, year, setYear }) {
             <BarChart data={barData} layout="vertical" margin={{ left: 6, right: 16 }}>
               <CartesianGrid stroke={ac.grid} strokeDasharray="2 2" horizontal={false} />
               <XAxis type="number" tick={{ fill: ac.tick, fontSize: 10 }} tickFormatter={axfmt} />
-              <YAxis type="category" dataKey="g" width={grouping === 'region' ? 86 : 42}
-                tick={{ fill: ac.tick, fontSize: 10 }} tickFormatter={labelOf} />
+              <YAxis type="category" dataKey="g" width={44} tick={{ fill: ac.tick, fontSize: 10 }} />
               <Tooltip contentStyle={tooltipStyle(isDark)} formatter={(v) => [vfmt(v), basket.label]}
                 labelFormatter={labelOf} />
               <Bar dataKey="v" isAnimationActive={false}>
