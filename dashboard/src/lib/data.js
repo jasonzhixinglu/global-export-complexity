@@ -56,47 +56,71 @@ function mixtureDensity(params, b, grid) {
   })
 }
 
-// Build chart rows: array over the chosen grid, each row {pci, [iso3]: value}.
+// Combine mixtures into one (a value-weighted sum is itself a mixture): component weights
+// scale by each entry's total, so the combined shape integrates to 1 and total = sum of totals.
+export function aggregateMixtures(entries) {
+  const params = []
+  let total = 0
+  for (const e of entries) {
+    if (!e || !e.params || e.total == null) continue
+    for (const [w, mu, sd] of e.params) params.push([w * e.total, mu, sd])
+    total += e.total
+  }
+  return params.length ? { params, total } : { params: null, total: null }
+}
+
+// ISO3s in a region (from the displayed top-N universe), excluding any explicitly-selected ones
+// so a region bloc and an individually-picked member never double-count.
+export function membersOf(data, region, excludeIsos = []) {
+  const ex = new Set(excludeIsos)
+  return data.meta.countries.filter(c => c.region === region && !ex.has(c.iso3)).map(c => c.iso3)
+}
+
+// Build chart rows over the chosen grid. `items` is a mix of ISO3 codes and region blocs
+// ('@<Region>'); a bloc aggregates its member countries (minus any individually-selected ones).
 // measure: 'share' | 'value' | 'density'; level: 'low'|'med'|'high'; flow: 'export'|'import'
-export function buildRows(data, isos, year, measure, level = 'med', flow = 'export') {
+export function buildRows(data, items, year, measure, level = 'med', flow = 'export') {
   const { meta, series, gmm } = data
-  const grid = measure === 'share' ? meta.shareGrid : meta.kdeGrid
   const y = String(year)
+  const selIsos = items.filter(i => i[0] !== '@')
 
   if (measure === 'share') {
+    const grid = meta.shareGrid
     const shF = series.share[flow] || series.share.export || series.share
     const sh = shF[level] || shF.med || shF
+    const at = (item, gi) => {
+      if (item[0] === '@') {                       // region bloc = sum of member shares
+        let s = 0, any = false
+        for (const m of membersOf(data, item.slice(1), selIsos)) {
+          const v = sh[m]?.[y]?.[gi]; if (v != null) { s += v; any = true }
+        }
+        return any ? s : null
+      }
+      return sh[item]?.[y]?.[gi] ?? null
+    }
     return grid.map((pci, gi) => {
-      const row = { pci }
-      for (const iso of isos) row[iso] = sh[iso]?.[y]?.[gi] ?? null
-      return row
+      const row = { pci }; for (const it of items) row[it] = at(it, gi); return row
     })
   }
 
-  // density / value: reconstruct each country's curve from its Gaussian mixture.
-  // The mixture is analytic, so render on a FINE grid (decoupled from any stored grid)
-  // for a genuinely smooth curve -- evaluating a handful of Gaussians is cheap.
-  const lo = grid[0], hi = grid[grid.length - 1], N = 400
+  // density / value: reconstruct from Gaussian mixtures on a fine analytic grid
+  const grid = meta.kdeGrid, lo = grid[0], hi = grid[grid.length - 1], N = 400
   const fine = Array.from({ length: N }, (_, i) => lo + (hi - lo) * i / (N - 1))
   const totF = series.totalB[flow] || series.totalB.export || series.totalB
   const mixF = gmm?.mix?.[flow] || gmm?.mix?.export || {}
   const b = gmm?.blur?.[level] ?? gmm?.blur?.med ?? 0.10
+  const resolve = (item) => item[0] === '@'
+    ? aggregateMixtures(membersOf(data, item.slice(1), selIsos).map(m => ({ params: mixF[m]?.[y], total: totF[m]?.[y] })))
+    : { params: mixF[item]?.[y] || null, total: totF[item]?.[y] ?? null }
   const curves = {}
-  for (const iso of isos) {
-    const params = mixF[iso]?.[y]
-    if (!params) { curves[iso] = null; continue }
-    const dens = mixtureDensity(params, b, fine)          // shape, integrates to ~1
-    if (measure === 'value') {
-      const t = totF[iso]?.[y]
-      curves[iso] = (t != null) ? dens.map(d => d * t) : null   // $B per PCI unit
-    } else {
-      curves[iso] = dens
-    }
+  for (const it of items) {
+    const { params, total } = resolve(it)
+    if (!params) { curves[it] = null; continue }
+    const dens = mixtureDensity(params, b, fine)
+    curves[it] = measure === 'value' ? (total != null ? dens.map(d => d * total) : null) : dens
   }
   return fine.map((pci, gi) => {
-    const row = { pci }
-    for (const iso of isos) row[iso] = curves[iso] ? curves[iso][gi] : null
-    return row
+    const row = { pci }; for (const it of items) row[it] = curves[it] ? curves[it][gi] : null; return row
   })
 }
 
@@ -120,15 +144,7 @@ export const ANCHOR_KEY = '__anchor__'
 // the value-weighted sum of mixtures is a mixture — component weights scale by each corridor's
 // total, so the combined shape integrates to 1 and `total` is the bloc's summed value.
 export function aggregateCorridors(data, anchor, members, year, role = 'origin') {
-  const params = []
-  let total = 0
-  for (const m of members) {
-    const { params: p, total: t } = corridorOf(data, anchor, m, year, role)
-    if (!p || t == null) continue
-    for (const [w, mu, sd] of p) params.push([w * t, mu, sd])
-    total += t
-  }
-  return params.length ? { params, total } : { params: null, total: null }
+  return aggregateMixtures(members.map(m => corridorOf(data, anchor, m, year, role)))
 }
 
 // Build corridor chart rows for one anchor vs several pre-resolved `partySeries` = [{name,params,total}].

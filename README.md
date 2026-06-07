@@ -18,9 +18,10 @@ A static React + Vite + Recharts app (in [`dashboard/`](dashboard/)), deployed t
 reads only small precomputed JSON — the heavy data stays in the pipeline. An **Exports / Imports**
 toggle drives the country views; the tabs are:
 
-- **Explorer** — for any set of countries (top 50), their **market share** or **value** distribution
-  across PCI (stacked or lines, 3 smoothness levels), animated over years. Click the chart or drag
-  the PCI slider to drill into the **largest products** (export or import) near that complexity.
+- **Explorer** — for any set of countries (top 50) — individually or aggregated into **region blocs**
+  (the per-region "bloc" toggle) — their **market share** or **value** distribution across PCI
+  (stacked or lines, 3 smoothness levels), animated over years. Click the chart or drag the PCI
+  slider to drill into the **largest products** (export or import) near that complexity.
 - **Corridors** — bilateral **origin → destination** flows (top 50 + a Rest-of-world bloc). Pick an
   exporter (or flip to "Imports to" for an importer) and compare its corridors as **partner share**,
   **value ($B)**, or **distribution** across PCI — counterparties individually or grouped into
