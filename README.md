@@ -82,6 +82,7 @@ scripts/
   validate_bilateral.py     corridor checks: marginal adding-up + recomposition vs country GMMs
   export_tech_data.py       HS12 -> AI/semiconductor basket JSON (techai.json)
   export_pci_products.py    per-PCI product drill-down JSON (pci_products.json)
+  export_country_products.py per-country top-50 HS4 categories/year (country_products.json)
   fetch_comtrade.py         pull recent-year HS4 exports from UN Comtrade
   explore_bilateral_pci.py  prototype: origin x destination complexity (sizing)
 dashboard/             React/Vite/Recharts app (deployed to GitHub Pages)
@@ -103,6 +104,7 @@ python scripts/run_all.py
 python scripts/export_dashboard_data.py
 python scripts/export_gmm_data.py           # distribution curves as Gaussian mixtures (gmm.json)
 python scripts/export_pci_products.py
+python scripts/export_country_products.py   # per-country top categories (corridor drill-down)
 python scripts/export_tech_data.py          # needs the HS12 file: python scripts/download_data.py --hs12
 cd dashboard && npm install && npm run dev    # local; `npm run build` for production
 ```
