@@ -81,17 +81,29 @@ export default function BilateralPanel({ data, year, setYear }) {
   const selShare = totalCorr ? selSum / totalCorr : null
   const cov = countryTot ? totalCorr / countryTot : null
 
-  // PCI product drill-down (global products near the selected PCI; no per-corridor product detail)
+  // PCI product drill-down: the ANCHOR country's largest export/import categories near the
+  // selected PCI (top-50 per country-year in country_products.json). Show the 10 nearest by PCI,
+  // then sort by value -- a sparse PCI may surface categories somewhat further away. Falls back to
+  // global products when the anchor has no per-country data (e.g. the ROW bloc).
   const baseWin = meta.smoothing?.find(s => s.id === level)?.win ?? 0.05
   const vIdx = role === 'origin' ? 2 : 3   // pci_products row = [hs4, pci, exportB, importB]
-  const { prods, win } = useMemo(() => {
-    const list = pp?.byYear?.[y] || []
-    if (!list.length) return { prods: [], win: baseWin }
+  const { prods, win, src } = useMemo(() => {
+    const cp = data.countryProducts?.products?.[cflow]?.[anchor]?.[y]
+    if (cp && cp.length) {
+      const arr = cp.map(([hs4, pci, val]) => ({ hs4, pci, val }))
+        .sort((a, b) => Math.abs(a.pci - selectedPci) - Math.abs(b.pci - selectedPci))
+      const near = arr.slice(0, 10)
+      const w = near.length ? Math.max(...near.map(p => Math.abs(p.pci - selectedPci))) : baseWin
+      near.sort((a, b) => b.val - a.val)
+      return { prods: near, win: w, src: 'country' }
+    }
+    const list = pp?.byYear?.[y] || []          // fallback: global products window
+    if (!list.length) return { prods: [], win: baseWin, src: 'global' }
     let w = baseWin, cand = list.filter(p => Math.abs(p[1] - selectedPci) <= w)
     while (cand.length < 10 && w < 1.5) { w += baseWin; cand = list.filter(p => Math.abs(p[1] - selectedPci) <= w) }
     const prods = cand.sort((a, b) => b[vIdx] - a[vIdx]).slice(0, 10).map(p => ({ hs4: p[0], pci: p[1], val: p[vIdx] }))
-    return { prods, win: w }
-  }, [pp, y, selectedPci, baseWin, vIdx])
+    return { prods, win: w, src: 'global' }
+  }, [data, pp, y, selectedPci, baseWin, vIdx, anchor, cflow])
   const maxVal = prods.length ? Math.max(...prods.map(p => p.val)) : 1
   const onPick = (e) => { if (e && e.activeLabel != null) setSelectedPci(Number(e.activeLabel)) }
 
@@ -237,7 +249,9 @@ export default function BilateralPanel({ data, year, setYear }) {
       {/* RIGHT — products near the selected PCI (what sits at this complexity) */}
       <div className="md:col-span-1 lg:col-span-3 min-w-0">
         <div className="panel p-3 h-full">
-          <div className="text-[11px] text-slate-400 uppercase tracking-wide">Top global {flowWord} near</div>
+          <div className="text-[11px] text-slate-400 uppercase tracking-wide">
+            {src === 'country' ? `${nameOf(anchor)}’s top ${flowWord} near` : `Top global ${flowWord} near`}
+          </div>
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-bold font-mono text-amber-500">PCI {fmtPci(selectedPci)}</span>
             <span className="text-xs text-slate-400">{y}</span>
@@ -245,7 +259,8 @@ export default function BilateralPanel({ data, year, setYear }) {
           <input type="range" min={-2.5} max={2.5} step={0.01} value={selectedPci}
             onChange={e => setSelectedPci(Number(e.target.value))} className="w-full my-1.5" />
           <div className="text-[11px] text-slate-400 mb-2">
-            largest products within ±{win.toFixed(2)} PCI · drag or click the chart
+            {src === 'country' ? `10 nearest of ${nameOf(anchor)}’s top-50 categories (±${win.toFixed(2)} PCI)`
+              : `largest global products within ±${win.toFixed(2)} PCI`} · drag or click the chart
             {selShare != null && <> · selected = {(100 * selShare).toFixed(0)}% of {nameOf(anchor)}’s corridors</>}
             {cov != null && cov < 0.97 && <span className="text-amber-500"> · corridors cover {(100 * cov).toFixed(0)}% of reported total</span>}
           </div>
@@ -275,8 +290,8 @@ export default function BilateralPanel({ data, year, setYear }) {
         Counterparties can be individual countries or <b>region blocs</b> (a region’s curve is the
         value-weighted sum of its member corridors). <b>Share</b> = each counterparty’s % of
         {' '}{nameOf(anchor)}’s {flowWord} at each complexity (stacks toward 100%; the gap is unselected
-        {' '}{otherWord} + unallocated flow). The product list is the largest <i>global</i> {flowWord}
-        {' '}near the selected PCI — corridor-level product detail isn’t stored.
+        {' '}{otherWord} + unallocated flow). The product list shows {nameOf(anchor)}’s own largest
+        {' '}{flowWord} categories near the selected PCI (top-50 per year; not corridor-specific).
       </p>
     </div>
   )
