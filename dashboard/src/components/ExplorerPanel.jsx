@@ -30,7 +30,13 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
     const m = {}; selected.forEach((iso, i) => { m[iso] = colorFor(i) }); return m
   }, [selected])
   const cOf = (iso) => colorOf[iso] || '#94a3b8'
-  const labelOf = (k) => k[0] === '@' ? k.slice(1) : (byIso[k]?.name || k)
+  // country name, or region-bloc name with "(rest)" when some members are picked individually
+  const labelOf = (k) => {
+    if (k[0] !== '@') return byIso[k]?.name || k
+    const region = k.slice(1)
+    const partial = meta.countries.some(c => c.region === region && selected.includes(c.iso3))
+    return region + (partial ? ' (rest)' : '')
+  }
 
   // PCI drill-down: within a window around the selected PCI, the 10 LARGEST products by
   // export value (continuous window, so the list shifts as you move the selector).
