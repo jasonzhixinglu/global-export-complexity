@@ -47,6 +47,17 @@ HS12_DOI = "doi:10.7910/DVN/YAVJDF"
 HS12_HS6_FILE_ID = 13685185  # hs12_country_product_year_6.csv (~463 MB, 2012-2023)
 HS12_HS6_CSV = RAW_DIR / "hs12_country_product_year_6.csv"
 
+# HS2012 BILATERAL origin x destination x HS6 x year (HS2012 codes match the OECD/Fed tech baskets,
+# unlike the HS92 bilateral whose 6-digit semiconductor codes diverged). Covers 2012-2024 only.
+HS12_BILATERAL_FILE_IDS = {
+    "2012_2019": 13685181,  # ~4.45 GB
+    "2020_2024": 13685183,  # ~2.80 GB
+}
+
+
+def hs12_bilateral_path(year_range: str):
+    return RAW_DIR / f"hs12_country_country_product_year_6_{year_range}.csv"
+
 # --- analysis constants ----------------------------------------------------
 YEARS = list(range(2000, 2025))   # 2000-2024 inclusive
 N_TOP = 50                        # number of top exporters to track (per-country panels)

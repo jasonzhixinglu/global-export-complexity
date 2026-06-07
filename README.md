@@ -29,8 +29,8 @@ toggle drives the country views; the tabs are:
 - **Tech & AI** — **AI-compute hardware** (Fed definition) and the **semiconductor value chain**
   (OECD), by country and year, as world share / value / share of the country's own trade — exports
   or imports (e.g. who *ships* chips vs who *buys* them). A **Corridors** sub-view shows the
-  bilateral *trade network* for clean HS4 product groups (integrated circuits, computers, telecom,
-  diodes/PV): where an exporter's chips go, by partner or region bloc, over time.
+  bilateral *trade network* for the same HS6 baskets (HS2012 bilateral, 2012–2024): where an
+  exporter's chips go, by partner or region bloc, over time.
 - **About** — top-N coverage by complexity (top exporters or importers), plus methodology, caveats,
   and references.
 
@@ -93,7 +93,7 @@ scripts/
   export_gmm_bilateral.py   origin->destination corridor distributions as mixtures (gmm_bilateral.json)
   validate_bilateral.py     corridor checks: marginal adding-up + recomposition vs country GMMs
   export_tech_data.py       HS12 -> AI/semiconductor basket JSON (techai.json)
-  export_tech_bilateral.py  HS4 tech product corridors from the bilateral caches (techai_bilateral.json)
+  export_tech_bilateral.py  HS6 tech baskets x origin x destination from the HS2012 bilateral (techai_bilateral.json)
   export_pci_products.py    per-PCI product drill-down JSON (pci_products.json)
   export_country_products.py per-country top-50 HS4 categories/year (country_products.json)
   fetch_comtrade.py         pull recent-year HS4 exports from UN Comtrade
@@ -119,6 +119,7 @@ python scripts/export_gmm_data.py           # distribution curves as Gaussian mi
 python scripts/export_pci_products.py
 python scripts/export_country_products.py   # per-country top categories (corridor drill-down)
 python scripts/export_tech_data.py          # needs the HS12 file: python scripts/download_data.py --hs12
+python scripts/export_tech_bilateral.py     # needs HS2012 bilateral: python scripts/download_data.py --hs12-bilateral all
 cd dashboard && npm install && npm run dev    # local; `npm run build` for production
 ```
 
