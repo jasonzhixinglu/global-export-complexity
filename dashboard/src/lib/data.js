@@ -23,13 +23,14 @@ export function useDataset() {
       getJSON('gmm.json').catch(() => null),
       getJSON('gmm_bilateral.json').catch(() => null),
       getJSON('country_products.json').catch(() => null),
-    ]).then(([meta, series, coverage, anchors, techai, pciProducts, gmm, gmmBilateral, countryProducts]) => {
+      getJSON('techai_bilateral.json').catch(() => null),
+    ]).then(([meta, series, coverage, anchors, techai, pciProducts, gmm, gmmBilateral, countryProducts, techaiBilateral]) => {
       if (!alive) return
       // index helpers
       const byIso = Object.fromEntries(meta.countries.map(c => [c.iso3, c]))
       const colorByIso = {}
       meta.countries.forEach((c, i) => { colorByIso[c.iso3] = i })
-      setData({ meta, series, coverage, anchors, techai, pciProducts, gmm, gmmBilateral, countryProducts, byIso, colorByIso })
+      setData({ meta, series, coverage, anchors, techai, pciProducts, gmm, gmmBilateral, countryProducts, techaiBilateral, byIso, colorByIso })
     }).catch(e => alive && setError(e))
     return () => { alive = false }
   }, [])
