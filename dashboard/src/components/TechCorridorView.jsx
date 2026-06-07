@@ -14,7 +14,7 @@ export default function TechCorridorView({ data, year, setYear }) {
   const { isDark } = useDarkMode()
   const { byIso } = data
   const tb = data.techaiBilateral
-  const [basketId, setBasketId] = useState('ic')
+  const [basketId, setBasketId] = useState('chips')
   const [anchor, setAnchor] = useState('TWN')
   const [role, setRole] = useState('origin')      // exports from / imports to
   const [metric, setMetric] = useState('share')    // share of anchor's flow / value $B
@@ -107,8 +107,8 @@ export default function TechCorridorView({ data, year, setYear }) {
         </div>
         <div className="text-xs text-slate-500">
           {role === 'origin' ? `${nameOf(anchor)}’s ${basket.label} exports by ${otherWord}`
-            : `${basket.label} ${flowWord} into ${nameOf(anchor)} by ${otherWord}`} ·
-          {' '}HS {basket.codes.join('+')} · world {fmtB(totY, 0)} from {nameOf(anchor)} ({ty})
+            : `${basket.label} ${flowWord} into ${nameOf(anchor)} by ${otherWord}`}
+          {' '}· {fmtB(totY, 1)} from {nameOf(anchor)} ({ty})
         </div>
       </div>
 
@@ -156,11 +156,11 @@ export default function TechCorridorView({ data, year, setYear }) {
       </div>
 
       <p className="text-xs text-slate-400 px-1">
-        Bilateral flows for clean HS4 product groups (coarser than the OECD/Fed HS6 baskets in the
-        “By country” view; HS 8486 semiconductor equipment is HS2012-only and not represented).
-        One flow read two ways — {nameOf(anchor)}’s {basket.label} exports to a partner are that
-        partner’s imports from {nameOf(anchor)}. “Share” = the partner’s % of {nameOf(anchor)}’s
-        {basket.label} {flowWord}; stacked top {otherWord} (the gap to 100% is smaller partners).
+        Bilateral flows for the OECD value-chain + Fed AI-compute HS6 baskets (HS2012, 2012–2024) —
+        the same baskets as the “By country” view. One flow read two ways: {nameOf(anchor)}’s
+        {' '}{basket.label} exports to a partner are that partner’s imports from {nameOf(anchor)}.
+        “Share” = the partner’s % of {nameOf(anchor)}’s {basket.label} {flowWord}; stacked top
+        {' '}{otherWord} (the gap to 100% is smaller partners).
       </p>
     </div>
   )
