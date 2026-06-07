@@ -21,13 +21,14 @@ export function useDataset() {
       getJSON('techai.json').catch(() => null),
       getJSON('pci_products.json').catch(() => null),
       getJSON('gmm.json').catch(() => null),
-    ]).then(([meta, series, coverage, anchors, techai, pciProducts, gmm]) => {
+      getJSON('gmm_bilateral.json').catch(() => null),
+    ]).then(([meta, series, coverage, anchors, techai, pciProducts, gmm, gmmBilateral]) => {
       if (!alive) return
       // index helpers
       const byIso = Object.fromEntries(meta.countries.map(c => [c.iso3, c]))
       const colorByIso = {}
       meta.countries.forEach((c, i) => { colorByIso[c.iso3] = i })
-      setData({ meta, series, coverage, anchors, techai, pciProducts, gmm, byIso, colorByIso })
+      setData({ meta, series, coverage, anchors, techai, pciProducts, gmm, gmmBilateral, byIso, colorByIso })
     }).catch(e => alive && setError(e))
     return () => { alive = false }
   }, [])
@@ -102,4 +103,58 @@ export const MEASURES = {
   share:   { label: 'Market share', unit: '% of world trade', stack: true },
   value:   { label: 'Value ($)',    unit: '$B per PCI unit',  stack: true },
   density: { label: 'Distribution', unit: 'share of trade (normalized)', stack: false },
+}
+
+// ---- Bilateral corridors (gmm_bilateral.json) ----------------------------------------------
+
+// A fine evaluation grid spanning the stored PCI endpoints (analytic mixtures -> render smooth).
+export function fineGrid(data, n = 400) {
+  const g = data.meta.kdeGrid, lo = g[0], hi = g[g.length - 1]
+  return Array.from({ length: n }, (_, i) => lo + (hi - lo) * i / (n - 1))
+}
+
+// Build chart rows from a list of mixture `series` = [{ name, params, total }].
+// measure 'value' scales each shape by its total ($B per PCI unit); else the normalized shape.
+export function buildMixtureRows(data, series, measure, level = 'med') {
+  const grid = fineGrid(data)
+  const b = (data.gmmBilateral?.blur || data.gmm?.blur || {})[level] ?? 0.10
+  const curves = series.map(s => {
+    if (!s.params) return { name: s.name, vals: null }
+    const dens = mixtureDensity(s.params, b, grid)
+    return { name: s.name, vals: measure === 'value' && s.total != null ? dens.map(d => d * s.total) : dens }
+  })
+  return grid.map((pci, gi) => {
+    const row = { pci }
+    for (const c of curves) row[c.name] = c.vals ? c.vals[gi] : null
+    return row
+  })
+}
+
+// Look up a corridor's stored mixture + total for a given year and perspective.
+// role 'origin' => anchor exports to party;  role 'dest' => anchor imports from party.
+export function corridorOf(data, anchor, party, year, role = 'origin') {
+  const bil = data.gmmBilateral
+  if (!bil) return { params: null, total: null }
+  const y = String(year)
+  const [o, d] = role === 'origin' ? [anchor, party] : [party, anchor]
+  return { params: bil.mix?.[o]?.[d]?.[y] || null, total: bil.corridorB?.[o]?.[d]?.[y] ?? null }
+}
+
+// List counterparties for an anchor, ranked by corridor value in `year` (for the picker / list).
+export function corridorCounterparties(data, anchor, year, role = 'origin') {
+  const bil = data.gmmBilateral
+  if (!bil) return []
+  const y = String(year)
+  const out = []
+  for (const b of bil.blocs) {
+    if (b === anchor) continue
+    const t = role === 'origin' ? bil.corridorB?.[anchor]?.[b]?.[y] : bil.corridorB?.[b]?.[anchor]?.[y]
+    if (t != null && t > 0) out.push({ iso: b, valueB: t })
+  }
+  return out.sort((a, b) => b.valueB - a.valueB)
+}
+
+export const CORRIDOR_MEASURES = {
+  density: { label: 'Distribution', stack: false },
+  value:   { label: 'Value ($B)',   stack: true },
 }

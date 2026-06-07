@@ -4,9 +4,14 @@ import { useDarkMode } from './lib/useDarkMode.jsx'
 import ExplorerPanel from './components/ExplorerPanel.jsx'
 import TechPanel from './components/TechPanel.jsx'
 import AboutPanel from './components/AboutPanel.jsx'
+import BilateralPanel from './components/BilateralPanel.jsx'
+
+// Flip to false to instantly return to the original 3-tab dashboard (Corridors hidden, code intact).
+const ENABLE_CORRIDORS = true
 
 const TABS = [
   { id: 'explorer', label: 'Explorer', sub: 'Distribution by PCI' },
+  ...(ENABLE_CORRIDORS ? [{ id: 'corridors', label: 'Corridors', sub: 'Origin → destination' }] : []),
   { id: 'tech', label: 'Tech & AI', sub: 'AI & semiconductors' },
   { id: 'about', label: 'About', sub: 'Coverage · methodology' },
 ]
@@ -63,6 +68,9 @@ export default function App() {
             <ExplorerPanel data={data} selected={selected} setSelected={setSelected}
               year={year} setYear={setYear} measure={measure} setMeasure={setMeasure}
               flow={flow} setFlow={setFlow} />
+          )}
+          {data && ENABLE_CORRIDORS && tab === 'corridors' && (
+            <BilateralPanel data={data} year={year} setYear={setYear} />
           )}
           {data && tab === 'tech' && (
             <TechPanel data={data} year={year} setYear={setYear} measure={measure} setMeasure={setMeasure}
