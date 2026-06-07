@@ -137,11 +137,30 @@ export function aggregateCorridors(data, anchor, members, year, role = 'origin')
 //   measure 'value'   -> shape x party total ($B per PCI), + anchor total value (ref)
 //   measure 'share'   -> party value density / anchor total value density (% of the anchor's flow by PCI)
 // role 'origin' => anchor exports (export distribution is the denominator); 'dest' => imports.
+// All counterparties of an anchor that have a stored corridor in a given year/role.
+export function allCounterparties(data, anchor, year, role = 'origin') {
+  const bil = data.gmmBilateral
+  if (!bil) return []
+  const y = String(year)
+  if (role === 'origin') return Object.keys(bil.mix?.[anchor] || {}).filter(d => bil.mix[anchor][d]?.[y])
+  return Object.keys(bil.mix || {}).filter(o => bil.mix[o]?.[anchor]?.[y])
+}
+
 export function buildCorridorRows(data, anchor, role, year, partySeries, measure, level = 'med') {
   const grid = fineGrid(data)
   const b = (data.gmmBilateral?.blur || data.gmm?.blur || {})[level] ?? 0.10
   const y = String(year)
   const cflow = role === 'origin' ? 'export' : 'import'
+
+  // SHARE denominator = the anchor's TOTAL flow built from the SAME corridor mixtures (sum over all
+  // counterparties), so disjoint selected parties sum to <=100% and all parties sum to exactly 100%.
+  // (Using the independently-fit country GMM here makes regions overshoot 100%.)
+  let denomVal = null
+  if (measure === 'share') {
+    const agg = aggregateCorridors(data, anchor, allCounterparties(data, anchor, year, role), year, role)
+    denomVal = (agg.params && agg.total != null) ? mixtureDensity(agg.params, b, grid).map(s => s * agg.total) : null
+  }
+  // country-level GMM as the dashed reference (density / value modes only)
   const aParams = data.gmm?.mix?.[cflow]?.[anchor]?.[y]
   const aTotal = data.series?.totalB?.[cflow]?.[anchor]?.[y]
   const aShape = aParams ? mixtureDensity(aParams, b, grid) : null
@@ -152,8 +171,8 @@ export function buildCorridorRows(data, anchor, role, year, partySeries, measure
     if (!s.params) { cur[s.name] = null; continue }
     const shape = mixtureDensity(s.params, b, grid)
     if (measure === 'value') cur[s.name] = s.total != null ? shape.map(d => d * s.total) : null
-    else if (measure === 'share') cur[s.name] = (s.total != null && aValue)
-      ? shape.map((d, i) => aValue[i] > 1e-9 ? Math.min(1, (d * s.total) / aValue[i]) : 0) : null
+    else if (measure === 'share') cur[s.name] = (s.total != null && denomVal)
+      ? shape.map((d, i) => denomVal[i] > 1e-9 ? (d * s.total) / denomVal[i] : 0) : null
     else cur[s.name] = shape
   }
   return grid.map((pci, gi) => {
