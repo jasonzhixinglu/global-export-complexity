@@ -15,17 +15,24 @@ toggle flips every view between the two flows.
 ## Dashboard
 
 A static React + Vite + Recharts app (in [`dashboard/`](dashboard/)), deployed to GitHub Pages. It
-reads only small precomputed JSON — the heavy data stays in the pipeline. A global **Exports /
-Imports** toggle drives all three tabs:
+reads only small precomputed JSON — the heavy data stays in the pipeline. An **Exports / Imports**
+toggle drives the country views; the tabs are:
 
 - **Explorer** — for any set of countries (top 50), their **market share** or **value** distribution
   across PCI (stacked or lines, 3 smoothness levels), animated over years. Click the chart or drag
   the PCI slider to drill into the **largest products** (export or import) near that complexity.
+- **Corridors** — bilateral **origin → destination** flows (top 50 + a Rest-of-world bloc). Pick an
+  exporter (or flip to "Imports to" for an importer) and compare its corridors as **partner share**,
+  **value ($B)**, or **distribution** across PCI — counterparties individually or grouped into
+  **region blocs**. The drill-down lists the anchor country's own top categories near the clicked PCI.
 - **Tech & AI** — **AI-compute hardware** (Fed definition) and the **semiconductor value chain**
   (OECD), by country and year, as world share / value / share of the country's own trade — exports
   or imports (e.g. who *ships* chips vs who *buys* them).
 - **About** — top-N coverage by complexity (top exporters or importers), plus methodology, caveats,
   and references.
+
+The Corridors tab is gated behind an `ENABLE_CORRIDORS` flag in `dashboard/src/App.jsx`
+(set it to `false` to revert to the three country/sector tabs).
 
 ## Methodology (one paragraph)
 
@@ -54,6 +61,8 @@ identities — in [`docs/analysis.md`](docs/analysis.md).
 - **Atlas of Economic Complexity** (Harvard Growth Lab), HS92 HS4 `country × product × year`,
   2000–2024 — the core dataset. Tech/AI uses the **HS2012** vintage (codes like 8486/8542 don't
   exist in HS92). Provenance in [`data/README.md`](data/README.md).
+- **Atlas bilateral** (HS92 HS6 `origin × destination × product × year`) — reconciled flows for the
+  **Corridors** tab; aggregated to HS4, top 50 + ROW. Imports are the same matrix read by destination.
 - **Tech & AI baskets** — AI compute from the Fed FEDS Note (2026); semiconductor value chain from
   OECD (2025). See [`docs/tech-ai-taxonomy.md`](docs/tech-ai-taxonomy.md) (basket tiers, national
   monthly sources, and the Haver cross-check).

@@ -102,7 +102,7 @@ export function buildRows(data, isos, year, measure, level = 'med', flow = 'expo
 
 export const MEASURES = {
   share:   { label: 'Market share', unit: '% of world trade', stack: true },
-  value:   { label: 'Value ($)',    unit: '$B per PCI unit',  stack: true },
+  value:   { label: 'Value ($B)',   unit: '$B per PCI unit',  stack: true },
   density: { label: 'Distribution', unit: 'share of trade (normalized)', stack: false },
 }
 
@@ -190,7 +190,7 @@ export function corridorCounterparties(data, anchor, year, role = 'origin') {
 }
 
 export const CORRIDOR_MEASURES = {
-  share:   { label: 'Share', stack: true },        // % of anchor's flow to each counterparty, by PCI
+  share:   { label: 'Partner share', stack: true }, // % of anchor's flow to each counterparty, by PCI
   value:   { label: 'Value ($B)', stack: true },
   density: { label: 'Distribution', stack: false },
 }

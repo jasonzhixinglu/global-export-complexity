@@ -16,6 +16,7 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
   const [display, setDisplay] = useState('stack')
   const [selectedPci, setSelectedPci] = useState(1.0)
   const [q, setQ] = useState('')
+  const [pickerOpen, setPickerOpen] = useState(false)   // mobile: country list collapsed by default
   const [level, setLevel] = useState(meta.defaultLevel || 'med')
   const mode = stackable && display === 'stack' ? 'stack' : 'line'
   const isImp = flow === 'import'
@@ -73,15 +74,21 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
           <div className="border-t border-slate-200 dark:border-slate-800 pt-3 flex flex-col flex-1 min-h-0 gap-2">
             <div className="flex items-center justify-between">
               <div className="label">Countries · {selected.length}</div>
-              <button onClick={() => setSelected([])} disabled={!selected.length}
-                className="text-[11px] text-slate-400 hover:text-rose-500 disabled:opacity-40">Clear</button>
+              <div className="flex items-center gap-2">
+                <button onClick={() => setPickerOpen(o => !o)}
+                  className="lg:hidden text-[11px] text-indigo-500 hover:text-indigo-400">{pickerOpen ? 'Hide' : 'Edit'}</button>
+                <button onClick={() => setSelected([])} disabled={!selected.length}
+                  className="text-[11px] text-slate-400 hover:text-rose-500 disabled:opacity-40">Clear</button>
+              </div>
             </div>
-            <input value={q} onChange={e => setQ(e.target.value)} placeholder="Filter countries…"
-              className="w-full bg-transparent border border-slate-300 dark:border-slate-600 rounded px-2 py-1 text-sm placeholder:text-slate-400 focus:outline-none focus:border-indigo-400" />
-            <div className="flex-1 min-h-0 overflow-y-auto pr-1 -mr-1 max-h-[60vh] lg:max-h-none">
-              <CountryPicker countries={meta.countries} regionsOrder={meta.regionsOrder}
-                selected={selected} onToggle={toggle} onToggleRegion={toggleRegion}
-                colorOf={cOf} query={q} />
+            <div className={`${pickerOpen ? 'flex' : 'hidden'} lg:flex flex-col flex-1 min-h-0 gap-2`}>
+              <input value={q} onChange={e => setQ(e.target.value)} placeholder="Filter countries…"
+                className="w-full bg-transparent border border-slate-300 dark:border-slate-600 rounded px-2 py-1 text-sm placeholder:text-slate-400 focus:outline-none focus:border-indigo-400" />
+              <div className="flex-1 min-h-0 overflow-y-auto pr-1 -mr-1 max-h-[60vh] lg:max-h-none">
+                <CountryPicker countries={meta.countries} regionsOrder={meta.regionsOrder}
+                  selected={selected} onToggle={toggle} onToggleRegion={toggleRegion}
+                  colorOf={cOf} query={q} />
+              </div>
             </div>
           </div>
         </div>
