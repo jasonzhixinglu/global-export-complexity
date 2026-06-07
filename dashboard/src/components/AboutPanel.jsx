@@ -91,8 +91,11 @@ export default function AboutPanel({ data, year, setYear, flow, setFlow }) {
             <strong> market share</strong> of world trade at each complexity level or the
             <strong> distribution of their trade value</strong> across complexity; click the chart
             (or drag the slider) to see the largest products near a chosen PCI. The
-            <strong> Tech &amp; AI</strong> tab tracks AI-compute hardware and the semiconductor
-            value chain — by country, year, world share, and share of each country's own trade.
+            <strong> Corridors</strong> tab opens up bilateral <strong>origin → destination</strong>
+            flows: pick an exporter and see how its trade across complexity splits among partner
+            countries or region blocs. The <strong>Tech &amp; AI</strong> tab tracks AI-compute
+            hardware and the semiconductor value chain — by country and as bilateral trade networks
+            (where the chips and AI hardware actually flow).
           </p>
         </div>
 
