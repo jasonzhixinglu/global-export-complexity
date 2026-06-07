@@ -7,11 +7,13 @@ import { colorFor, fmtPct, fmtB } from '../lib/format.js'
 import { axisColors, tooltipStyle } from '../lib/chartTheme.js'
 import { Toggle, YearStepper } from './Controls.jsx'
 import { useDarkMode } from '../lib/useDarkMode.jsx'
+import TechCorridorView from './TechCorridorView.jsx'
 
 export default function TechPanel({ data, year, setYear, flow, setFlow }) {
   const { isDark } = useDarkMode()
   const t = data.techai
   const { byIso } = data
+  const [mode, setMode] = useState('totals')   // 'totals' = by country · 'corridors' = bilateral network
   const [basketId, setBasketId] = useState('all')
   const [tm, setTm] = useState('share')
   const ac = axisColors(isDark)
@@ -74,6 +76,18 @@ export default function TechPanel({ data, year, setYear, flow, setFlow }) {
 
   return (
     <div className="space-y-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="label">View</span>
+        <Toggle value={mode} onChange={setMode}
+          options={[{ value: 'totals', label: 'By country' }, { value: 'corridors', label: 'Corridors' }]} />
+        <span className="text-[11px] text-slate-400">
+          {mode === 'corridors' ? 'bilateral trade network — where the products flow' : 'each economy’s basket totals'}
+        </span>
+      </div>
+
+      {mode === 'corridors' && <TechCorridorView data={data} year={year} setYear={setYear} />}
+
+      {mode === 'totals' && <>
       <div className="panel p-4 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
@@ -149,6 +163,7 @@ export default function TechPanel({ data, year, setYear, flow, setFlow }) {
         value chain. HS2012 data. “World share” = of world {flowWord} in the basket; “% of own {flowWord}” =
         basket value ÷ the country’s total {flowWord}.
       </p>
+      </>}
     </div>
   )
 }

@@ -28,7 +28,9 @@ toggle drives the country views; the tabs are:
   **region blocs**. The drill-down lists the anchor country's own top categories near the clicked PCI.
 - **Tech & AI** — **AI-compute hardware** (Fed definition) and the **semiconductor value chain**
   (OECD), by country and year, as world share / value / share of the country's own trade — exports
-  or imports (e.g. who *ships* chips vs who *buys* them).
+  or imports (e.g. who *ships* chips vs who *buys* them). A **Corridors** sub-view shows the
+  bilateral *trade network* for clean HS4 product groups (integrated circuits, computers, telecom,
+  diodes/PV): where an exporter's chips go, by partner or region bloc, over time.
 - **About** — top-N coverage by complexity (top exporters or importers), plus methodology, caveats,
   and references.
 
@@ -91,6 +93,7 @@ scripts/
   export_gmm_bilateral.py   origin->destination corridor distributions as mixtures (gmm_bilateral.json)
   validate_bilateral.py     corridor checks: marginal adding-up + recomposition vs country GMMs
   export_tech_data.py       HS12 -> AI/semiconductor basket JSON (techai.json)
+  export_tech_bilateral.py  HS4 tech product corridors from the bilateral caches (techai_bilateral.json)
   export_pci_products.py    per-PCI product drill-down JSON (pci_products.json)
   export_country_products.py per-country top-50 HS4 categories/year (country_products.json)
   fetch_comtrade.py         pull recent-year HS4 exports from UN Comtrade
