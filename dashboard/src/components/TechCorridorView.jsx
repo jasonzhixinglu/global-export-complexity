@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import {
   ResponsiveContainer, BarChart, Bar, AreaChart, Area,
   XAxis, YAxis, CartesianGrid, Tooltip, Cell,
@@ -7,6 +7,7 @@ import { distinctColor, fmtPct, fmtB } from '../lib/format.js'
 import { axisColors, tooltipStyle } from '../lib/chartTheme.js'
 import { Toggle, YearStepper } from './Controls.jsx'
 import { useDarkMode } from '../lib/useDarkMode.jsx'
+import { useSessionState } from '../lib/sessionState.js'
 
 // Bilateral trade network for a tech product group: where an anchor's flow goes, by partner
 // country, as value or share, over time + ranked for the selected year.
@@ -14,10 +15,11 @@ export default function TechCorridorView({ data, year, setYear }) {
   const { isDark } = useDarkMode()
   const { byIso, colorByIso } = data
   const tb = data.techaiBilateral
-  const [basketId, setBasketId] = useState('ai')
-  const [anchor, setAnchor] = useState('TWN')
-  const [role, setRole] = useState('origin')      // exports from / imports to
-  const [metric, setMetric] = useState('share')    // share of anchor's flow / value $B
+  // options persist across tab switches (sessionStorage)
+  const [basketId, setBasketId] = useSessionState('techc-basket', 'ai')
+  const [anchor, setAnchor] = useSessionState('techc-anchor', 'TWN')
+  const [role, setRole] = useSessionState('techc-role', 'origin')      // exports from / imports to
+  const [metric, setMetric] = useSessionState('techc-metric', 'share')  // share of anchor's flow / value $B
   const ac = axisColors(isDark)
 
   if (!tb) return <div className="panel p-6 text-sm text-slate-400">Tech corridor data not available.</div>

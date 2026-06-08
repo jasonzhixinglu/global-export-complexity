@@ -28,7 +28,7 @@ export default function App() {
   const { isDark, toggle } = useDarkMode()
   const qp = new URLSearchParams(window.location.search)  // deep-link seeds: ?tab=&flow=&measure=
   const [tab, setTab] = useSessionState('gec-tab', qp.get('tab') || 'explorer')
-  const [selected, setSelected] = useSessionState('gec-selected', ['CHN', 'DEU', 'JPN', 'USA'])
+  const [selected, setSelected] = useSessionState('gec-selected', ['CHN', 'DEU', 'JPN'])
   const [year, setYear] = useSessionState('gec-year', 2024)
   const [measure, setMeasure] = useSessionState('gec-measure', qp.get('measure') || 'share')
   const [flow, setFlow] = useSessionState('gec-flow', qp.get('flow') || 'export')

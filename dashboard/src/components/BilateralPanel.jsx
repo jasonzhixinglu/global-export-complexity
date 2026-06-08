@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   ResponsiveContainer, LineChart, Line, AreaChart, Area,
   XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine,
@@ -11,18 +11,20 @@ import { colorFor, fmtB, fmtPct, fmtPci } from '../lib/format.js'
 import { axisColors, tooltipStyle } from '../lib/chartTheme.js'
 import { Toggle, YearStepper, CountryPicker } from './Controls.jsx'
 import { useDarkMode } from '../lib/useDarkMode.jsx'
+import { useSessionState } from '../lib/sessionState.js'
 
 export default function BilateralPanel({ data, year, setYear }) {
   const { isDark } = useDarkMode()
   const { meta, byIso, gmmBilateral: bil, pciProducts: pp } = data
-  const [role, setRole] = useState('origin')          // 'origin' = exports from; 'dest' = imports to
-  const [anchor, setAnchor] = useState('CHN')
-  const [parties, setParties] = useState([])
-  const [measure, setMeasure] = useState('share')
-  const [level, setLevel] = useState(meta.defaultLevel || 'med')
-  const [display, setDisplay] = useState('stack')
+  // options persist across tab switches (sessionStorage)
+  const [role, setRole] = useSessionState('corr-role', 'origin')   // 'origin' = exports from; 'dest' = imports to
+  const [anchor, setAnchor] = useSessionState('corr-anchor', 'CHN')
+  const [parties, setParties] = useSessionState('corr-parties', [])
+  const [measure, setMeasure] = useSessionState('corr-measure', 'share')
+  const [level, setLevel] = useSessionState('corr-level', meta.defaultLevel || 'med')
+  const [display, setDisplay] = useSessionState('corr-display', 'stack')
   const [pickerOpen, setPickerOpen] = useState(false)   // mobile: counterparty list collapsed by default
-  const [selectedPci, setSelectedPci] = useState(1.0)
+  const [selectedPci, setSelectedPci] = useSessionState('corr-pci', 1.0)
   const ac = axisColors(isDark)
 
   if (!bil) return <div className="panel p-6 text-sm text-slate-400">Bilateral corridor data not available.</div>
@@ -57,8 +59,11 @@ export default function BilateralPanel({ data, year, setYear }) {
   const ranked = useMemo(() => corridorCounterparties(data, anchor, Number(y), role),
     [data, anchor, y, role])
 
-  // default selection when anchor / perspective changes: the region blocs (a clean 100% split)
+  // default selection = the region blocs (a clean 100% split). Re-default when the user changes
+  // anchor/perspective, but on first mount keep any persisted selection (so it survives tab switches).
+  const didMount = useRef(false)
   useEffect(() => {
+    if (!didMount.current) { didMount.current = true; if (parties.length) return }
     setParties(regionList.map(r => '@' + r))
   }, [anchor, role])  // eslint-disable-line react-hooks/exhaustive-deps
 

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import {
   ResponsiveContainer, BarChart, Bar, AreaChart, Area,
   XAxis, YAxis, CartesianGrid, Tooltip, Cell,
@@ -7,15 +7,17 @@ import { distinctColor, fmtPct, fmtB } from '../lib/format.js'
 import { axisColors, tooltipStyle } from '../lib/chartTheme.js'
 import { Toggle, YearStepper } from './Controls.jsx'
 import { useDarkMode } from '../lib/useDarkMode.jsx'
+import { useSessionState } from '../lib/sessionState.js'
 import TechCorridorView from './TechCorridorView.jsx'
 
 export default function TechPanel({ data, year, setYear, flow, setFlow }) {
   const { isDark } = useDarkMode()
   const t = data.techai
   const { byIso, colorByIso } = data
-  const [mode, setMode] = useState('totals')   // 'totals' = by country · 'corridors' = bilateral network
-  const [basketId, setBasketId] = useState('all')
-  const [tm, setTm] = useState('share')
+  // options persist across tab switches (sessionStorage)
+  const [mode, setMode] = useSessionState('tech-mode', 'totals')   // 'totals' = by country · 'corridors' = bilateral
+  const [basketId, setBasketId] = useSessionState('tech-basket', 'all')
+  const [tm, setTm] = useSessionState('tech-metric', 'share')
   const ac = axisColors(isDark)
   const fl = flow === 'import' ? 'import' : 'export'
   const flowWord = fl === 'import' ? 'imports' : 'exports'
