@@ -146,7 +146,7 @@ export default function BilateralPanel({ data, year, setYear }) {
             <Toggle value={role} onChange={setRole}
               options={[{ value: 'origin', label: 'Exports' }, { value: 'dest', label: 'Imports' }]} />
             <select value={anchor} onChange={e => setAnchor(e.target.value)}
-              className="flex-1 min-w-0 bg-transparent border border-slate-300 dark:border-slate-600 rounded px-2 py-1 text-sm">
+              className="flex-1 min-w-0 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer border border-slate-300 dark:border-slate-600 rounded px-2 py-1 text-sm">
               {bil.blocs.map(b => <option key={b} value={b}>{nameOf(b)}</option>)}
             </select>
           </div>
