@@ -84,7 +84,7 @@ export function YearStepper({ years, year, onChange, playable = true }) {
       )}
       <button onClick={() => go(i - 1)} disabled={i <= 0} className={btn} title="Previous year">‹</button>
       <select value={year} onChange={e => { stop(); onChange(Number(e.target.value)) }}
-        className="bg-transparent border border-slate-300 dark:border-slate-600 rounded px-2 py-1 text-sm font-mono font-semibold tabular-nums">
+        className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer border border-slate-300 dark:border-slate-600 rounded px-2 py-1 text-sm font-mono font-semibold tabular-nums">
         {years.map(y => <option key={y} value={y}>{y}</option>)}
       </select>
       <button onClick={() => go(i + 1)} disabled={i >= years.length - 1} className={btn} title="Next year">›</button>

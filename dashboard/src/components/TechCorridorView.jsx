@@ -87,7 +87,7 @@ export default function TechCorridorView({ data, year, setYear }) {
             <Toggle value={role} onChange={setRole}
               options={[{ value: 'origin', label: 'Exports from' }, { value: 'dest', label: 'Imports to' }]} />
             <select value={anchor} onChange={e => setAnchor(e.target.value)}
-              className="bg-transparent border border-slate-300 dark:border-slate-600 rounded px-2 py-1 text-sm">
+              className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer border border-slate-300 dark:border-slate-600 rounded px-2 py-1 text-sm">
               {tb.blocs.map(b => <option key={b} value={b}>{nameOf(b)}</option>)}
             </select>
           </div>
