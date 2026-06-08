@@ -8,15 +8,17 @@ import { colorFor, fmtPct, fmtB, fmtPci } from '../lib/format.js'
 import { axisColors, tooltipStyle } from '../lib/chartTheme.js'
 import { MeasureToggle, Toggle, YearStepper, CountryPicker } from './Controls.jsx'
 import { useDarkMode } from '../lib/useDarkMode.jsx'
+import { useSessionState } from '../lib/sessionState.js'
 
 export default function ExplorerPanel({ data, selected, setSelected, year, setYear, measure, setMeasure, flow, setFlow }) {
   const { isDark } = useDarkMode()
   const { meta, byIso } = data
   const stackable = MEASURES[measure].stack
-  const [display, setDisplay] = useState('stack')
-  const [selectedPci, setSelectedPci] = useState(1.0)
+  // options persist across tab switches (sessionStorage)
+  const [display, setDisplay] = useSessionState('exp-display', 'stack')
+  const [selectedPci, setSelectedPci] = useSessionState('exp-pci', 1.0)
   const [pickerOpen, setPickerOpen] = useState(false)   // mobile: country list collapsed by default
-  const [level, setLevel] = useState(meta.defaultLevel || 'med')
+  const [level, setLevel] = useSessionState('exp-level', meta.defaultLevel || 'med')
   const mode = stackable && display === 'stack' ? 'stack' : 'line'
   const isImp = flow === 'import'
   const vIdx = isImp ? 3 : 2  // pci_products row = [hs4, pci, exportB, importB]
