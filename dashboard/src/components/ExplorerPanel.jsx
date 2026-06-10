@@ -18,7 +18,7 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
   const [display, setDisplay] = useSessionState('exp-display', 'stack')
   const [selectedPci, setSelectedPci] = useSessionState('exp-pci', 1.0)
   const [pickerOpen, setPickerOpen] = useState(false)   // mobile: country list collapsed by default
-  const [level, setLevel] = useSessionState('exp-level', meta.defaultLevel || 'med')
+  const level = 'high'   // smoothness fixed to High (selector removed)
   const mode = stackable && display === 'stack' ? 'stack' : 'line'
   const isImp = flow === 'import'
   const vIdx = isImp ? 3 : 2  // pci_products row = [hs4, pci, exportB, importB]
@@ -106,21 +106,14 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
               <Toggle value={flow} onChange={setFlow}
                 options={[{ value: 'export', label: 'Exports' }, { value: 'import', label: 'Imports' }]} />
               <MeasureToggle value={measure} onChange={setMeasure} measures={MEASURES} />
-            </div>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-              <span className="inline-flex items-center gap-1.5">
-                <span className="label">Smoothness</span>
-                <Toggle value={level} onChange={setLevel}
-                  options={meta.smoothing.map(s => ({ value: s.id, label: s.label }))} />
-              </span>
               {stackable && (
                 <Toggle value={display} onChange={setDisplay}
                   options={[{ value: 'stack', label: 'Stacked' }, { value: 'line', label: 'Lines' }]} />
               )}
-              <span className="text-[11px] text-amber-500/90 inline-flex items-center gap-1">
-                <span className="inline-block w-3 border-t border-dashed border-amber-500" /> click to inspect
-              </span>
             </div>
+            <span className="text-[11px] text-amber-500/90 inline-flex items-center gap-1">
+              <span className="inline-block w-3 border-t border-dashed border-amber-500" /> click to inspect
+            </span>
           </div>
           <div className="cursor-crosshair">
             <ResponsiveContainer width="100%" height={460}>
