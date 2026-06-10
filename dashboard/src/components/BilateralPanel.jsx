@@ -7,7 +7,7 @@ import {
   buildCorridorRows, corridorOf, aggregateCorridors, corridorCounterparties,
   CORRIDOR_MEASURES, ANCHOR_KEY,
 } from '../lib/data.js'
-import { colorFor, fmtB, fmtPct, fmtPci } from '../lib/format.js'
+import { colorFor, fmtB, fmtPct, fmtPci, niceShareMax, shareTicks } from '../lib/format.js'
 import { axisColors, tooltipStyle } from '../lib/chartTheme.js'
 import { Toggle, YearStepper, CountryPicker } from './Controls.jsx'
 import { useDarkMode } from '../lib/useDarkMode.jsx'
@@ -21,7 +21,7 @@ export default function BilateralPanel({ data, year, setYear }) {
   const [anchor, setAnchor] = useSessionState('corr-anchor', 'CHN')
   const [parties, setParties] = useSessionState('corr-parties', [])
   const [measure, setMeasure] = useSessionState('corr-measure', 'share')
-  const [level, setLevel] = useSessionState('corr-level', meta.defaultLevel || 'med')
+  const level = 'high'   // smoothness fixed to High (selector removed, matches Explorer)
   const [display, setDisplay] = useSessionState('corr-display', 'stack')
   const [pickerOpen, setPickerOpen] = useState(false)   // mobile: counterparty list collapsed by default
   const [selectedPci, setSelectedPci] = useSessionState('corr-pci', 1.0)
@@ -128,6 +128,17 @@ export default function BilateralPanel({ data, year, setYear }) {
   // product values: $B for sizeable categories, $M for the small tail ones (avoids "$0.0B")
   const fmtVal = (v) => v >= 0.1 ? fmtB(v, 1) : v > 0 ? `$${Math.max(1, Math.round(v * 1000))}M` : '$0'
 
+  // share y-axis: round the plotted peak up to a nice threshold, capped at 100% (no redundant 120%)
+  const shareTop = useMemo(() => {
+    if (measure !== 'share') return 'auto'
+    let m = 0
+    for (const r of rows) {
+      if (stack) { let s = 0; for (const p of parties) s += r[p] || 0; if (s > m) m = s }
+      else for (const p of parties) { const v = r[p] || 0; if (v > m) m = v }
+    }
+    return niceShareMax(m)
+  }, [rows, parties, measure, stack])
+
   const toggle = (key) => setParties(prev => prev.includes(key) ? prev.filter(x => x !== key) : [...prev, key])
   const onBloc = (region) => toggle('@' + region)
 
@@ -181,11 +192,6 @@ export default function BilateralPanel({ data, year, setYear }) {
             <Toggle value={measure} onChange={setMeasure}
               options={Object.entries(CORRIDOR_MEASURES).map(([k, m]) => ({ value: k, label: m.label }))} />
             <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-              <span className="inline-flex items-center gap-1.5">
-                <span className="label">Smoothness</span>
-                <Toggle value={level} onChange={setLevel}
-                  options={meta.smoothing.map(s => ({ value: s.id, label: s.label }))} />
-              </span>
               {stackable && (
                 <Toggle value={display} onChange={setDisplay}
                   options={[{ value: 'stack', label: 'Stacked' }, { value: 'lines', label: 'Lines' }]} />
@@ -208,7 +214,7 @@ export default function BilateralPanel({ data, year, setYear }) {
                   tick={{ fill: ac.tick, fontSize: 10 }} tickFormatter={fmtPci}
                   label={{ value: 'Product Complexity Index (PCI)', position: 'insideBottom', offset: -12, fill: ac.tick, fontSize: 11 }} />
                 <YAxis tick={{ fill: ac.tick, fontSize: 10 }} tickFormatter={yfmt} width={46}
-                  domain={measure === 'share' ? [0, 1] : [0, 'auto']} allowDataOverflow={measure === 'share'} />
+                  domain={[0, shareTop]} ticks={measure === 'share' ? shareTicks(shareTop) : undefined} />
                 <ReferenceLine x={0} stroke={ac.grid} />
                 <ReferenceLine x={selectedPci} stroke="#f59e0b" strokeWidth={1.5} strokeDasharray="4 2" />
                 <Tooltip contentStyle={tooltipStyle(isDark)} labelFormatter={(p) => `PCI ${fmtPci(p)}`}

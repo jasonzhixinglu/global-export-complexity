@@ -3,7 +3,7 @@ import {
   ResponsiveContainer, BarChart, Bar, AreaChart, Area,
   XAxis, YAxis, CartesianGrid, Tooltip, Cell,
 } from 'recharts'
-import { distinctColor, fmtPct, fmtB } from '../lib/format.js'
+import { distinctColor, fmtPct, fmtB, niceShareMax, shareTicks } from '../lib/format.js'
 import { axisColors, tooltipStyle } from '../lib/chartTheme.js'
 import { Toggle, YearStepper } from './Controls.jsx'
 import { useDarkMode } from '../lib/useDarkMode.jsx'
@@ -74,6 +74,10 @@ export default function TechCorridorView({ data, year, setYear }) {
   const vfmt = isPct ? (v) => fmtPct(v, 1) : (v) => fmtB(v, 1)
   const axfmt = isPct ? (v) => `${Math.round(v * 100)}%` : (v) => `$${Math.round(v)}B`
   const barData = rankedYear.slice(0, 12).map(r => ({ g: r.g, v: isPct ? (totY ? r.v / totY : 0) : r.v }))
+  // share y-axis: round the stacked peak up to a nice threshold, capped at 100%
+  const shareTop = isPct
+    ? niceShareMax(series.reduce((m, r) => Math.max(m, topGroups.reduce((s, g) => s + (r[g] || 0), 0)), 0))
+    : 'auto'
 
   return (
     <div className="space-y-3">
@@ -133,7 +137,7 @@ export default function TechCorridorView({ data, year, setYear }) {
               <CartesianGrid stroke={ac.grid} strokeDasharray="2 2" />
               <XAxis dataKey="year" tick={{ fill: ac.tick, fontSize: 10 }} />
               <YAxis tick={{ fill: ac.tick, fontSize: 10 }} tickFormatter={axfmt} width={48}
-                domain={isPct ? [0, 1] : [0, 'auto']} />
+                domain={[0, shareTop]} ticks={isPct ? shareTicks(shareTop) : undefined} />
               <Tooltip contentStyle={tooltipStyle(isDark)} formatter={(v, n) => [vfmt(v), labelOf(n)]} />
               {topGroups.map(g => (
                 <Area key={g} type="monotone" dataKey={g} stackId="1" stroke={cOf(g)} fill={cOf(g)}

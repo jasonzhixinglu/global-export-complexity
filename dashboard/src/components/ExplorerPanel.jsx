@@ -4,7 +4,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine,
 } from 'recharts'
 import { buildRows, MEASURES } from '../lib/data.js'
-import { colorFor, fmtPct, fmtB, fmtPci } from '../lib/format.js'
+import { colorFor, fmtPct, fmtB, fmtPci, niceShareMax, shareTicks } from '../lib/format.js'
 import { axisColors, tooltipStyle } from '../lib/chartTheme.js'
 import { MeasureToggle, Toggle, YearStepper, CountryPicker } from './Controls.jsx'
 import { useDarkMode } from '../lib/useDarkMode.jsx'
@@ -57,6 +57,18 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
   }, [pp, year, selectedPci, baseWin, vIdx])
   const maxVal = prods.length ? Math.max(...prods.map(p => p.val)) : 1
   const onPick = (e) => { if (e && e.activeLabel != null) setSelectedPci(Number(e.activeLabel)) }
+
+  // share y-axis: round the plotted peak up to a nice threshold (stacked = sum at each PCI;
+  // lines = tallest single series), capped at 100%.
+  const shareTop = useMemo(() => {
+    if (measure !== 'share') return 'auto'
+    let m = 0
+    for (const r of rows) {
+      if (mode === 'stack') { let s = 0; for (const k of selected) s += r[k] || 0; if (s > m) m = s }
+      else for (const k of selected) { const v = r[k] || 0; if (v > m) m = v }
+    }
+    return niceShareMax(m)
+  }, [rows, selected, measure, mode])
 
   const yfmt = measure === 'share' ? (v) => `${Math.round(v * 100)}%`
     : measure === 'value' ? (v) => `$${v >= 1000 ? (v / 1000).toFixed(1) + 'T' : Math.round(v) + 'B'}`
@@ -123,7 +135,7 @@ export default function ExplorerPanel({ data, selected, setSelected, year, setYe
                   tick={{ fill: ac.tick, fontSize: 10 }} tickFormatter={fmtPci}
                   label={{ value: 'Product Complexity Index (PCI)', position: 'insideBottom', offset: -12, fill: ac.tick, fontSize: 11 }} />
                 <YAxis tick={{ fill: ac.tick, fontSize: 10 }} tickFormatter={yfmt} width={46} tickCount={9}
-                  domain={measure === 'share' ? [0, 1] : [0, 'auto']} allowDataOverflow={measure === 'share'} />
+                  domain={[0, shareTop]} ticks={measure === 'share' ? shareTicks(shareTop) : undefined} />
                 <ReferenceLine x={0} stroke={ac.grid} />
                 <ReferenceLine x={selectedPci} stroke="#f59e0b" strokeWidth={1.5} strokeDasharray="4 2" />
                 <Tooltip contentStyle={tooltipStyle(isDark)} labelFormatter={(p) => `PCI ${fmtPci(p)}`}
