@@ -15,6 +15,32 @@ export function fmtPci(x) {
   return (x >= 0 ? '+' : '') + x.toFixed(2)
 }
 
+// Nice y-axis ceiling for SHARE charts: the smallest "round" share threshold that leaves some
+// breathing room above the data peak — a middle ground between always pinning 100% (wastes space
+// when the selection is a small share) and hugging the data (stretches the chart). The peak fills
+// at most FILL of the axis height, so there's always headroom up top (e.g. a 38% peak → 50%, a 7%
+// peak → 10%). Capped at 1.0 so the axis never exceeds 100%.
+const SHARE_STEPS = [0.02, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.75, 1]
+const FILL = 0.8
+export function niceShareMax(max) {
+  if (!(max > 0)) return SHARE_STEPS[0]
+  for (const s of SHARE_STEPS) if (max <= FILL * s + 1e-9) return s
+  return 1
+}
+
+// Round, evenly-spaced tick values from 0 to a niceShareMax ceiling, so axis labels land on
+// standardized intervals (e.g. ceiling 0.5 → 0/10/20/30/40/50%) instead of recharts' auto
+// fractions. The step per ceiling keeps ~3–6 ticks, each a whole-percent value.
+const SHARE_TICK_STEP = {
+  0.02: 0.01, 0.05: 0.01, 0.1: 0.02, 0.15: 0.05, 0.2: 0.05, 0.25: 0.05,
+  0.3: 0.1, 0.4: 0.1, 0.5: 0.1, 0.6: 0.2, 0.75: 0.25, 1: 0.2,
+}
+export function shareTicks(ceiling) {
+  const step = SHARE_TICK_STEP[ceiling] || ceiling / 5
+  const n = Math.round(ceiling / step)
+  return Array.from({ length: n + 1 }, (_, i) => Math.round(i * step * 1000) / 1000)
+}
+
 // Bright, full-spectrum categorical palette (blue→orange→green→pink→yellow→teal→
 // purple→cyan→lime…), readable on dark. First four = CHN / USA / DEU / JPN.
 export const PALETTE = [

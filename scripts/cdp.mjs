@@ -6,7 +6,7 @@
 //   node scripts/cdp.mjs shot <outfile.png>
 //   node scripts/cdp.mjs text                 # visible innerText of the page
 //   node scripts/cdp.mjs eval '<js expr>'     # evaluate JS in page, print JSON result
-const BASE = 'http://127.0.0.1:9222'
+const BASE = `http://127.0.0.1:${process.env.CDP_PORT || 9222}`
 
 async function firstPage() {
   const list = await (await fetch(`${BASE}/json`)).json()
