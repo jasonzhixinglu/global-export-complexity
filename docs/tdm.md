@@ -10,8 +10,9 @@ customs directly (~1-month lag), covering what Comtrade lacks or lags on:
 | China | monthly ends **2024-12** | 2025-01 onward, through 2026-05 |
 | THA / KOR / SGP / FRA / TUR | end 2025-02 / 2025-12 (×4) | recent top-ups |
 
-**Vietnam is NOT available via this TDM account** (probed 2026-07: empty responses for
-all reporter codes and frequencies, while control queries return data). Fallback:
+**Vietnam is NOT a TDM reporting country at all** — confirmed against the complete
+163-entry reporter list in [tdm/tdm-api-specification.xlsx](tdm/tdm-api-specification.xlsx)
+(no Vietnam edition exists; it appears only as a *partner* code `VIETNAM`). Fallback:
 Vietnam's export row is mirrored from partners' imports — and with TDM's China and
 Taiwan import files in hand, the formerly-dark VNM->CHN corridor (72% of Vietnam's
 847150 exports) is covered through 2026-05; residual mirror coverage is near-complete.
@@ -37,8 +38,14 @@ python scripts/fetch_tdm.py TW E 202001 202606 # one custom pull
 
 ## The standing report set (portal fallback)
 
+Vendor documentation lives in [docs/tdm/](tdm/): user guide, quick tips, the
+Comtrade/TradeMap comparison sheet, the API specification workbook (reporter/partner/
+language code lists — reporter codes are mostly ISO2 with edition variants like USC =
+US Consumption, CNC, "(CIF)" editions; partner codes are TDM-internal names like
+`VIETNAM`, `AFGHAN`), and the report-by-email help file.
+
 Portal workflow: `Username -> Report -> Download` ("Special Report - Download" form);
-see [tdm-report-by-email-help.pdf](tdm-report-by-email-help.pdf). Common settings for
+see [tdm/tdm-report-by-email-help.pdf](tdm/tdm-report-by-email-help.pdf). Common settings for
 every request: **Frequency = Monthly**, **Commodity = 847150, 847180, 847330**,
 **Partner countries = All**, **Aggregate Partner Countries = No** (keeps bilateral
 detail), "To" period = latest available month. One request at a time; use
