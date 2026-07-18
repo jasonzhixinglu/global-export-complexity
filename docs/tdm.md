@@ -1,6 +1,6 @@
 # Trade Data Monitor (TDM) — monthly AI-compute pulls
 
-TDM (tradedatamonitor.com, personal login, **no API**) supplements UN Comtrade for the
+TDM (tradedatamonitor.com, personal login) supplements UN Comtrade for the
 monthly bilateral AI-compute panel (HS **847150 / 847180 / 847330**). It sources national
 customs directly (~1-month lag), covering what Comtrade lacks or lags on:
 
@@ -11,7 +11,21 @@ customs directly (~1-month lag), covering what Comtrade lacks or lags on:
 | Vietnam | monthly ends **2023-12** | 2024-01 onward |
 | THA / KOR / SGP / FRA / TUR | end 2025-02 / 2025-12 (×4) | recent top-ups |
 
-## The standing report set
+## API (preferred): scripted pulls
+
+The "Special Report - Download" form's **Generate API URL** button exposes a plain GET
+endpoint (`www1.tdmlogin.com/tdm/api/api.asp`) taking the same parameters (ISO2
+`reporter`, `periodBegin/periodEnd` as YYYYMM, `flow` E/I, comma-joined `hsCode`,
+`separator=T`, `ISO3=Y`, ...). `scripts/fetch_tdm.py` wraps it and runs the standing
+pull set below; credentials live in the git-ignored `.env` (`TDM_USERNAME` /
+`TDM_PASSWORD`). Output lands in `data/raw/tdm/tdm_<reporter>_<flow>_<begin>_<end>.tsv`.
+
+```
+python scripts/fetch_tdm.py                    # standing set (6 pulls)
+python scripts/fetch_tdm.py TW E 202001 202606 # one custom pull
+```
+
+## The standing report set (portal fallback)
 
 Portal workflow: `Username -> Report -> Download` ("Special Report - Download" form);
 see [tdm-report-by-email-help.pdf](tdm-report-by-email-help.pdf). Common settings for

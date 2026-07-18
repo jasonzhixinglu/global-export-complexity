@@ -1,0 +1,86 @@
+"""Fetch monthly bilateral AI-compute data from the Trade Data Monitor (TDM) API.
+
+TDM's "Special Report - Download" form exposes a parameterized GET endpoint
+(discovered via its "Generate API URL" button). Credentials come from the
+git-ignored repo-root .env (TDM_USERNAME / TDM_PASSWORD) -- never commit them,
+and never commit the raw extracts either (data/raw/tdm/ is git-ignored):
+TDM is subscription-licensed data.
+
+Standing pull set (see docs/tdm.md): Taiwan full history, China/Vietnam from
+2024-01, exports + imports each, HS 847150/847180/847330.
+
+Usage:
+  python scripts/fetch_tdm.py            # the standing pull set
+  python scripts/fetch_tdm.py TW E 202001 202606   # one custom pull
+"""
+from __future__ import annotations
+import sys
+import urllib.parse
+import urllib.request
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+from gec import config as cfg
+
+API = "https://www1.tdmlogin.com/tdm/api/api.asp"
+CODES = "847150,847180,847330"
+OUT_DIR = cfg.RAW_DIR / "tdm"
+
+# (reporter ISO2, flow letter E/I, periodBegin, periodEnd)
+STANDING = [
+    ("TW", "E", "202001", "202606"), ("TW", "I", "202001", "202606"),
+    ("CN", "E", "202401", "202606"), ("CN", "I", "202401", "202606"),
+    ("VN", "E", "202401", "202606"), ("VN", "I", "202401", "202606"),
+]
+
+
+def credentials():
+    envf = cfg.ROOT / ".env"
+    creds = {}
+    if envf.exists():
+        for line in envf.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if line and not line.startswith("#") and "=" in line:
+                k, v = line.split("=", 1)
+                creds[k.strip()] = v.strip().strip('"').strip("'")
+    user, pw = creds.get("TDM_USERNAME"), creds.get("TDM_PASSWORD")
+    if not user or not pw:
+        sys.exit("TDM_USERNAME / TDM_PASSWORD missing from .env -- add them (git-ignored).")
+    return user, pw
+
+
+def fetch(reporter, flow, begin, end):
+    user, pw = credentials()
+    params = {
+        "username": user, "password": pw,
+        "reporter": reporter, "periodBegin": begin, "periodEnd": end,
+        "flow": flow, "partners": "All", "frequency": "M",
+        "hsCode": CODES, "productCode": "", "levelDetail": "6",
+        "levelDetailGroup": "6", "currency": "USD", "includeUnits": "BOTH",
+        "isoCountryCode": "BOTH", "conv": "0", "separator": "T",
+        "includeFlow": "Y", "ISO3": "Y",
+    }
+    url = f"{API}?{urllib.parse.urlencode(params)}"
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    out = OUT_DIR / f"tdm_{reporter}_{flow}_{begin}_{end}.tsv"
+    print(f"fetching {reporter} {flow} {begin}-{end} ...", flush=True)
+    with urllib.request.urlopen(url, timeout=600) as r:
+        data = r.read()
+    head = data[:200].decode("utf-8", errors="replace").lower()
+    if len(data) < 500 and ("error" in head or "invalid" in head or "denied" in head):
+        sys.exit(f"  API returned an error for {reporter} {flow}: {data[:300]!r}")
+    out.write_bytes(data)
+    n_lines = data.count(b"\n")
+    print(f"  -> {out} ({len(data)/1e6:.1f} MB, {n_lines} lines)")
+    return out
+
+
+def main():
+    args = sys.argv[1:]
+    pulls = [tuple(args)] if len(args) == 4 else STANDING
+    for reporter, flow, begin, end in pulls:
+        fetch(reporter, flow, begin, end)
+
+
+if __name__ == "__main__":
+    main()
