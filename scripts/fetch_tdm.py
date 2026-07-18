@@ -26,11 +26,14 @@ API = "https://www1.tdmlogin.com/tdm/api/api.asp"
 CODES = "847150,847180,847330"
 OUT_DIR = cfg.RAW_DIR / "tdm"
 
-# (reporter ISO2, flow letter E/I, periodBegin, periodEnd)
+# (reporter code, flow letter E/I, periodBegin, periodEnd). Codes are mostly ISO2;
+# VN2 = "Vietnam (preliminary) 2", the only live Vietnam edition (plain VN is dead --
+# not in the API spec workbook, which is outdated; VN2 found by probing after the
+# edition showed up in the query dashboard).
 STANDING = [
     ("TW", "E", "202001", "202606"), ("TW", "I", "202001", "202606"),
     ("CN", "E", "202401", "202606"), ("CN", "I", "202401", "202606"),
-    ("VN", "E", "202401", "202606"), ("VN", "I", "202401", "202606"),
+    ("VN2", "E", "202001", "202606"), ("VN2", "I", "202001", "202606"),
 ]
 
 

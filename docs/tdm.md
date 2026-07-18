@@ -8,15 +8,16 @@ customs directly (~1-month lag), covering what Comtrade lacks or lags on:
 |---|---|---|
 | Taiwan | never reports (mirror-only, partner code 490) | full direct X+M history, through 2026-06 |
 | China | monthly ends **2024-12** | 2025-01 onward, through 2026-05 |
+| Vietnam | monthly ends **2023-12** | edition **"Vietnam (preliminary) 2"**, API code `VN2`: full X+M history 2020-01 through 2026-04 |
 | THA / KOR / SGP / FRA / TUR | end 2025-02 / 2025-12 (×4) | recent top-ups |
 
-**Vietnam is NOT a TDM reporting country at all** — confirmed against the complete
-163-entry reporter list in [tdm/tdm-api-specification.xlsx](tdm/tdm-api-specification.xlsx)
-(no Vietnam edition exists; it appears only as a *partner* code `VIETNAM`). Fallback:
-Vietnam's export row is mirrored from partners' imports — and with TDM's China and
-Taiwan import files in hand, the formerly-dark VNM->CHN corridor (72% of Vietnam's
-847150 exports) is covered through 2026-05; residual mirror coverage is near-complete.
-Vietnam's import column mirrors from partners' exports likewise.
+Caution: [tdm/tdm-api-specification.xlsx](tdm/tdm-api-specification.xlsx) is **outdated**
+— its 163-entry reporter list omits the Vietnam (preliminary) editions entirely (plain
+`VN`/`VNM`/`VIETNAM` reporter queries return empty). `VN2` was found by probing after
+the edition appeared in the query dashboard; treat the dashboard's reporter dropdown,
+not the workbook, as the source of truth for available editions. The "(preliminary)"
+label suggests provisional figures — compare the 2020-2023 overlap against Comtrade's
+final Vietnam data to gauge revision size.
 
 ## API (preferred): scripted pulls
 
