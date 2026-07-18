@@ -6,10 +6,16 @@ customs directly (~1-month lag), covering what Comtrade lacks or lags on:
 
 | gap | Comtrade status (checked 2026-07) | TDM fills |
 |---|---|---|
-| Taiwan | never reports (mirror-only, partner code 490) | full direct X+M history |
-| China | monthly ends **2024-12** | 2025-01 onward |
-| Vietnam | monthly ends **2023-12** | 2024-01 onward |
+| Taiwan | never reports (mirror-only, partner code 490) | full direct X+M history, through 2026-06 |
+| China | monthly ends **2024-12** | 2025-01 onward, through 2026-05 |
 | THA / KOR / SGP / FRA / TUR | end 2025-02 / 2025-12 (×4) | recent top-ups |
+
+**Vietnam is NOT available via this TDM account** (probed 2026-07: empty responses for
+all reporter codes and frequencies, while control queries return data). Fallback:
+Vietnam's export row is mirrored from partners' imports — and with TDM's China and
+Taiwan import files in hand, the formerly-dark VNM->CHN corridor (72% of Vietnam's
+847150 exports) is covered through 2026-05; residual mirror coverage is near-complete.
+Vietnam's import column mirrors from partners' exports likewise.
 
 ## API (preferred): scripted pulls
 
@@ -19,6 +25,10 @@ endpoint (`www1.tdmlogin.com/tdm/api/api.asp`) taking the same parameters (ISO2
 `separator=T`, `ISO3=Y`, ...). `scripts/fetch_tdm.py` wraps it and runs the standing
 pull set below; credentials live in the git-ignored `.env` (`TDM_USERNAME` /
 `TDM_PASSWORD`). Output lands in `data/raw/tdm/tdm_<reporter>_<flow>_<begin>_<end>.tsv`.
+
+Response format: **UTF-16 LE** TSV with columns FLOW, CTY_RPT, RPT_ISO, REPORTER,
+CTY_PTN, PTN_ISO, PARTNER, COMMODITY, YEAR, MONTH, VALUE (USD), QTY1/UNIT1,
+QTY2/UNIT2, CURRENCY. Quantity units: Taiwan reports SET+KG, China KG+NO (pieces).
 
 ```
 python scripts/fetch_tdm.py                    # standing set (6 pulls)
