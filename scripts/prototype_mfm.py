@@ -1,7 +1,9 @@
 """Constant-loading matrix factor models on bilateral AI-compute trade flows, 2020-2024.
 
 Model (Chen, Chen, Bolivar & Chen 2024, docs/references/, without time variation):
-    Y_t = R F_t C' + E_t,  Y_t (p x p) = log1p bilateral export matrix, t = 2020..2024.
+    Y_t = R F_t C' + E_t,  Y_t (p x p) = bilateral export matrix in $B levels, t = 2020..2024.
+Levels (not logs) follow the paper's Section 7, which factors raw dollar volumes; a log
+transform buries scale (e.g. Taiwan's corridor-concentrated dollar dominance).
 Estimation: R = sqrt(p) * top-k eigenvectors of M_R = sum_t Y_t Y_t';  C likewise from
 sum_t Y_t' Y_t;  F_t = R' Y_t C / (p*q).  Ranks by eigenvalue ratio (Ahn-Horenstein).
 Rotation fixed by varimax on each side (one global rotation; loadings are constant here),
@@ -11,6 +13,7 @@ Runs one analysis per Fed AI-compute HS6 code (847150 AI servers, 847180 other A
 units, 847330 parts/GPU cards) plus their sum ("ai_compute"). Outputs one subdirectory
 per analysis under results/mfm/ so experiments don't clutter the main results tree.
 Run after scripts/extract_ai_compute.py.  Usage: python scripts/prototype_mfm.py [label ...]
+
 """
 from __future__ import annotations
 import json
@@ -43,7 +46,7 @@ N_COUNTRIES = 40          # top countries by total (export+import) involvement
 KMAX = 8                  # max rank considered by the eigenvalue-ratio estimator
 EXCLUDE = {"WLD", "ANS"}  # world / areas-not-specified pseudo-codes
 PARQUET = cfg.DATA_DIR / "derived" / "bilateral_ai_compute_2020_2024.parquet"
-SPACE = "log space"       # set per run(); labels figure/summary units
+SPACE = "$B levels"       # units note for figures/summaries
 
 # dataviz reference palette (light mode)
 SERIES = ["#2a78d6", "#008300", "#e87ba4", "#eda100", "#1baf7a", "#eb6834", "#4a3aa7", "#e34948"]
@@ -58,7 +61,7 @@ plt.rcParams.update({
 })
 
 
-def load_matrices(codes, transform):
+def load_matrices(codes):
     df = pd.read_parquet(PARQUET)
     df = df[df.code.isin(codes)]
     df = df[(df.export_value > 0) & ~df.exporter.isin(EXCLUDE) & ~df.importer.isin(EXCLUDE)]
@@ -74,8 +77,7 @@ def load_matrices(codes, transform):
     Y = np.zeros((len(YEARS), p, p))
     for t, yr in enumerate(YEARS):
         d = sub[sub.year == yr]
-        v = d.export_value / 1e9 if transform == "levels" else np.log1p(d.export_value / 1e6)
-        Y[t, d.exporter.map(idx), d.importer.map(idx)] = v
+        Y[t, d.exporter.map(idx), d.importer.map(idx)] = d.export_value / 1e9
     top = {
         "exporters_usd_bn": (df.groupby("exporter").export_value.sum()
                              .nlargest(10) / 1e9).round(2).to_dict(),
@@ -114,17 +116,14 @@ def fix_signs_order(L):
     return L[:, order], signs, order
 
 
-def run(label, transform="log"):
+def run(label):
     codes = ANALYSES[label]
-    title = TITLES[label] + (" [levels, $B]" if transform == "levels" else "")
-    suffix = "_levels" if transform == "levels" else ""
-    out_dir = cfg.RESULTS_DIR / "mfm" / f"{label}_annual_{YEARS[0]}_{YEARS[-1]}{suffix}"
+    title = TITLES[label]
+    out_dir = cfg.RESULTS_DIR / "mfm" / f"{label}_annual_{YEARS[0]}_{YEARS[-1]}"
     out_dir.mkdir(parents=True, exist_ok=True)
-    global SPACE
-    SPACE = "$B levels" if transform == "levels" else "log space"
     print(f"\n=== {title} ===")
 
-    Y, countries, coverage, world_total, top = load_matrices(codes, transform)
+    Y, countries, coverage, world_total, top = load_matrices(codes)
     T, p, q = Y.shape
     print(f"{T} years {YEARS[0]}-{YEARS[-1]}, {p} countries, "
           f"coverage {coverage:.1%} of ${world_total/1e9:.0f}B world trade")
@@ -178,7 +177,7 @@ def run(label, transform="log"):
     print(f"  by hub pair (rows=export hub, cols=import hub):\n{np.round(hub_pair_share, 3)}")
 
     stats = {
-        "label": label, "codes": codes, "transform": transform,
+        "label": label, "codes": codes, "transform": "levels_usd_bn",
         "years": YEARS, "countries": countries,
         "coverage": float(coverage), "top10": top,
         "hub_size_signal_share": {"export": exp_hub_share.tolist(),
@@ -386,8 +385,6 @@ def fig_factors(F, k, r, title, out_dir):
 
 
 if __name__ == "__main__":
-    args = sys.argv[1:]
-    transform = "levels" if "--levels" in args else "log"
-    labels = [a for a in args if not a.startswith("--")] or list(ANALYSES)
+    labels = sys.argv[1:] or list(ANALYSES)
     for lab in labels:
-        run(lab, transform)
+        run(lab)

@@ -1,15 +1,15 @@
 # AI compute (847150+847180+847330) — matrix factor model, 2020-2024
 
 Constant-loading matrix factor model `Y_t = R F_t C' + E_t` on annual bilateral
-log1p export matrices (Atlas HS2012 bilateral data), top 40 countries
+export matrices in $B levels (Atlas HS2012 bilateral data), top 40 countries
 covering 96.2% of $1233B world trade.
 Estimation per Chen, Chen, Bolivar & Chen (2024), `docs/references/`; varimax
 rotation on each side; hub size = share of fitted signal (exact under the
-orthonormal-loading decomposition, log space — not dollar shares).
+orthonormal-loading decomposition, $B levels).
 
-- **Rank:** eigenvalue-ratio estimator picks 1 (the dominant
-  gravity/size factor); working rank for hub analysis k=3, r=3 (2nd ratio peak).
-- **Fit:** uncentered R^2 0.895 (rank-1 baseline 0.822).
+- **Rank:** eigenvalue-ratio estimator picks 5 (the dominant
+  gravity/size factor); working rank for hub analysis k=5, r=4 (2nd ratio peak).
+- **Fit:** uncentered R^2 0.977 (rank-1 baseline 0.666).
 
 ## Top traders, 2020-2024 ($B)
 
@@ -28,28 +28,33 @@ orthonormal-loading decomposition, log space — not dollar shares).
 
 ## Hub structure
 
-Export-hub sizes: hub 1 36%, hub 2 32%, hub 3 32%.
-Import-hub sizes: hub 1 38%, hub 2 39%, hub 3 23%.
+Export-hub sizes: hub 1 22%, hub 2 34%, hub 3 7%, hub 4 4%, hub 5 33%.
+Import-hub sizes: hub 1 69%, hub 2 20%, hub 3 3%, hub 4 7%.
 
 Share of fitted signal by hub pair (rows = export hub, cols = import hub):
 
-| | imp 1 | imp 2 | imp 3 |
-|---|---|---|---|
-| exp 1 | 6% | 15% | 15% |
-| exp 2 | 22% | 4% | 6% |
-| exp 3 | 10% | 20% | 3% |
+| | imp 1 | imp 2 | imp 3 | imp 4 |
+|---|---|---|---|---|
+| exp 1 | 3% | 19% | 0% | 1% |
+| exp 2 | 32% | 1% | 1% | 0% |
+| exp 3 | 0% | 0% | 0% | 7% |
+| exp 4 | 1% | 0% | 2% | 0% |
+| exp 5 | 33% | 0% | 0% | 0% |
 
 ### Export hubs (varimax loadings, top 8)
 
-- **hub 1** (36%): KOR +2.57, VNM +2.22, THA +2.07, SGP +1.64, TWN +1.57, MEX +1.52, JPN +1.52, MYS +1.47
-- **hub 2** (32%): CZE +2.74, NLD +2.19, DEU +2.09, HUN +1.94, DNK +1.50, FRA +1.42, POL +1.39, GBR +1.34
-- **hub 3** (32%): CHN +3.59, USA +3.36, HKG +2.34, MYS +1.43, SGP +1.32, DEU +1.12, TWN +1.08, NLD +0.99
+- **hub 1** (22%): CHN +6.29, KOR +0.44, SGP +0.30, HKG -0.30, MYS +0.27, THA -0.09, NLD +0.06, MEX -0.05
+- **hub 2** (34%): TWN +6.32, THA +0.24, HKG -0.15, SGP +0.10, MYS +0.09, NLD +0.08, VNM +0.07, CZE +0.06
+- **hub 3** (7%): USA +6.31, HKG +0.30, KOR -0.17, VNM -0.15, MYS +0.11, CZE +0.11, HUN +0.09, DEU +0.08
+- **hub 4** (4%): VNM +4.57, HKG +3.51, KOR +2.37, THA +0.73, MYS +0.50, JPN +0.36, SGP +0.34, CZE +0.16
+- **hub 5** (33%): MEX +6.24, KOR +0.89, HKG -0.33, MYS +0.28, CAN +0.17, VNM -0.14, NLD +0.09, DEU +0.08
 
 ### Import hubs (varimax loadings, top 8)
 
-- **hub 1** (38%): ITA +1.85, SWE +1.80, ESP +1.76, CHE +1.72, BEL +1.64, DNK +1.55, FRA +1.50, GBR +1.47
-- **hub 2** (39%): THA +2.09, MEX +2.04, PHL +1.86, VNM +1.82, TWN +1.61, IDN +1.54, IND +1.48, KOR +1.48
-- **hub 3** (23%): USA +4.10, CHN +2.97, HKG +1.81, DEU +1.69, NLD +1.53, SGP +0.99, KAZ -0.79, MYS +0.77
+- **hub 1** (69%): USA +6.31, THA +0.29, SGP +0.21, MYS +0.16, NLD +0.16, TWN -0.14, KOR -0.06, DEU +0.05
+- **hub 2** (20%): HKG +5.94, TWN +1.21, KOR +0.83, JPN +0.72, VNM +0.52, SGP +0.52, MYS +0.51, DEU +0.46
+- **hub 3** (3%): CHN +6.26, KOR +0.53, SGP +0.41, NLD +0.35, PHL +0.23, IRL +0.22, DEU +0.20, TWN +0.18
+- **hub 4** (7%): MEX +5.89, CAN +1.36, NLD +1.22, TWN +0.87, SGP +0.48, JPN +0.44, MYS +0.42, THA +0.35
 
 ## Figures
 
