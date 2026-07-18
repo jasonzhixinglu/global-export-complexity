@@ -1,0 +1,77 @@
+{
+ "rank": 4,
+ "eval_from_month_index": 36,
+ "n_months": 76,
+ "results": [
+  {
+   "scheme": "rolling 3m",
+   "kind": "uniform",
+   "param": 3,
+   "oos_r2": 0.9638216102886736,
+   "stability_dist": 0.17199340187742296
+  },
+  {
+   "scheme": "rolling 6m",
+   "kind": "uniform",
+   "param": 6,
+   "oos_r2": 0.9623430219997265,
+   "stability_dist": 0.10301508435916283
+  },
+  {
+   "scheme": "rolling 12m",
+   "kind": "uniform",
+   "param": 12,
+   "oos_r2": 0.9588073371275214,
+   "stability_dist": 0.08546375947766761
+  },
+  {
+   "scheme": "rolling 18m",
+   "kind": "uniform",
+   "param": 18,
+   "oos_r2": 0.9566234691806534,
+   "stability_dist": 0.05127206524714436
+  },
+  {
+   "scheme": "rolling 24m",
+   "kind": "uniform",
+   "param": 24,
+   "oos_r2": 0.9534375323207138,
+   "stability_dist": 0.04221571327454978
+  },
+  {
+   "scheme": "rolling 36m",
+   "kind": "uniform",
+   "param": 36,
+   "oos_r2": 0.9486547064459351,
+   "stability_dist": 0.034983474888596267
+  },
+  {
+   "scheme": "EWMA hl=3m",
+   "kind": "ewma",
+   "param": 3,
+   "oos_r2": 0.9620545695026903,
+   "stability_dist": 0.10023366696641302
+  },
+  {
+   "scheme": "EWMA hl=6m",
+   "kind": "ewma",
+   "param": 6,
+   "oos_r2": 0.9601166866378784,
+   "stability_dist": 0.055966351893225866
+  },
+  {
+   "scheme": "EWMA hl=12m",
+   "kind": "ewma",
+   "param": 12,
+   "oos_r2": 0.9569453310887517,
+   "stability_dist": 0.04058299491247986
+  },
+  {
+   "scheme": "expanding (constant)",
+   "kind": "expanding",
+   "param": null,
+   "oos_r2": 0.9449619413740269,
+   "stability_dist": 0.028091486124696335
+  }
+ ]
+}
