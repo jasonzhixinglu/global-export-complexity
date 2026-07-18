@@ -43,8 +43,10 @@ ROW = "ROW"
 # Countries whose own reporting ends before the panel endpoint but whose kept-partner
 # corridors are covered by mirror (partners' reports). Their ROW cells go dark beyond
 # their horizon (0 + provenance flag). FRA: Comtrade ends 2025-12, TDM edition
-# inaccessible on this account (probed empty even for 2024).
-MIRROR_FALLBACK = {"FRA"}
+# inaccessible on this account (probed empty even for 2024). PHL/IND/ITA/ESP/SWE:
+# ~1-month slower than the rest; mirroring them moves the balanced endpoint from
+# 2026-03 to 2026-04 at ~0.06% of monthly value going dark (see build report).
+MIRROR_FALLBACK = {"FRA", "PHL", "IND", "ITA", "ESP", "SWE"}
 CT_DIR = cfg.RAW_DIR / "comtrade_monthly"
 TDM_DIR = cfg.RAW_DIR / "tdm"
 OUT_PARQUET = cfg.DATA_DIR / "derived" / "panel_ai_compute_monthly.parquet"
@@ -175,6 +177,45 @@ def main():
     print(f"panel -> {OUT_PARQUET}: {len(panel)} rows through {endpoint}")
 
 
+def lag_analysis(panel, horizons, endpoint):
+    """Document publication lags and the endpoint choice: what each laggard tier costs.
+
+    A country whose reporting stops before the endpoint is 'mirror-fallback': its
+    corridors with reporting partners survive via the partner's report; corridors
+    where NEITHER party reports (laggard x laggard, laggard x ROW) go dark (0).
+    Dark shares are measured against 2025+ value weights.
+    """
+    w = panel[panel.period >= "202501"]
+    tot = w.value.sum()
+    inv = lambda g: w.exporter.isin(g) | w.importer.isin(g)
+    dark = lambda fb: w[(w.exporter.isin(fb) & w.importer.isin(fb)) |
+                        (inv(fb) & ((w.exporter == ROW) | (w.importer == ROW)))
+                        ].value.sum() / tot
+    tiers = horizons.groupby(horizons).groups
+    lines = ["", "## Publication lags and the endpoint choice", "",
+             "National monthly submissions arrive with heterogeneous lags (~2-4 months; "
+             "France has stopped monthly reporting since 2025-12 and its TDM edition is "
+             "inaccessible). The balanced endpoint is the last month at which every "
+             "kept country outside the mirror-fallback set has reported. Fallback "
+             "countries stay covered on corridors where the partner reports; only "
+             "laggard-laggard and laggard-ROW corridors go dark (set to 0, weighted "
+             "share of 2025+ value shown below).", "",
+             f"- Mirror-fallback set: {', '.join(sorted(MIRROR_FALLBACK))} -> "
+             f"balanced endpoint {endpoint[:4]}-{endpoint[4:]}; dark-cell share "
+             f"{dark(MIRROR_FALLBACK):.2%} of monthly value.",
+             "- Cost of pushing further (dark share if all countries reporting before "
+             "that month were mirrored):"]
+    for h in sorted(set(horizons) - {horizons.max()}):
+        fb = set(horizons[horizons <= h].index)
+        nxt = min(x for x in set(horizons) if x > h)
+        lines.append(f"  - endpoint {nxt[:4]}-{nxt[4:]}: fallback {len(fb)} countries "
+                     f"({', '.join(sorted(fb)[:8])}{'...' if len(fb) > 8 else ''}), "
+                     f"dark {dark(fb):.2%}")
+    lines.append("- Re-running the fetch scripts + assembler rolls the endpoint forward "
+                 "as laggards file; the fallback set should be revisited then.")
+    return lines
+
+
 def validate_vs_atlas(panel):
     """Aggregate kept-kept cells to annual and compare with the Atlas bilateral file."""
     atlas = pd.read_parquet(cfg.DATA_DIR / "derived" / "bilateral_ai_compute_2020_2024.parquet")
@@ -224,14 +265,7 @@ def write_report(panel, horizons, endpoint):
         "| country | last period |", "|---|---|",
     ]
     lines += [f"| {c} | {p[:4]}-{p[4:]} |" for c, p in horizons.sort_values().items()]
-    for c in sorted(MIRROR_FALLBACK):
-        h = horizons.get(c)
-        if h is not None and h < endpoint:
-            lines += ["", f"**{c}** stops reporting at {h[:4]}-{h[4:]} (mirror-fallback): "
-                      f"its kept-partner corridors after that come from partners' reports; "
-                      f"its ROW corridors are dark (treated as 0) for "
-                      f"{(int(endpoint[:4])-int(h[:4]))*12 + int(endpoint[4:])-int(h[4:])} "
-                      "months x 2 directions x 3 codes."]
+    lines += lag_analysis(panel, horizons, endpoint)
     lines += ["", "## Validation vs Atlas annual bilateral (2020–2024, kept-kept "
               "corridors > $0.1M)", "",
               "| code | corridor-years | log-corr | median panel/Atlas | IQR(log ratio) |",

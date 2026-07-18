@@ -1,11 +1,11 @@
 # Monthly bilateral AI-compute panel — build report
 
-Codes 847150, 847180, 847330; 30 countries + ROW; 2020-01 .. 2026-03 (balanced endpoint = slowest reporter).
+Codes 847150, 847180, 847330; 30 countries + ROW; 2020-01 .. 2026-04 (balanced endpoint = slowest reporter).
 Sources: UN Comtrade monthly (backbone) + TDM (TWN always; CHN/VNM beyond Comtrade; KR/SG/FR/TR/TH top-ups). Reconciliation: simplified Bustos–Yildirim — importer CIF deflated by 1.1, mean of the two sides when both report.
 
-- Rows: 202,228; total value 2122B (by year, $B: 2020 195, 2021 232, 2022 249, 2023 229, 2024 356, 2025 628, 2026 233)
-- Provenance shares: both:comtrade+comtrade 69.8%, m_only:comtrade 12.5%, x_only:comtrade 6.9%, both:tdm+comtrade 5.1%, both:comtrade+tdm 4.4%, m_only:tdm 0.7%, both:tdm+tdm 0.4%, x_only:tdm 0.3%
-- Mirror gap log(x/m_fob), cells with both sides: median +0.174, IQR 1.978 (161,006 cells)
+- Rows: 204,789; total value 2218B (by year, $B: 2020 195, 2021 232, 2022 249, 2023 229, 2024 356, 2025 628, 2026 330)
+- Provenance shares: both:comtrade+comtrade 69.3%, m_only:comtrade 12.6%, x_only:comtrade 7.0%, both:tdm+comtrade 5.2%, both:comtrade+tdm 4.4%, m_only:tdm 0.8%, both:tdm+tdm 0.4%, x_only:tdm 0.3%
+- Mirror gap log(x/m_fob), cells with both sides: median +0.174, IQR 1.979 (162,484 cells)
 
 ## Reporter horizons (last reported month)
 
@@ -42,7 +42,17 @@ Sources: UN Comtrade monthly (backbone) + TDM (TWN always; CHN/VNM beyond Comtra
 | TWN | 2026-06 |
 | KOR | 2026-06 |
 
-**FRA** stops reporting at 2025-12 (mirror-fallback): its kept-partner corridors after that come from partners' reports; its ROW corridors are dark (treated as 0) for 3 months x 2 directions x 3 codes.
+## Publication lags and the endpoint choice
+
+National monthly submissions arrive with heterogeneous lags (~2-4 months; France has stopped monthly reporting since 2025-12 and its TDM edition is inaccessible). The balanced endpoint is the last month at which every kept country outside the mirror-fallback set has reported. Fallback countries stay covered on corridors where the partner reports; only laggard-laggard and laggard-ROW corridors go dark (set to 0, weighted share of 2025+ value shown below).
+
+- Mirror-fallback set: ESP, FRA, IND, ITA, PHL, SWE -> balanced endpoint 2026-04; dark-cell share 0.06% of monthly value.
+- Cost of pushing further (dark share if all countries reporting before that month were mirrored):
+  - endpoint 2026-03: fallback 1 countries (FRA), dark 0.00%
+  - endpoint 2026-04: fallback 6 countries (ESP, FRA, IND, ITA, PHL, SWE), dark 0.06%
+  - endpoint 2026-05: fallback 16 countries (BEL, DEU, ESP, FRA, GBR, HUN, IND, IRL...), dark 5.88%
+  - endpoint 2026-06: fallback 28 countries (BEL, CAN, CHE, CHN, CZE, DEU, DNK, ESP...), dark 56.25%
+- Re-running the fetch scripts + assembler rolls the endpoint forward as laggards file; the fallback set should be revisited then.
 
 ## Validation vs Atlas annual bilateral (2020–2024, kept-kept corridors > $0.1M)
 
