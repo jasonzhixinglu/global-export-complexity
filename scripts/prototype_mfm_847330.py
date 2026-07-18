@@ -61,7 +61,13 @@ def load_matrices():
     for t, yr in enumerate(YEARS):
         d = sub[sub.year == yr]
         Y[t, d.exporter.map(idx), d.importer.map(idx)] = np.log1p(d.export_value / 1e6)
-    return Y, countries, coverage, world_total
+    top = {
+        "exporters_usd_bn": (df.groupby("exporter").export_value.sum()
+                             .nlargest(10) / 1e9).round(2).to_dict(),
+        "importers_usd_bn": (df.groupby("importer").export_value.sum()
+                             .nlargest(10) / 1e9).round(2).to_dict(),
+    }
+    return Y, countries, coverage, world_total, top
 
 
 def eig_ratio(M, kmax=KMAX):
@@ -94,7 +100,7 @@ def fix_signs_order(L):
 
 
 def main():
-    Y, countries, coverage, world_total = load_matrices()
+    Y, countries, coverage, world_total, top = load_matrices()
     T, p, q = Y.shape
     print(f"HS {CODE}: {T} years {YEARS[0]}-{YEARS[-1]}, {p} countries, "
           f"coverage {coverage:.1%} of ${world_total/1e9:.0f}B world trade")
@@ -132,8 +138,27 @@ def main():
     print(f"fit: uncentered R^2 total {r2_total:.3f} (rank-1 baseline {r2_rank1:.3f}), by year "
           f"{dict(zip(YEARS, np.round(r2_year, 3)))}")
 
+    # Hub sizes. Column norms of R and C are fixed by the R'R = pI normalization, so hub
+    # scale lives in F alone; with orthonormal loadings the fitted signal decomposes exactly
+    # by hub pair, share of cell (i,j) = mean_t F_t[i,j]^2.
+    F2 = (F**2).mean(0)
+    hub_pair_share = F2 / F2.sum()
+    exp_hub_share, imp_hub_share = hub_pair_share.sum(1), hub_pair_share.sum(0)
+    print(f"\ntop exporters 2020-24 ($B): "
+          + ", ".join(f"{c} {v:.1f}" for c, v in top["exporters_usd_bn"].items()))
+    print(f"top importers 2020-24 ($B): "
+          + ", ".join(f"{c} {v:.1f}" for c, v in top["importers_usd_bn"].items()))
+    print(f"hub size (share of fitted signal, log space):")
+    print(f"  export hubs: {np.round(exp_hub_share, 3)}")
+    print(f"  import hubs: {np.round(imp_hub_share, 3)}")
+    print(f"  by hub pair (rows=export hub, cols=import hub):\n{np.round(hub_pair_share, 3)}")
+
     stats = {
         "code": CODE, "years": YEARS, "countries": countries, "coverage": float(coverage),
+        "top10": top,
+        "hub_size_signal_share": {"export": exp_hub_share.tolist(),
+                                  "import": imp_hub_share.tolist(),
+                                  "by_pair": hub_pair_share.tolist()},
         "world_total_usd": float(world_total), "k_selected": k_sel, "r_selected": r_sel,
         "k": k, "r": r,
         "eigvals_row": vals_R[:KMAX + 1].tolist(), "eigvals_col": vals_C[:KMAX + 1].tolist(),
@@ -151,14 +176,51 @@ def main():
     for side, L, name in (("export", R, "R"), ("import", C, "C")):
         print(f"\n{side} hubs (varimax loadings, top 8 per hub):")
         for j in range(L.shape[1]):
-            top = np.argsort(-np.abs(L[:, j]))[:8]
-            print(f"  hub {j+1}: " + ", ".join(f"{countries[i]} {L[i, j]:+.2f}" for i in top))
+            lead = np.argsort(-np.abs(L[:, j]))[:8]
+            print(f"  hub {j+1}: " + ", ".join(f"{countries[i]} {L[i, j]:+.2f}" for i in lead))
 
+    fig_summary(top, hub_pair_share, exp_hub_share, imp_hub_share)
     fig_scree(vals_R, vals_C, ratios_R, ratios_C, k, r)
     fig_loadings(R, countries, k, "export", "R")
     fig_loadings(C, countries, r, "import", "C")
     fig_factors(F, k, r)
     print(f"outputs -> {OUT_DIR}")
+
+
+def fig_summary(top, pair_share, exp_share, imp_share):
+    fig = plt.figure(figsize=(10, 7))
+    gs = fig.add_gridspec(2, 2, height_ratios=[1, 1.15], hspace=0.45, wspace=0.35)
+    for col, (key, title) in enumerate((("exporters_usd_bn", "Top 10 exporters, 2020-24"),
+                                        ("importers_usd_bn", "Top 10 importers, 2020-24"))):
+        ax = fig.add_subplot(gs[0, col])
+        names, vals = list(top[key])[::-1], list(top[key].values())[::-1]
+        ax.barh(names, vals, color=SERIES[0], height=0.62)
+        for n, v in zip(names, vals):
+            ax.annotate(f"{v:.0f}", (v, n), xytext=(4, -3), textcoords="offset points",
+                        fontsize=8, color=INK2)
+        ax.set_title(title, fontsize=10, color=INK)
+        ax.set_xlabel("$B")
+        ax.tick_params(labelsize=8)
+    ax = fig.add_subplot(gs[1, :])
+    k, r = pair_share.shape
+    im = ax.imshow(pair_share, cmap=matplotlib.colors.LinearSegmentedColormap.from_list(
+        "seq", ["#cde2fb", "#0d366b"]), vmin=0, vmax=pair_share.max())
+    for i in range(k):
+        for j in range(r):
+            dark = pair_share[i, j] > 0.55 * pair_share.max()
+            ax.text(j, i, f"{pair_share[i, j]:.0%}", ha="center", va="center",
+                    fontsize=11, color="#ffffff" if dark else INK)
+    ax.set_xticks(range(r), [f"imp hub {j+1}\n({imp_share[j]:.0%} total)" for j in range(r)],
+                  fontsize=9)
+    ax.set_yticks(range(k), [f"exp hub {i+1}\n({exp_share[i]:.0%})" for i in range(k)],
+                  fontsize=9)
+    ax.set_title("Hub size: share of fitted signal by hub pair (log space)",
+                 fontsize=10, color=INK)
+    ax.grid(False)
+    fig.colorbar(im, ax=ax, shrink=0.8, label="share of signal")
+    fig.suptitle(f"HS {CODE} — summary statistics", color=INK)
+    fig.savefig(OUT_DIR / "summary.png", dpi=150, bbox_inches="tight")
+    plt.close(fig)
 
 
 def fig_scree(vals_R, vals_C, ratios_R, ratios_C, k, r):
