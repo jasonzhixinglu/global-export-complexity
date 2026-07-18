@@ -11,3 +11,9 @@ Bilateral-trade matrix factor models (Chen, Chen, Bolivar & Chen 2024 — see
 | [847180_annual_2020_2024](847180_annual_2020_2024/summary.md) | HS 847180 other ADP units / baseboards | $210B |
 | [847330_annual_2020_2024](847330_annual_2020_2024/summary.md) | HS 847330 ADP parts / GPU cards | $593B |
 | [ai_compute_annual_2020_2024](ai_compute_annual_2020_2024/summary.md) | Fed AI-compute basket (sum of the three) | $1,233B |
+
+Each analysis also has a `*_levels` twin (e.g.
+[ai_compute_annual_2020_2024_levels](ai_compute_annual_2020_2024_levels/summary.md))
+estimated on raw $B values instead of log1p — the paper's convention (`--levels` flag).
+Logs give bloc-structured hubs weighted by network breadth; levels give near-singleton
+hubs (CHN/TWN/USA/MEX) weighted by dollar scale.
