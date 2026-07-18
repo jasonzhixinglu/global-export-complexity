@@ -1,4 +1,4 @@
-"""Constant-loading matrix factor model on bilateral HS 847330 flows, 2020-2024.
+"""Constant-loading matrix factor models on bilateral AI-compute trade flows, 2020-2024.
 
 Model (Chen, Chen, Bolivar & Chen 2024, docs/references/, without time variation):
     Y_t = R F_t C' + E_t,  Y_t (p x p) = log1p bilateral export matrix, t = 2020..2024.
@@ -7,9 +7,10 @@ sum_t Y_t' Y_t;  F_t = R' Y_t C / (p*q).  Ranks by eigenvalue ratio (Ahn-Horenst
 Rotation fixed by varimax on each side (one global rotation; loadings are constant here),
 signs set so each hub's dominant loading is positive, hubs ordered by loading mass.
 
-Outputs: results/mfm/847330_annual_2020_2024/ (figures + stats.json), one subdirectory
+Runs one analysis per Fed AI-compute HS6 code (847150 AI servers, 847180 other ADP
+units, 847330 parts/GPU cards) plus their sum ("ai_compute"). Outputs one subdirectory
 per analysis under results/mfm/ so experiments don't clutter the main results tree.
-Run after scripts/extract_847330.py.
+Run after scripts/extract_ai_compute.py.  Usage: python scripts/prototype_mfm.py [label ...]
 """
 from __future__ import annotations
 import json
@@ -25,13 +26,23 @@ import matplotlib.pyplot as plt
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from gec import config as cfg
 
-CODE = "847330"
+ANALYSES = {
+    "847150": ["847150"],
+    "847180": ["847180"],
+    "847330": ["847330"],
+    "ai_compute": ["847150", "847180", "847330"],
+}
+TITLES = {
+    "847150": "HS 847150 (ADP processing units / AI servers)",
+    "847180": "HS 847180 (other ADP units / baseboards)",
+    "847330": "HS 847330 (ADP parts / GPU cards)",
+    "ai_compute": "AI compute (847150+847180+847330)",
+}
 YEARS = [2020, 2021, 2022, 2023, 2024]
 N_COUNTRIES = 40          # top countries by total (export+import) involvement
 KMAX = 8                  # max rank considered by the eigenvalue-ratio estimator
 EXCLUDE = {"WLD", "ANS"}  # world / areas-not-specified pseudo-codes
-PARQUET = cfg.DATA_DIR / "derived" / f"bilateral_{CODE}_2020_2024.parquet"
-OUT_DIR = cfg.RESULTS_DIR / "mfm" / f"{CODE}_annual_{YEARS[0]}_{YEARS[-1]}"
+PARQUET = cfg.DATA_DIR / "derived" / "bilateral_ai_compute_2020_2024.parquet"
 
 # dataviz reference palette (light mode)
 SERIES = ["#2a78d6", "#008300", "#e87ba4", "#eda100", "#1baf7a", "#eb6834", "#4a3aa7", "#e34948"]
@@ -46,9 +57,11 @@ plt.rcParams.update({
 })
 
 
-def load_matrices():
+def load_matrices(codes):
     df = pd.read_parquet(PARQUET)
+    df = df[df.code.isin(codes)]
     df = df[(df.export_value > 0) & ~df.exporter.isin(EXCLUDE) & ~df.importer.isin(EXCLUDE)]
+    df = df.groupby(["exporter", "importer", "year"], as_index=False).export_value.sum()
     world_total = df.export_value.sum()
     involvement = (df.groupby("exporter").export_value.sum()
                    .add(df.groupby("importer").export_value.sum(), fill_value=0.0))
@@ -99,10 +112,16 @@ def fix_signs_order(L):
     return L[:, order], signs, order
 
 
-def main():
-    Y, countries, coverage, world_total, top = load_matrices()
+def run(label):
+    codes = ANALYSES[label]
+    title = TITLES[label]
+    out_dir = cfg.RESULTS_DIR / "mfm" / f"{label}_annual_{YEARS[0]}_{YEARS[-1]}"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    print(f"\n=== {title} ===")
+
+    Y, countries, coverage, world_total, top = load_matrices(codes)
     T, p, q = Y.shape
-    print(f"HS {CODE}: {T} years {YEARS[0]}-{YEARS[-1]}, {p} countries, "
+    print(f"{T} years {YEARS[0]}-{YEARS[-1]}, {p} countries, "
           f"coverage {coverage:.1%} of ${world_total/1e9:.0f}B world trade")
 
     M_R = sum(Y[t] @ Y[t].T for t in range(T)) / (T * q)
@@ -123,17 +142,17 @@ def main():
     C = np.sqrt(q) * vecs_C[:, :r]
 
     # varimax + sign/order conventions on each side; transform F accordingly
-    O, Q = varimax(R), varimax(C)
-    R, C = R @ O, C @ Q
-    R, sgn_R, ord_R = fix_signs_order(R)
-    C, sgn_C, ord_C = fix_signs_order(C)
+    R, C = R @ varimax(R), C @ varimax(C)
+    R, _, _ = fix_signs_order(R)
+    C, _, _ = fix_signs_order(C)
     F = np.array([R.T @ Y[t] @ C / (p * q) for t in range(T)])
 
     S = np.einsum("ik,tkr,jr->tij", R, F, C)
     r2_total = 1 - ((Y - S)**2).sum() / (Y**2).sum()
     r2_year = 1 - ((Y - S)**2).sum((1, 2)) / (Y**2).sum((1, 2))
     R1, C1 = np.sqrt(p) * vecs_R[:, :1], np.sqrt(q) * vecs_C[:, :1]
-    S1 = np.einsum("ik,tkr,jr->tij", R1, np.array([R1.T @ Y[t] @ C1 / (p * q) for t in range(T)]), C1)
+    S1 = np.einsum("ik,tkr,jr->tij", R1,
+                   np.array([R1.T @ Y[t] @ C1 / (p * q) for t in range(T)]), C1)
     r2_rank1 = 1 - ((Y - S1)**2).sum() / (Y**2).sum()
     print(f"fit: uncentered R^2 total {r2_total:.3f} (rank-1 baseline {r2_rank1:.3f}), by year "
           f"{dict(zip(YEARS, np.round(r2_year, 3)))}")
@@ -148,14 +167,14 @@ def main():
           + ", ".join(f"{c} {v:.1f}" for c, v in top["exporters_usd_bn"].items()))
     print(f"top importers 2020-24 ($B): "
           + ", ".join(f"{c} {v:.1f}" for c, v in top["importers_usd_bn"].items()))
-    print(f"hub size (share of fitted signal, log space):")
+    print("hub size (share of fitted signal, log space):")
     print(f"  export hubs: {np.round(exp_hub_share, 3)}")
     print(f"  import hubs: {np.round(imp_hub_share, 3)}")
     print(f"  by hub pair (rows=export hub, cols=import hub):\n{np.round(hub_pair_share, 3)}")
 
     stats = {
-        "code": CODE, "years": YEARS, "countries": countries, "coverage": float(coverage),
-        "top10": top,
+        "label": label, "codes": codes, "years": YEARS, "countries": countries,
+        "coverage": float(coverage), "top10": top,
         "hub_size_signal_share": {"export": exp_hub_share.tolist(),
                                   "import": imp_hub_share.tolist(),
                                   "by_pair": hub_pair_share.tolist()},
@@ -163,34 +182,32 @@ def main():
         "k": k, "r": r,
         "eigvals_row": vals_R[:KMAX + 1].tolist(), "eigvals_col": vals_C[:KMAX + 1].tolist(),
         "eig_ratios_row": ratios_R.tolist(), "eig_ratios_col": ratios_C.tolist(),
-        "r2_total": float(r2_total), "r2_by_year": dict(zip(map(str, YEARS), r2_year.tolist())),
+        "r2_total": float(r2_total), "r2_rank1": float(r2_rank1),
+        "r2_by_year": dict(zip(map(str, YEARS), r2_year.tolist())),
         "R": {c: R[i].tolist() for i, c in enumerate(countries)},
         "C": {c: C[i].tolist() for i, c in enumerate(countries)},
         "F_by_year": {str(yr): F[t].tolist() for t, yr in enumerate(YEARS)},
     }
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-    out = OUT_DIR / "stats.json"
-    out.write_text(json.dumps(stats, indent=1))
-    print(f"stats -> {out}")
+    (out_dir / "stats.json").write_text(json.dumps(stats, indent=1))
 
-    for side, L, name in (("export", R, "R"), ("import", C, "C")):
+    for side, L in (("export", R), ("import", C)):
         print(f"\n{side} hubs (varimax loadings, top 8 per hub):")
         for j in range(L.shape[1]):
             lead = np.argsort(-np.abs(L[:, j]))[:8]
             print(f"  hub {j+1}: " + ", ".join(f"{countries[i]} {L[i, j]:+.2f}" for i in lead))
 
-    fig_summary(top, hub_pair_share, exp_hub_share, imp_hub_share)
-    fig_scree(vals_R, vals_C, ratios_R, ratios_C, k, r)
-    fig_loadings(R, countries, k, "export", "R")
-    fig_loadings(C, countries, r, "import", "C")
-    fig_factors(F, k, r)
-    print(f"outputs -> {OUT_DIR}")
+    fig_summary(top, hub_pair_share, exp_hub_share, imp_hub_share, title, out_dir)
+    fig_scree(vals_R, vals_C, ratios_R, ratios_C, k, r, k_sel, title, out_dir)
+    fig_loadings(R, countries, k, "export", "R", title, out_dir)
+    fig_loadings(C, countries, r, "import", "C", title, out_dir)
+    fig_factors(F, k, r, title, out_dir)
+    print(f"outputs -> {out_dir}")
 
 
-def fig_summary(top, pair_share, exp_share, imp_share):
+def fig_summary(top, pair_share, exp_share, imp_share, title, out_dir):
     fig = plt.figure(figsize=(10, 7))
     gs = fig.add_gridspec(2, 2, height_ratios=[1, 1.15], hspace=0.45, wspace=0.35)
-    for col, (key, title) in enumerate((("exporters_usd_bn", "Top 10 exporters, 2020-24"),
+    for col, (key, panel) in enumerate((("exporters_usd_bn", "Top 10 exporters, 2020-24"),
                                         ("importers_usd_bn", "Top 10 importers, 2020-24"))):
         ax = fig.add_subplot(gs[0, col])
         names, vals = list(top[key])[::-1], list(top[key].values())[::-1]
@@ -198,7 +215,7 @@ def fig_summary(top, pair_share, exp_share, imp_share):
         for n, v in zip(names, vals):
             ax.annotate(f"{v:.0f}", (v, n), xytext=(4, -3), textcoords="offset points",
                         fontsize=8, color=INK2)
-        ax.set_title(title, fontsize=10, color=INK)
+        ax.set_title(panel, fontsize=10, color=INK)
         ax.set_xlabel("$B")
         ax.tick_params(labelsize=8)
     ax = fig.add_subplot(gs[1, :])
@@ -218,12 +235,12 @@ def fig_summary(top, pair_share, exp_share, imp_share):
                  fontsize=10, color=INK)
     ax.grid(False)
     fig.colorbar(im, ax=ax, shrink=0.8, label="share of signal")
-    fig.suptitle(f"HS {CODE} — summary statistics", color=INK)
-    fig.savefig(OUT_DIR / "summary.png", dpi=150, bbox_inches="tight")
+    fig.suptitle(f"{title} — summary statistics", color=INK)
+    fig.savefig(out_dir / "summary.png", dpi=150, bbox_inches="tight")
     plt.close(fig)
 
 
-def fig_scree(vals_R, vals_C, ratios_R, ratios_C, k, r):
+def fig_scree(vals_R, vals_C, ratios_R, ratios_C, k, r, k_sel, title, out_dir):
     fig, axes = plt.subplots(2, 2, figsize=(9, 5.6), sharex=True)
     n = np.arange(1, KMAX + 1)
     for col, (vals, ratios, kk, side) in enumerate(
@@ -238,18 +255,17 @@ def fig_scree(vals_R, vals_C, ratios_R, ratios_C, k, r):
         axr.axvline(kk + 0.5, color=MUTED, ls="--", lw=1)
         axr.set_ylabel("ratio λi / λi+1")
         axr.set_xlabel("component")
-    fig.suptitle(f"HS {CODE} matrix factor model — rank selection "
-                 f"(ratio estimator picks 1; working rank {k} for hub analysis)",
+    fig.suptitle(f"{title} — rank selection "
+                 f"(ratio estimator picks {k_sel}; working rank {k} for hub analysis)",
                  y=1.0, color=INK)
     fig.tight_layout()
-    fig.savefig(OUT_DIR / "scree.png", dpi=150, bbox_inches="tight")
+    fig.savefig(out_dir / "scree.png", dpi=150, bbox_inches="tight")
     plt.close(fig)
 
 
-def fig_loadings(L, countries, k, side, mat):
-    ncols = k
+def fig_loadings(L, countries, k, side, mat, title, out_dir):
     show = 12
-    fig, axes = plt.subplots(1, ncols, figsize=(2.9 * ncols, 4.6), squeeze=False)
+    fig, axes = plt.subplots(1, k, figsize=(2.9 * k, 4.6), squeeze=False)
     for j in range(k):
         ax = axes[0, j]
         order = np.argsort(-np.abs(L[:, j]))[:show][::-1]
@@ -259,13 +275,13 @@ def fig_loadings(L, countries, k, side, mat):
         ax.axvline(0, color="#c3c2b7", lw=1)
         ax.set_title(f"{side} hub {j+1}", fontsize=10, color=INK)
         ax.tick_params(labelsize=8)
-    fig.suptitle(f"HS {CODE} — {side}-side loadings ({mat}, varimax, top {show})", color=INK)
+    fig.suptitle(f"{title} — {side}-side loadings ({mat}, varimax, top {show})", color=INK)
     fig.tight_layout()
-    fig.savefig(OUT_DIR / f"loadings_{side}.png", dpi=150, bbox_inches="tight")
+    fig.savefig(out_dir / f"loadings_{side}.png", dpi=150, bbox_inches="tight")
     plt.close(fig)
 
 
-def fig_factors(F, k, r):
+def fig_factors(F, k, r, title, out_dir):
     lo, hi = F.min(), F.max()
     pad = 0.06 * (hi - lo)
     fig, axes = plt.subplots(k, r, figsize=(2.6 * r, 2.0 * k), sharex=True, sharey=True)
@@ -280,12 +296,14 @@ def fig_factors(F, k, r):
             ax.tick_params(labelsize=8)
             if j == 0:
                 ax.set_ylabel("F (log units)", fontsize=8)
-    fig.suptitle(f"HS {CODE} — hub-to-hub factor matrix F_t, {YEARS[0]}-{YEARS[-1]} "
+    fig.suptitle(f"{title} — hub-to-hub factor matrix F_t, {YEARS[0]}-{YEARS[-1]} "
                  "(shared y-scale)", color=INK)
     fig.tight_layout()
-    fig.savefig(OUT_DIR / "factors.png", dpi=150, bbox_inches="tight")
+    fig.savefig(out_dir / "factors.png", dpi=150, bbox_inches="tight")
     plt.close(fig)
 
 
 if __name__ == "__main__":
-    main()
+    labels = sys.argv[1:] or list(ANALYSES)
+    for lab in labels:
+        run(lab)
