@@ -43,6 +43,7 @@ N_COUNTRIES = 40          # top countries by total (export+import) involvement
 KMAX = 8                  # max rank considered by the eigenvalue-ratio estimator
 EXCLUDE = {"WLD", "ANS"}  # world / areas-not-specified pseudo-codes
 PARQUET = cfg.DATA_DIR / "derived" / "bilateral_ai_compute_2020_2024.parquet"
+SPACE = "log space"       # set per run(); labels figure/summary units
 
 # dataviz reference palette (light mode)
 SERIES = ["#2a78d6", "#008300", "#e87ba4", "#eda100", "#1baf7a", "#eb6834", "#4a3aa7", "#e34948"]
@@ -57,7 +58,7 @@ plt.rcParams.update({
 })
 
 
-def load_matrices(codes):
+def load_matrices(codes, transform):
     df = pd.read_parquet(PARQUET)
     df = df[df.code.isin(codes)]
     df = df[(df.export_value > 0) & ~df.exporter.isin(EXCLUDE) & ~df.importer.isin(EXCLUDE)]
@@ -73,7 +74,8 @@ def load_matrices(codes):
     Y = np.zeros((len(YEARS), p, p))
     for t, yr in enumerate(YEARS):
         d = sub[sub.year == yr]
-        Y[t, d.exporter.map(idx), d.importer.map(idx)] = np.log1p(d.export_value / 1e6)
+        v = d.export_value / 1e9 if transform == "levels" else np.log1p(d.export_value / 1e6)
+        Y[t, d.exporter.map(idx), d.importer.map(idx)] = v
     top = {
         "exporters_usd_bn": (df.groupby("exporter").export_value.sum()
                              .nlargest(10) / 1e9).round(2).to_dict(),
@@ -112,14 +114,17 @@ def fix_signs_order(L):
     return L[:, order], signs, order
 
 
-def run(label):
+def run(label, transform="log"):
     codes = ANALYSES[label]
-    title = TITLES[label]
-    out_dir = cfg.RESULTS_DIR / "mfm" / f"{label}_annual_{YEARS[0]}_{YEARS[-1]}"
+    title = TITLES[label] + (" [levels, $B]" if transform == "levels" else "")
+    suffix = "_levels" if transform == "levels" else ""
+    out_dir = cfg.RESULTS_DIR / "mfm" / f"{label}_annual_{YEARS[0]}_{YEARS[-1]}{suffix}"
     out_dir.mkdir(parents=True, exist_ok=True)
+    global SPACE
+    SPACE = "$B levels" if transform == "levels" else "log space"
     print(f"\n=== {title} ===")
 
-    Y, countries, coverage, world_total, top = load_matrices(codes)
+    Y, countries, coverage, world_total, top = load_matrices(codes, transform)
     T, p, q = Y.shape
     print(f"{T} years {YEARS[0]}-{YEARS[-1]}, {p} countries, "
           f"coverage {coverage:.1%} of ${world_total/1e9:.0f}B world trade")
@@ -173,7 +178,8 @@ def run(label):
     print(f"  by hub pair (rows=export hub, cols=import hub):\n{np.round(hub_pair_share, 3)}")
 
     stats = {
-        "label": label, "codes": codes, "years": YEARS, "countries": countries,
+        "label": label, "codes": codes, "transform": transform,
+        "years": YEARS, "countries": countries,
         "coverage": float(coverage), "top10": top,
         "hub_size_signal_share": {"export": exp_hub_share.tolist(),
                                   "import": imp_hub_share.tolist(),
@@ -226,11 +232,11 @@ def write_summary_md(s, title, out_dir):
         f"# {title} — matrix factor model, {yrs}",
         "",
         "Constant-loading matrix factor model `Y_t = R F_t C' + E_t` on annual bilateral",
-        f"log1p export matrices (Atlas HS2012 bilateral data), top {len(s['countries'])} countries",
+        f"export matrices in {SPACE} (Atlas HS2012 bilateral data), top {len(s['countries'])} countries",
         f"covering {s['coverage']:.1%} of ${s['world_total_usd']/1e9:.0f}B world trade.",
         "Estimation per Chen, Chen, Bolivar & Chen (2024), `docs/references/`; varimax",
         "rotation on each side; hub size = share of fitted signal (exact under the",
-        "orthonormal-loading decomposition, log space — not dollar shares).",
+        f"orthonormal-loading decomposition, {SPACE}).",
         "",
         f"- **Rank:** eigenvalue-ratio estimator picks {s['k_selected']} (the dominant",
         f"  gravity/size factor); working rank for hub analysis k={k}, r={r} (2nd ratio peak).",
@@ -307,7 +313,7 @@ def fig_summary(top, pair_share, exp_share, imp_share, title, out_dir):
                   fontsize=9)
     ax.set_yticks(range(k), [f"exp hub {i+1}\n({exp_share[i]:.0%})" for i in range(k)],
                   fontsize=9)
-    ax.set_title("Hub size: share of fitted signal by hub pair (log space)",
+    ax.set_title(f"Hub size: share of fitted signal by hub pair ({SPACE})",
                  fontsize=10, color=INK)
     ax.grid(False)
     fig.colorbar(im, ax=ax, shrink=0.8, label="share of signal")
@@ -371,7 +377,7 @@ def fig_factors(F, k, r, title, out_dir):
             ax.set_xticks([YEARS[0], YEARS[2], YEARS[-1]])
             ax.tick_params(labelsize=8)
             if j == 0:
-                ax.set_ylabel("F (log units)", fontsize=8)
+                ax.set_ylabel(f"F ({SPACE})", fontsize=8)
     fig.suptitle(f"{title} — hub-to-hub factor matrix F_t, {YEARS[0]}-{YEARS[-1]} "
                  "(shared y-scale)", color=INK)
     fig.tight_layout()
@@ -380,6 +386,8 @@ def fig_factors(F, k, r, title, out_dir):
 
 
 if __name__ == "__main__":
-    labels = sys.argv[1:] or list(ANALYSES)
+    args = sys.argv[1:]
+    transform = "levels" if "--levels" in args else "log"
+    labels = [a for a in args if not a.startswith("--")] or list(ANALYSES)
     for lab in labels:
-        run(lab)
+        run(lab, transform)
