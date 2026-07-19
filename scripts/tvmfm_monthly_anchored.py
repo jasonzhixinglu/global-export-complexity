@@ -45,12 +45,17 @@ ALL_CODES = ["847150", "847180", "847330"]
 # Taiwan is deliberately NOT part of this bloc -- it is a separate economy in the
 # supply chain; its substitution vs China is a finding to measure, not to merge away.
 CHNHKG_BLOC = {"CHN": "CHK", "HKG": "CHK"}
+# USM: USA+Mexico merged -- cancels the US<->MEX assembly loop (parts south,
+# servers north) the way CHK cancels the entrepot churn.
+TWO_BLOCS = {"CHN": "CHK", "HKG": "CHK", "USA": "USM", "MEX": "USM"}
+# label -> (codes, bloc map, results subfolder under results/mfm/tvmfm/)
 ANALYSES = {
-    "847150": (["847150"], {}),
-    "847180": (["847180"], {}),
-    "847330": (["847330"], {}),
-    "ai_compute": (ALL_CODES, {}),
-    "ai_compute_chnhkg": (ALL_CODES, CHNHKG_BLOC),
+    "847150": (["847150"], {}, "by_country"),
+    "847180": (["847180"], {}, "by_country"),
+    "847330": (["847330"], {}, "by_country"),
+    "ai_compute": (ALL_CODES, {}, "by_country"),
+    "ai_compute_chnhkg": (ALL_CODES, CHNHKG_BLOC, "chn_hkg_bloc"),
+    "ai_compute_2blocs": (ALL_CODES, TWO_BLOCS, "chnhkg_usamex_blocs"),
 }
 TITLES = {
     "847150": "HS 847150 (AI servers)",
@@ -58,6 +63,7 @@ TITLES = {
     "847330": "HS 847330 (parts / GPU cards)",
     "ai_compute": "AI compute (sum of 3 codes)",
     "ai_compute_chnhkg": "AI compute, China+HKG bloc (TWN separate)",
+    "ai_compute_2blocs": "AI compute, CHN+HKG and USA+MEX blocs",
 }
 
 SERIES = ["#2a78d6", "#008300", "#e87ba4", "#eda100", "#1baf7a", "#eb6834", "#4a3aa7", "#e34948"]
@@ -163,12 +169,11 @@ def segment_eras(est_t, drift):
 
 def main(label="ai_compute"):
     global OUT_DIR, TITLE
-    codes_, bloc_ = ANALYSES[label]
-    group = "chn_hkg_bloc" if bloc_ else "by_country"
-    OUT_DIR = cfg.RESULTS_DIR / "mfm" / "tvmfm" / group / label.replace("_chnhkg", "")
+    codes, bloc, group = ANALYSES[label]
+    base = label.split("_chnhkg")[0].split("_2blocs")[0]
+    OUT_DIR = cfg.RESULTS_DIR / "mfm" / "tvmfm" / group / base
     TITLE = TITLES[label]
     print(f"\n=== {TITLE} ===")
-    codes, bloc = ANALYSES[label]
     Y, countries, periods = load_Y(codes, bloc)
     p = q = Y.shape[1]
     est_t, Rraw, Craw, drift = local_spaces(Y)
