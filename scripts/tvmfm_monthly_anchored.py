@@ -38,7 +38,19 @@ WINDOW = 12
 THR = 0.20               # drift threshold marking a structural burst
 MIN_ERA = 6              # months; shorter calm stretches merge into the next era
 PANEL = cfg.DATA_DIR / "derived" / "panel_ai_compute_monthly.parquet"
-OUT_DIR = cfg.RESULTS_DIR / "mfm" / "tv_ai_compute_monthly_12m_anchored"
+
+ANALYSES = {
+    "847150": ["847150"],
+    "847180": ["847180"],
+    "847330": ["847330"],
+    "ai_compute": ["847150", "847180", "847330"],
+}
+TITLES = {
+    "847150": "HS 847150 (AI servers)",
+    "847180": "HS 847180 (other units / baseboards)",
+    "847330": "HS 847330 (parts / GPU cards)",
+    "ai_compute": "AI compute (sum of 3 codes)",
+}
 
 SERIES = ["#2a78d6", "#008300", "#e87ba4", "#eda100", "#1baf7a", "#eb6834", "#4a3aa7", "#e34948"]
 SURFACE, INK, INK2, MUTED, GRID = "#fcfcfb", "#0b0b0b", "#52514e", "#898781", "#e1e0d9"
@@ -50,8 +62,9 @@ plt.rcParams.update({
 })
 
 
-def load_Y():
+def load_Y(codes):
     p = pd.read_parquet(PANEL)
+    p = p[p.code.isin(codes)]
     agg = p.groupby(["exporter", "importer", "period"], as_index=False).value.sum()
     countries = sorted(set(agg.exporter) | set(agg.importer))
     periods = sorted(agg.period.unique())
@@ -137,8 +150,12 @@ def segment_eras(est_t, drift):
     return merged
 
 
-def main():
-    Y, countries, periods = load_Y()
+def main(label="ai_compute"):
+    global OUT_DIR, TITLE
+    OUT_DIR = cfg.RESULTS_DIR / "mfm" / f"tv_{label}_monthly_12m_anchored"
+    TITLE = TITLES[label]
+    print(f"\n=== {TITLE} ===")
+    Y, countries, periods = load_Y(ANALYSES[label])
     p = q = Y.shape[1]
     est_t, Rraw, Craw, drift = local_spaces(Y)
     labels = [periods[t] for t in est_t]
@@ -249,7 +266,7 @@ def fig_paths(Ls, countries, labels, eras, side):
                         color=SERIES[ci % len(SERIES)])
         ax.set_title(f"{side} hub {j+1}", fontsize=10, color=INK)
         ax.axhline(0, color="#c3c2b7", lw=1)
-    fig.suptitle(f"AI compute — {side} loadings, era-anchored "
+    fig.suptitle(f"{TITLE} — {side} loadings, era-anchored "
                  "(12m window; shaded bands = eras)", color=INK)
     fig.tight_layout()
     fig.savefig(OUT_DIR / f"loadings_{side}.png", dpi=150, bbox_inches="tight")
@@ -270,7 +287,7 @@ def fig_factors(F, F_ma, labels, eras):
             ax.set_ylim(lo - pad, hi + pad)
             ax.set_title(f"exp {i+1} → imp {j+1}", fontsize=8, color=INK2)
             ax.tick_params(labelsize=7)
-    fig.suptitle("AI compute — hub-to-hub F_t, era-anchored (3m MA thick)", color=INK)
+    fig.suptitle(f"{TITLE} — hub-to-hub F_t, era-anchored (3m MA thick)", color=INK)
     fig.tight_layout()
     fig.savefig(OUT_DIR / "factors.png", dpi=150, bbox_inches="tight")
     plt.close(fig)
@@ -296,7 +313,7 @@ def write_summary(aR, aC, crosswalk, func, eras, labels, countries, r2, step):
         lead = np.argsort(-np.abs(A[:, j]))[:n]
         return ", ".join(f"{countries[i]} {A[i, j]:+.2f}" for i in lead)
 
-    lines = ["# Era-anchored time-varying MFM — AI compute monthly panel", "",
+    lines = [f"# Era-anchored time-varying MFM — {TITLE}, monthly panel", "",
              f"12m trailing loadings, k=r={K}, $B levels; months aligned to per-era "
              f"constant anchors (Procrustes), no chained matching. In-sample R^2 "
              f"{r2:.3f}; mean within-era loading step {step:.3f} "
@@ -325,4 +342,5 @@ def write_summary(aR, aC, crosswalk, func, eras, labels, countries, r2, step):
 
 
 if __name__ == "__main__":
-    main()
+    for lab in (sys.argv[1:] or list(ANALYSES)):
+        main(lab)
