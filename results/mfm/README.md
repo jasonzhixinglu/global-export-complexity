@@ -1,15 +1,29 @@
-# Matrix factor model experiments
+# Matrix factor model results
 
-Bilateral-trade matrix factor models (Chen, Chen, Bolivar & Chen 2024 — see
-`docs/references/`), one subdirectory per analysis. Each contains `summary.md`
-(start here), figures, and `stats.json` with all estimates. Matrices are raw
-$B dollar levels, following the paper's Section 7 (a log transform buries
-dollar scale — it demoted Taiwan badly). Regenerate with
-`python scripts/prototype_mfm.py [label ...]` after `python scripts/extract_ai_compute.py`.
+Bilateral-trade matrix factor models on the Fed AI-compute codes (847150 AI servers,
+847180 baseboards/units, 847330 parts/GPU cards), per Chen, Chen, Bolivar & Chen
+(2024) — see `docs/references/`. All estimation in $B dollar levels (logs bury scale).
+Each analysis folder has `summary.md` (start here), figures, and `stats.json`.
 
-| Analysis | Scope | World 2020-24 |
-|---|---|---:|
-| [847150_annual_2020_2024](847150_annual_2020_2024/summary.md) | HS 847150 ADP processing units / AI servers | $429B |
-| [847180_annual_2020_2024](847180_annual_2020_2024/summary.md) | HS 847180 other ADP units / baseboards | $210B |
-| [847330_annual_2020_2024](847330_annual_2020_2024/summary.md) | HS 847330 ADP parts / GPU cards | $593B |
-| [ai_compute_annual_2020_2024](ai_compute_annual_2020_2024/summary.md) | Fed AI-compute basket (sum of the three) | $1,233B |
+```
+annual/                constant-loading MFM on Atlas annual bilateral data, 2020-2024
+  847150_2020_2024/  847180_2020_2024/  847330_2020_2024/  ai_compute_2020_2024/
+  (regenerate: python scripts/prototype_mfm.py [label ...])
+
+tvmfm/                 time-varying MFM on the monthly panel (results/panel_monthly)
+  by_country/          12m trailing loadings, era-anchored hub labels
+    847150/  847180/  847330/  ai_compute/
+  chn_hkg_bloc/        same, with China+Hong Kong merged into one bloc (CHK);
+    ai_compute/        intra-bloc entrepot churn cancels. Taiwan deliberately separate.
+  bandwidth_experiment/  OOS window-length comparison that chose the 12m window
+  archive/
+    ai_compute_chained/  superseded pre-anchoring run (chained label matching)
+  (regenerate: python scripts/tvmfm_monthly_anchored.py [label ...];
+   labels: 847150 847180 847330 ai_compute ai_compute_chnhkg)
+```
+
+Headline findings so far: the parts network (847330) shows no structural breaks over
+65 months while the systems layers reorganize repeatedly; at country level the
+2023-07 break is the birth of a solo Taiwan hub; with CHN+HKG merged, only 2023-07
+(Taiwan's rise) and 2025-04 (tariffs) survive as breaks — the 2024-10 country-level
+burst was Hong Kong entrepot noise.

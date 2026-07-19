@@ -34,7 +34,7 @@ from gec import config as cfg
 
 K = 4
 T_MIN_EVAL = 36          # first t whose (t -> t+1) projection enters the evaluation
-OUT_DIR = cfg.RESULTS_DIR / "mfm" / "tv_bandwidth_ai_compute_monthly"
+OUT_DIR = cfg.RESULTS_DIR / "mfm" / "tvmfm" / "bandwidth_experiment"
 PANEL = cfg.DATA_DIR / "derived" / "panel_ai_compute_monthly.parquet"
 
 SERIES = ["#2a78d6", "#008300", "#e87ba4", "#eda100", "#1baf7a", "#eb6834", "#4a3aa7", "#e34948"]

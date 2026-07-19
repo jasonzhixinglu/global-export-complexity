@@ -1,6 +1,6 @@
 # Era-anchored time-varying MFM — HS 847180 (other units / baseboards), monthly panel
 
-12m trailing loadings, k=r=4, $B levels; months aligned to per-era constant anchors (Procrustes), no chained matching. In-sample R^2 0.981; mean within-era loading step 0.061 (chained version: see ../tv_ai_compute_monthly_12m).
+12m trailing loadings, k=r=4, $B levels; months aligned to per-era constant anchors (Procrustes), no chained matching. In-sample R^2 0.981; mean within-era loading step 0.061 (superseded chained version: ../../archive/ai_compute_chained).
 
 ## Era 0: 2020-12 .. 2022-05
 

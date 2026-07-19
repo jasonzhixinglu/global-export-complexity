@@ -29,7 +29,9 @@ from gec import config as cfg
 K = 4
 WINDOW = 12
 PANEL = cfg.DATA_DIR / "derived" / "panel_ai_compute_monthly.parquet"
-OUT_DIR = cfg.RESULTS_DIR / "mfm" / "tv_ai_compute_monthly_12m"
+# Superseded by tvmfm_monthly_anchored.py (chained matching accumulates label
+# ambiguity through drift bursts); kept as the archive/diagnostic run.
+OUT_DIR = cfg.RESULTS_DIR / "mfm" / "tvmfm" / "archive" / "ai_compute_chained"
 
 SERIES = ["#2a78d6", "#008300", "#e87ba4", "#eda100", "#1baf7a", "#eb6834", "#4a3aa7", "#e34948"]
 SURFACE, INK, INK2, MUTED, GRID = "#fcfcfb", "#0b0b0b", "#52514e", "#898781", "#e1e0d9"

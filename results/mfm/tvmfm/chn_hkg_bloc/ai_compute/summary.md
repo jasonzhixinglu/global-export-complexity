@@ -1,6 +1,6 @@
 # Era-anchored time-varying MFM — AI compute, China+HKG bloc (TWN separate), monthly panel
 
-12m trailing loadings, k=r=4, $B levels; months aligned to per-era constant anchors (Procrustes), no chained matching. In-sample R^2 0.982; mean within-era loading step 0.039 (chained version: see ../tv_ai_compute_monthly_12m).
+12m trailing loadings, k=r=4, $B levels; months aligned to per-era constant anchors (Procrustes), no chained matching. In-sample R^2 0.982; mean within-era loading step 0.039 (superseded chained version: ../../archive/ai_compute_chained).
 
 ## Era 0: 2020-12 .. 2023-06
 

@@ -119,7 +119,7 @@ def fix_signs_order(L):
 def run(label):
     codes = ANALYSES[label]
     title = TITLES[label]
-    out_dir = cfg.RESULTS_DIR / "mfm" / f"{label}_annual_{YEARS[0]}_{YEARS[-1]}"
+    out_dir = cfg.RESULTS_DIR / "mfm" / "annual" / f"{label}_{YEARS[0]}_{YEARS[-1]}"
     out_dir.mkdir(parents=True, exist_ok=True)
     print(f"\n=== {title} ===")
 

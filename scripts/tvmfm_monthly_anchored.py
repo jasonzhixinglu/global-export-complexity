@@ -163,7 +163,9 @@ def segment_eras(est_t, drift):
 
 def main(label="ai_compute"):
     global OUT_DIR, TITLE
-    OUT_DIR = cfg.RESULTS_DIR / "mfm" / f"tv_{label}_monthly_12m_anchored"
+    codes_, bloc_ = ANALYSES[label]
+    group = "chn_hkg_bloc" if bloc_ else "by_country"
+    OUT_DIR = cfg.RESULTS_DIR / "mfm" / "tvmfm" / group / label.replace("_chnhkg", "")
     TITLE = TITLES[label]
     print(f"\n=== {TITLE} ===")
     codes, bloc = ANALYSES[label]
@@ -329,7 +331,7 @@ def write_summary(aR, aC, crosswalk, func, eras, labels, countries, r2, step):
              f"12m trailing loadings, k=r={K}, $B levels; months aligned to per-era "
              f"constant anchors (Procrustes), no chained matching. In-sample R^2 "
              f"{r2:.3f}; mean within-era loading step {step:.3f} "
-             f"(chained version: see ../tv_ai_compute_monthly_12m).", ""]
+             f"(superseded chained version: ../../archive/ai_compute_chained).", ""]
     for e, (a, b) in enumerate(eras):
         lines += [f"## Era {e}: {labels[a][:4]}-{labels[a][4:]} .. "
                   f"{labels[b-1][:4]}-{labels[b-1][4:]}", ""]
