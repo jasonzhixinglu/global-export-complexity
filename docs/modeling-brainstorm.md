@@ -64,3 +64,59 @@ directed, time-varying flows with a chain ordering.
 **Status:** open idea, unprototyped. Minimal first test: scatter of countries'
 847330 import loadings vs 847150 export loadings by era, before building anything
 dynamic.
+
+## 2026-07: Multi-hop supply chains — a stage-layered flow-tracing model (OPEN)
+
+**The gap.** Bilateral flows per code describe single hops. The real object is a
+multi-hop chain crossing several countries and *several product codes* as value is
+added: semiconductor inputs leave TWN -> assembly in MYS/VNM (leaves as boards,
+847330) -> systems integration in MEX (leaves as servers, 847150) -> US data center;
+plus pure transshipment hops (same code re-exported, HKG/SGP). No single-code
+matrix, and no cross-code factor coupling, represents a *path*.
+
+**The borrowable framework: trade-in-value-added accounting** (OECD TiVA / WIOD /
+ADB MRIO). Its architecture: (1) inter-country flows per sector (observed);
+(2) within-country absorption coefficients -- how imports of upstream sectors enter
+production of downstream outputs; (3) a Leontief-type inversion that turns one-hop
+flows + absorption into ultimate origin->final destination content. Not usable
+directly: annual, 2-3y lag, sector-level (all of computers+electronics is one cell).
+But the architecture ports to our monthly HS6-stage panel.
+
+**Sketch: a mini-TiVA at stage granularity, monthly.**
+- *Layers* = production stages from docs/tech-ai-taxonomy.md (chips 8542/8541 ->
+  parts/boards 847330 -> units 847180 -> systems 847150), i.e. the ordered context
+  the factorization discussion said was required.
+- *Within-stage edges* = our observed bilateral monthly flows per stage (the panel;
+  chips layer would need adding -- codes exist in the taxonomy).
+- *Cross-stage edges (the modeled part)* = within-country absorption: country c's
+  stage-s imports absorbed into its stage-(s+1) exports. Identification options, in
+  increasing ambition: (a) TiVA-style *proportionality assumption* (imports of stage
+  s are absorbed proportionally across all of c's stage-s+1 outputs); (b) calibrate
+  levels with lagged import->export regressions per country (the chain-coupling
+  layer above becomes the estimator of absorption intensities); (c) sanity-bound by
+  value-added markups (unit values / quantities are in the TDM pulls).
+- *Transshipment vs transformation*: same-code re-export needs separate treatment
+  for entrepots. Data exists: HKG publishes re-export statistics explicitly;
+  Comtrade has re-export flow codes for some reporters; TDM's Additional Data
+  Fields include re-export flags for some countries.
+- *Output objects*: absorbing-Markov / Leontief walk through the layered graph ->
+  monthly "ultimate content" matrices, e.g. the TWN-origin share of US
+  systems-imports by month, or the distribution of hop counts and routes for a
+  dollar of stage-1 exports. Era-dated rewiring of *routes* (not just bilateral
+  intensities) becomes measurable: did 2025-04 tariffs reroute the MYS->MEX->USA
+  path around CHN?
+
+**What it needs that we have:** the stage taxonomy, the monthly panel machinery
+(extending to the chips layer is a code-list change), quantities for markup checks,
+HKG re-export ratios (public).
+**What it needs that is genuinely new:** the absorption identification (the
+proportionality assumption is the standard crutch and is strong at monthly
+frequency), and inventory/timing slack between import and re-export hops.
+**Relation to the MFM:** complementary, not competing -- the MFM describes each
+layer's network structure; this describes flow *through* layers. The era breaks
+found by the MFM are the natural hypothesis dates for route rewiring.
+
+**Status:** open; the biggest missing ingredient is a defensible absorption
+identification. Cheapest first probe: pick the single best-instrumented path
+(TWN chips -> MYS/VNM boards -> MEX/USA systems) and check timing + magnitude
+consistency in the raw panel before formalizing anything.
