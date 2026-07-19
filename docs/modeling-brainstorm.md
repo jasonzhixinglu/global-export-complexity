@@ -120,3 +120,30 @@ found by the MFM are the natural hypothesis dates for route rewiring.
 identification. Cheapest first probe: pick the single best-instrumented path
 (TWN chips -> MYS/VNM boards -> MEX/USA systems) and check timing + magnitude
 consistency in the raw panel before formalizing anything.
+
+## 2026-07: The overall architecture — two layers, quarantined assumptions
+
+Settled framing for the project's methodology:
+
+- **Layer 1 — per-product MFMs: horizontal measurement.** For each code/stage, the
+  cross-sectional network at that layer: hubs, memberships, hub-to-hub flows, break
+  dates. Deliberately context-free (no assumptions relating products), which is what
+  makes it robust measurement; all the Chen et al. econometrics lives here. Built,
+  validated (era-anchored, results/mfm/).
+- **Layer 2 — supply-chain / value-added layer: vertical structure.** Takes the
+  layers as given; models what Layer 1 cannot see by construction — within-country
+  absorption across stages and multi-hop, multi-code paths. All domain context
+  (stage ordering, absorption identification, re-export treatment) enters here and
+  ONLY here. Open (see mini-TiVA sketch above).
+- **Interfaces, both directions.** Up: Layer 1's era-anchored loadings are the
+  stable inputs Layer 2 correlates across codes (chain-coupling as absorption
+  estimator); Layer 1's break dates are Layer 2's hypothesis dates for route
+  rewiring. Down: Layer 2's absorption structure interprets Layer 1's functional
+  labels (the MEX-led serves-USA systems hub exists BECAUSE Mexico absorbs the
+  parts layer) — descriptive hubs become chain roles.
+- **Why the quarantine matters.** Structural assumptions are confined to Layer 2, so
+  Layer 1's results (hub dynamics, break dates) do not depend on them: a reader who
+  rejects the proportionality assumption must still accept Part 1. Paper structure
+  follows: Part 1 "the AI-compute trade network and its structural breaks"
+  (measurement, done); Part 2 "what rewired: chains through the network"
+  (structure, open, higher risk/reward).
