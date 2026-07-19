@@ -1,149 +1,133 @@
-# Modeling brainstorm — beyond the per-code matrix factor model
+# Why we need more than product-level factor models
 
-Running notes on modeling directions considered for the TV-MFM project: what was
-considered, why it was adopted/shelved, and what would trigger a revisit. Newest at
-the bottom; add dated sections as discussions happen.
+The argument of this note, in one paragraph: our product-level factor models measure
+who ships what to whom, and they do that well. But shipping is not the same as
+mattering. In electronics, the country that ships the most valuable boxes (Mexico,
+finished servers) often created little of the value inside them, while the country
+that created most of the value (Taiwan) can look mid-sized in any single product's
+data. So conclusions drawn from one product's model alone can be misleading. To say
+who actually matters in this supply chain — and how that is changing — we have to
+connect the product layers to each other and weight flows by where value is created.
+Some of that can be estimated from our data; some of it requires knowledge the data
+does not contain, and we should be explicit about which is which.
 
-## 2026-07: Tensor (Tucker) factor model over exporter x importer x product — SHELVED
+## 1. What the product-level models measure
 
-**The idea.** Extend `Y_t = R F_t C' + E_t` to a 3-way Tucker factorization
-`Y_t = G_t x1 A1 x2 A2 x3 A3 + E_t` where mode 3 is the HS6 product dimension:
-export hubs (A1), import hubs (A2), product baskets (A3), and a core tensor G_t of
-hub-to-hub flows per basket. Estimation is a mode-wise generalization of the current
-machinery (unfold, pooled second moments, top eigenvectors per mode) — everything
-built for the matrix case (12m windows, era anchoring, varimax, crosswalks) ports.
-Reference: Chen, Yang & Zhang (JASA 2022), TOPUP/TIPUP estimators (Han-Chen-Zhang).
+For one product code — say finished servers — the model takes the monthly matrix of
+who ships to whom and finds groups of countries that behave similarly as shippers
+and receivers (hubs), plus the flows between those groups over time. This is a good
+description of one layer of the system. What it cannot be, even in principle, is a
+description of the chain that runs *through* that layer: a server shipped from
+Mexico contains chips and boards that entered Mexico the month before as imports of
+different product codes. Each product model sees one cross-section of that journey.
 
-**Why shelved: Tucker separability contradicts how the baskets work.** In Tucker, a
-country's export composition over products is fully determined by its hub-membership
-vector: countries loading on the same single hub are forced to export the *same
-product mix* (differing only in scale), because loadings interact across modes only
-through the core. But real supply-chain blocs feature *complementary* specialization
-— within one bloc, Taiwan supplies boards, Korea memory, Malaysia assembly. A hub
-whose defining feature is internal division of labor is structurally invisible to a
-separable factorization; the specialization gets dumped into the error tensor. The
-escape (rank-inflating A1 until each big exporter is its own hub) re-derives
-"separate per-code models" with extra notation.
+## 2. How the cross-sections mislead if read alone
 
-**Empirical support for the objection:** the per-code annual MFMs found materially
-different hub structures per product — 847150 is MEX-led (server assembly), 847180
-TWN-led (baseboards), 847330 CHN-led (parts). Non-separability is in the data.
+Our own results supply the example that matters. In the finished-server data
+(847150), Mexico is the largest exporter — $110B over 2020–24 — and in the factor
+model it earns its own hub. Taken at face value: Mexico is a pillar of the global
+AI-compute trade. In reality, Mexico's role is final assembly — attaching imported
+boards to imported chassis. Most of the value in a server leaving Mexico was created
+elsewhere: chips fabricated in Taiwan, boards built in Taiwan or Malaysia, design
+from the US. The data is not wrong — Mexico genuinely shipped those servers — but
+the *importance reading* is wrong.
 
-**Revisit if:** a wider product panel (e.g. OECD semiconductor value-chain codes)
-reveals *blocks* of codes that do share exporter structure — then one Tucker model
-per block could be right-sized.
+Three mechanisms cause this, and all are visible in our data:
 
-## 2026-07: Why no off-the-shelf model fits the product dimension
+- **Double counting along the chain.** The same chip is counted once leaving Taiwan
+  (as a chip), again inside a board leaving Malaysia, again inside a server leaving
+  Mexico. Countries late in the chain ship the biggest dollar totals because their
+  boxes contain everyone else's work.
+- **Pass-through.** Hong Kong's $59B of "exports" is almost entirely re-export of
+  goods it neither made nor changed. The models place it in the core hubs alongside
+  actual producers.
+- **The bilateral single-hop view.** Taiwan's exports to the US look modest partly
+  because Taiwan's output reaches the US *via* Mexico and via assembly in Southeast
+  Asia. Its true US-bound share is spread across other countries' export rows.
 
-Factor models treat each mode's coordinates as exchangeable; the product dimension
-here is *ordered* — a production chain (chips -> boards/parts -> trays -> servers).
-The economically meaningful cross-product coupling is directed and cross-sided:
-a country's **imports** of the upstream code become its **exports** of the
-downstream code with a lag. That dependency (import side of one layer -> export side
-of another) is not expressible in any symmetric low-rank decomposition, and its
-direction is domain knowledge (HS taxonomy + engineering reality), not something
-contemporaneous covariance can identify. Nearest off-the-shelf relatives (multilayer
-/ inter-layer stochastic block models) target community detection, not valued,
-directed, time-varying flows with a chain ordering.
+A practical note: every time the model output was checked against prior knowledge of
+this industry (why is Taiwan only 4th in that hub? why does the log transform bury
+it?), the discrepancy traced back to one of these three mechanisms. That checking
+habit is the right validation method for everything below.
 
-## 2026-07: Candidate architecture — measurement layer + chain-coupling layer (OPEN)
+## 3. The question we actually want to answer
 
-- **Measurement layer (built):** per-code TV-MFMs with era-anchored hub labels.
-  Imposes nothing across products; defensible given non-separability.
-- **Structure layer (idea):** model coupling *between* per-code estimates with the
-  chain ordering imposed from context: country i's import loading on upstream-code
-  hubs at t vs its export loading on downstream-code hubs at t+lag. Existence proofs
-  in current results: MEX (top 847330 parts importer, top 847150 server exporter),
-  VNM similarly. Estimated across countries/time, this yields each country's
-  *chain position* and how positions migrated at the era breaks (did 2023-07
-  propagate upstream-first? did 2025-04 tariffs reroute the parts->systems link from
-  CHN to MEX?). Era-anchored labels make cross-code correlation of loadings
-  meaningful. Likely novel: "value-chain coupling of factor loadings across product
-  layers" does not appear to exist in this literature.
+"Who matters in the AI-compute supply chain, and how is that changing?" splits into
+two different questions:
 
-**Status:** open idea, unprototyped. Minimal first test: scatter of countries'
-847330 import loadings vs 847150 export loadings by era, before building anything
-dynamic.
+- **Where is value created?** This is measurable in principle: the value a country
+  adds at its hop is (roughly) what it exports minus the inputs it imported for
+  those exports. Mexico's markup per server is small; Taiwan's markup per chip is
+  enormous.
+- **Who is hard to replace?** This is not in trade data at all. Mexico's assembly
+  role could relocate in a year; TSMC's fabrication cannot relocate this decade.
+  Two countries with the same measured value added can have completely different
+  strategic importance. Answering this requires outside knowledge — technology,
+  capital intensity, lead times — imported explicitly as context, not inferred.
 
-## 2026-07: Multi-hop supply chains — a stage-layered flow-tracing model (OPEN)
+Keeping these separate matters, because the data can correct the Mexico illusion for
+the first question but only informed judgment answers the second.
 
-**The gap.** Bilateral flows per code describe single hops. The real object is a
-multi-hop chain crossing several countries and *several product codes* as value is
-added: semiconductor inputs leave TWN -> assembly in MYS/VNM (leaves as boards,
-847330) -> systems integration in MEX (leaves as servers, 847150) -> US data center;
-plus pure transshipment hops (same code re-exported, HKG/SGP). No single-code
-matrix, and no cross-code factor coupling, represents a *path*.
+## 4. What connecting the layers requires
 
-**The borrowable framework: trade-in-value-added accounting** (OECD TiVA / WIOD /
-ADB MRIO). Its architecture: (1) inter-country flows per sector (observed);
-(2) within-country absorption coefficients -- how imports of upstream sectors enter
-production of downstream outputs; (3) a Leontief-type inversion that turns one-hop
-flows + absorption into ultimate origin->final destination content. Not usable
-directly: annual, 2-3y lag, sector-level (all of computers+electronics is one cell).
-But the architecture ports to our monthly HS6-stage panel.
+Three ingredients, in increasing order of difficulty:
 
-**Sketch: a mini-TiVA at stage granularity, monthly.**
-- *Layers* = production stages from docs/tech-ai-taxonomy.md (chips 8542/8541 ->
-  parts/boards 847330 -> units 847180 -> systems 847150), i.e. the ordered context
-  the factorization discussion said was required.
-- *Within-stage edges* = our observed bilateral monthly flows per stage (the panel;
-  chips layer would need adding -- codes exist in the taxonomy).
-- *Cross-stage edges (the modeled part)* = within-country absorption: country c's
-  stage-s imports absorbed into its stage-(s+1) exports. Identification options, in
-  increasing ambition: (a) TiVA-style *proportionality assumption* (imports of stage
-  s are absorbed proportionally across all of c's stage-s+1 outputs); (b) calibrate
-  levels with lagged import->export regressions per country (the chain-coupling
-  layer above becomes the estimator of absorption intensities); (c) sanity-bound by
-  value-added markups (unit values / quantities are in the TDM pulls).
-- *Transshipment vs transformation*: same-code re-export needs separate treatment
-  for entrepots. Data exists: HKG publishes re-export statistics explicitly;
-  Comtrade has re-export flow codes for some reporters; TDM's Additional Data
-  Fields include re-export flags for some countries.
-- *Output objects*: absorbing-Markov / Leontief walk through the layered graph ->
-  monthly "ultimate content" matrices, e.g. the TWN-origin share of US
-  systems-imports by month, or the distribution of hop counts and routes for a
-  dollar of stage-1 exports. Era-dated rewiring of *routes* (not just bilateral
-  intensities) becomes measurable: did 2025-04 tariffs reroute the MYS->MEX->USA
-  path around CHN?
+1. **The chain order.** Chips → boards/parts → subassemblies → finished systems.
+   We already have this: it is the taxonomy (docs/tech-ai-taxonomy.md), and it is
+   knowledge about the products, not something estimated.
+2. **Tracking flows through countries.** How much of Mexico's server exports is
+   Taiwanese board content? Not directly observed — customs data records shipments,
+   not what happens inside the country between arrival and departure. It has to be
+   estimated by comparing what goes in (imports of upstream codes) with what comes
+   out (exports of downstream codes), country by country, with a lag. This is where
+   assumptions live: how imports map to exports when a country has several output
+   products, how long goods sit in inventory. Existing frameworks (the OECD's
+   value-added accounting) solve this with a proportionality assumption at annual
+   frequency; at monthly frequency it is harder and this is the genuinely new work.
+3. **Value-added weights at each hop.** The difference between the value of what a
+   country ships and what it imported to make it. Our data has raw material for
+   this: values and quantities (so unit values), and for pass-through hubs, actual
+   re-export statistics (Hong Kong publishes them).
 
-**What it needs that we have:** the stage taxonomy, the monthly panel machinery
-(extending to the chips layer is a code-list change), quantities for markup checks,
-HKG re-export ratios (public).
-**What it needs that is genuinely new:** the absorption identification (the
-proportionality assumption is the standard crutch and is strong at monthly
-frequency), and inventory/timing slack between import and re-export hops.
-**Relation to the MFM:** complementary, not competing -- the MFM describes each
-layer's network structure; this describes flow *through* layers. The era breaks
-found by the MFM are the natural hypothesis dates for route rewiring.
+With those three, the correcting objects become computable: e.g. "Taiwan-origin
+content of US server imports, monthly" — which would show Taiwan's true weight
+regardless of which country's flag is on the final box, and would show whether the
+2025 tariff shock actually rerouted chains or just relabeled them.
 
-**Status:** open; the biggest missing ingredient is a defensible absorption
-identification. Cheapest first probe: pick the single best-instrumented path
-(TWN chips -> MYS/VNM boards -> MEX/USA systems) and check timing + magnitude
-consistency in the raw panel before formalizing anything.
+## 5. The plan: two layers, and honesty about what each can claim
 
-## 2026-07: The overall architecture — two layers, quarantined assumptions
+- **Layer 1 (built): the per-product factor models.** Good measurement of each
+  cross-section: hubs, memberships, flows, and the dates when structure broke
+  (mid-2023, spring 2025). These results stand on their own and involve no
+  assumptions about how products relate.
+- **Layer 2 (open): the chain accounting.** Connect the layers using the three
+  ingredients above. Its outputs re-weight Layer 1's story: gross-flow importance
+  becomes value-added importance. Every Layer 2 claim depends on the absorption
+  assumptions, so they must be stated and stress-tested — and claims about
+  *replaceability* (question two above) additionally depend on imported industry
+  knowledge and should be labeled as judgments, not estimates.
 
-Settled framing for the project's methodology:
+Shelved along the way: a tensor factor model over exporter × importer × product.
+Rejected because it assumes countries in the same hub export the same product mix,
+when the defining feature of real supply-chain blocs is the opposite — members
+divide the labor (Taiwan boards, Korea memory, Malaysia assembly). Our per-code
+results confirm the mixes differ: the server network is Mexico-led, the board
+network Taiwan-led, the parts network China-led.
 
-- **Layer 1 — per-product MFMs: horizontal measurement.** For each code/stage, the
-  cross-sectional network at that layer: hubs, memberships, hub-to-hub flows, break
-  dates. Deliberately context-free (no assumptions relating products), which is what
-  makes it robust measurement; all the Chen et al. econometrics lives here. Built,
-  validated (era-anchored, results/mfm/).
-- **Layer 2 — supply-chain / value-added layer: vertical structure.** Takes the
-  layers as given; models what Layer 1 cannot see by construction — within-country
-  absorption across stages and multi-hop, multi-code paths. All domain context
-  (stage ordering, absorption identification, re-export treatment) enters here and
-  ONLY here. Open (see mini-TiVA sketch above).
-- **Interfaces, both directions.** Up: Layer 1's era-anchored loadings are the
-  stable inputs Layer 2 correlates across codes (chain-coupling as absorption
-  estimator); Layer 1's break dates are Layer 2's hypothesis dates for route
-  rewiring. Down: Layer 2's absorption structure interprets Layer 1's functional
-  labels (the MEX-led serves-USA systems hub exists BECAUSE Mexico absorbs the
-  parts layer) — descriptive hubs become chain roles.
-- **Why the quarantine matters.** Structural assumptions are confined to Layer 2, so
-  Layer 1's results (hub dynamics, break dates) do not depend on them: a reader who
-  rejects the proportionality assumption must still accept Part 1. Paper structure
-  follows: Part 1 "the AI-compute trade network and its structural breaks"
-  (measurement, done); Part 2 "what rewired: chains through the network"
-  (structure, open, higher risk/reward).
+## 6. Test cases the finished system must get right
+
+The calibration standard: the system is judged against what we know about this
+industry. If it fails these, the model is wrong, not the priors.
+
+| country | gross-flow picture (Layer 1) | true role the system must recover |
+|---|---|---|
+| Mexico | top server exporter, own hub | low-value final assembly; large flows, small value added, replaceable |
+| Taiwan | mid-ranked in several codes | dominant value creator; its content reaches the US mostly via others' exports; hard to replace |
+| Hong Kong | core-hub member, big flows | pass-through; near-zero value added |
+| Vietnam / Malaysia | rising exporters | assembly tier: genuine but thin value added, growing |
+| China | biggest parts exporter | mixed: assembly AND growing value creation AND a major final destination — the one case that needs care rather than a label |
+
+---
+*Working decisions (details in results/mfm/ and the git log): dollar levels rather
+than logs; 12-month trailing estimation window; no seasonal adjustment; era-anchored
+hub labels with breaks at 2023-07 and 2025-04.*
