@@ -39,17 +39,24 @@ THR = 0.20               # drift threshold marking a structural burst
 MIN_ERA = 6              # months; shorter calm stretches merge into the next era
 PANEL = cfg.DATA_DIR / "derived" / "panel_ai_compute_monthly.parquet"
 
+ALL_CODES = ["847150", "847180", "847330"]
+# Greater-China bloc: CHN+HKG+TWN merged into one entity GCN; intra-bloc flows
+# (incl. all CHN<->HKG entrepot churn) cancel. Motivation: CHN/HKG/TWN often act as
+# substitutes in the estimates (contrast hubs, re-export relabeling).
+GC_BLOC = {"CHN": "GCN", "HKG": "GCN", "TWN": "GCN"}
 ANALYSES = {
-    "847150": ["847150"],
-    "847180": ["847180"],
-    "847330": ["847330"],
-    "ai_compute": ["847150", "847180", "847330"],
+    "847150": (["847150"], {}),
+    "847180": (["847180"], {}),
+    "847330": (["847330"], {}),
+    "ai_compute": (ALL_CODES, {}),
+    "ai_compute_gc": (ALL_CODES, GC_BLOC),
 }
 TITLES = {
     "847150": "HS 847150 (AI servers)",
     "847180": "HS 847180 (other units / baseboards)",
     "847330": "HS 847330 (parts / GPU cards)",
     "ai_compute": "AI compute (sum of 3 codes)",
+    "ai_compute_gc": "AI compute, Greater-China bloc (CHN+HKG+TWN merged)",
 }
 
 SERIES = ["#2a78d6", "#008300", "#e87ba4", "#eda100", "#1baf7a", "#eb6834", "#4a3aa7", "#e34948"]
@@ -62,9 +69,12 @@ plt.rcParams.update({
 })
 
 
-def load_Y(codes):
+def load_Y(codes, bloc=None):
     p = pd.read_parquet(PANEL)
     p = p[p.code.isin(codes)]
+    if bloc:
+        p = p.assign(exporter=p.exporter.replace(bloc), importer=p.importer.replace(bloc))
+        p = p[p.exporter != p.importer]     # intra-bloc flows cancel
     agg = p.groupby(["exporter", "importer", "period"], as_index=False).value.sum()
     countries = sorted(set(agg.exporter) | set(agg.importer))
     periods = sorted(agg.period.unique())
@@ -155,7 +165,8 @@ def main(label="ai_compute"):
     OUT_DIR = cfg.RESULTS_DIR / "mfm" / f"tv_{label}_monthly_12m_anchored"
     TITLE = TITLES[label]
     print(f"\n=== {TITLE} ===")
-    Y, countries, periods = load_Y(ANALYSES[label])
+    codes, bloc = ANALYSES[label]
+    Y, countries, periods = load_Y(codes, bloc)
     p = q = Y.shape[1]
     est_t, Rraw, Craw, drift = local_spaces(Y)
     labels = [periods[t] for t in est_t]
