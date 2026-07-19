@@ -5,6 +5,36 @@ data centers evolved, told alongside our own monthly panel (HS 847150 servers,
 847180 baseboards, 847330 parts/cards; results/panel_monthly). Dollar figures are
 from the panel unless noted; industry events from the public record. Written 2026-07.
 
+## The chain itself: stages, products, sizes, places
+
+Before the story, the map. The stage definitions and HS6 code lists come from the
+OECD's *Mapping the semiconductor value chain* (2025, doi:10.1787/4154cdbf-en) and
+the Fed's AI-compute basket (FEDS Note, 2026-02-13), as pinned down in
+[tech-ai-taxonomy.md](tech-ai-taxonomy.md); the dollar sizes and corridors are from
+our own bilateral data (2024, HS2012 files; the three panel codes also from the
+monthly panel). The whole traded chain was ~$1.66T in 2024, more than half of it
+the chips stage.
+
+| # | stage | key HS6 codes | 2024 trade | who exports → who imports |
+|---|---|---|---|---|
+| 1 | Raw materials: polysilicon, rare gases, gallium/germanium, specialty chemicals | 280461, 280421/29, 282560, 811292/99 | part of ~$143B (stages 1–2 + optics inputs) | China (Ga/Ge ~90%/60%, polysilicon), Germany/US (polysilicon), Japan (gases, photoresists) → fab countries |
+| 2 | Wafers and wafer inputs | 381800 (doped wafers), 3701xx/370790 (photo plates & chemicals) | — (in the $143B above) | Japan (Shin-Etsu, SUMCO — half the world's wafers), Taiwan, Germany, Korea → Taiwan/Korea fabs |
+| 3 | Fab equipment & lithography optics | 8486xx, 9001xx/9002xx, 901210/90, 903141, 903082/84 | **$249B** | Japan 14%, US 13%, Netherlands 10% (ASML), Germany 8% → **China 23%** (Japan→China $16B, NL→China $9B), Taiwan, Korea |
+| 4 | Chips: logic, memory (incl. HBM), discretes, IC parts | 854231/32/33/39/90, 8541xx, 852351/52/59 | **$926B — 56% of the chain** | Taiwan 19%, China 17%, Korea 14% (memory/HBM), Singapore 10%, Malaysia 9% (packaging/test) → the China sphere absorbs 43% (China→HK $72B, Taiwan→China $52B, Korea→China $45B) |
+| 5 | Parts, boards, GPU cards/modules | **847330** (+ bare PCBs 853400) | $151B | China-led in tonnage; the high-value AI slice from Taiwan (CoWoS-packaged modules) → US, Mexico, everywhere |
+| 6 | Baseboards / subassemblies (HGX trays) | **847180** | $83B | Taiwan dominant (~2x China) → US, Mexico |
+| 7 | Finished AI servers | **847150** | $122B (→$262B in 2025) | Mexico and Taiwan → the US, which absorbs ~40% of world imports of the compute codes |
+| 8 | The rest of the data center: switches, optics, power, storage | 851762/851770, 854470/900110, 850440, 847170, 853400 | ~$450B (Tier B basket) | China, Mexico, Malaysia, Thailand → US and everywhere |
+
+Two facts about this map shape everything downstream. First, **each stage lives in
+different countries**, so the chain *is* a sequence of border crossings: Japanese
+wafers and Dutch machines into Taiwanese fabs; Taiwanese chips into Korean-memory-
+laden modules; modules into Mexican assembly; servers into US data centers — with
+design value (Nvidia, USA) never appearing in goods trade at all. Second, **our
+monthly panel covers stages 5–7 only** — the final, most double-counted segment;
+the chips stage (4), where the export-control battle is fought, is the natural
+extension.
+
 ## The starting point: a PC-era network (2020–2021)
 
 Before the boom, these three product codes described the personal-computer and
