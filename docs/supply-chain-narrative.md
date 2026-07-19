@@ -126,6 +126,42 @@ almost flat until 2025 (generic PC components still dominate that code's tonnage
 Any volume-based reading of this trade (weight, containers) misses most of the
 story; any value-based reading overstates physical reorganization.
 
+## What the two policy regimes did — and how differently they show up
+
+The export controls and the tariffs left completely different marks on the data,
+and the factor model separates them cleanly.
+
+**The chip export controls (October 2022, October 2023, December 2024) never
+changed the shape of this network.** The model finds no structural break at any
+control date, and China's export hub keeps its identity (similarity ~0.99)
+straight through all of them. What the controls did instead was *deny China the
+boom*: China's imports of these codes kept growing in ordinary dollars ($27B in
+2023 to $62B in 2025 — compliant chips and ordinary components) but its share of
+world imports fell from 13.6% to 9.8% while the US share climbed past 40%. The
+US bought five times more in 2025 than in 2020; China barely two. The controls
+also left routing fingerprints — Taiwan-to-China doubled in 2024 (the
+compliant-variant module trade), Hong Kong re-exports into China climbed to $27B
+— but the bloc-merged model shows these net out inside the China bloc: routes
+moved within the wall, the wall itself did not move. One caveat: the controls'
+real battlefield is bare chips (HS 8542.31), a layer this panel does not yet
+cover; there the story could differ.
+
+**The April 2025 tariffs are the one policy event the structure registers** — an
+era break in every model configuration, including the strictest (both blocs
+merged), where it is the *only* break in six years. Its anatomy: the China-bloc
+and US-bloc export patterns became entangled (they started moving together — the
+signature of a common policy shock), and a brand-new Singapore export factor
+appeared from nowhere, matching the corridor data (Singapore to US: ~$0.6B for
+five straight years, then $3.0B in 2025, amid rerouting scrutiny). Yet the
+tariffs did not cut volumes — exemptions kept the Taiwan and Mexico corridors
+booming. Their effect was on *which routes exist and who co-moves*, not on how
+much flows.
+
+The general lesson: gradual, targeted policy (controls) bends trajectories and
+shows up in levels and shares; sudden, broad policy (tariffs) breaks structure
+and shows up as reorganization. A factor model is a break-detector for the
+second kind and only a trend-reader for the first.
+
 ## How to read all of this (the standing caveats)
 
 Gross shipments still double-count the chain (a Taiwan board is re-counted inside a
