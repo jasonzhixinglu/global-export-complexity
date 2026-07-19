@@ -1,4 +1,4 @@
-# Era-anchored time-varying MFM — AI compute monthly panel
+# Era-anchored time-varying MFM — AI compute (sum of 3 codes), monthly panel
 
 12m trailing loadings, k=r=4, $B levels; months aligned to per-era constant anchors (Procrustes), no chained matching. In-sample R^2 0.976; mean within-era loading step 0.042 (chained version: see ../tv_ai_compute_monthly_12m).
 

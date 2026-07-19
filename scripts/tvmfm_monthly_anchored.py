@@ -40,23 +40,24 @@ MIN_ERA = 6              # months; shorter calm stretches merge into the next er
 PANEL = cfg.DATA_DIR / "derived" / "panel_ai_compute_monthly.parquet"
 
 ALL_CODES = ["847150", "847180", "847330"]
-# Greater-China bloc: CHN+HKG+TWN merged into one entity GCN; intra-bloc flows
-# (incl. all CHN<->HKG entrepot churn) cancel. Motivation: CHN/HKG/TWN often act as
-# substitutes in the estimates (contrast hubs, re-export relabeling).
-GC_BLOC = {"CHN": "GCN", "HKG": "GCN", "TWN": "GCN"}
+# China+HKG bloc: CHN and HKG merged into one entity CHK; intra-bloc flows (the
+# CHN<->HKG entrepot churn) cancel, and HKG re-exports are attributed to the bloc.
+# Taiwan is deliberately NOT part of this bloc -- it is a separate economy in the
+# supply chain; its substitution vs China is a finding to measure, not to merge away.
+CHNHKG_BLOC = {"CHN": "CHK", "HKG": "CHK"}
 ANALYSES = {
     "847150": (["847150"], {}),
     "847180": (["847180"], {}),
     "847330": (["847330"], {}),
     "ai_compute": (ALL_CODES, {}),
-    "ai_compute_gc": (ALL_CODES, GC_BLOC),
+    "ai_compute_chnhkg": (ALL_CODES, CHNHKG_BLOC),
 }
 TITLES = {
     "847150": "HS 847150 (AI servers)",
     "847180": "HS 847180 (other units / baseboards)",
     "847330": "HS 847330 (parts / GPU cards)",
     "ai_compute": "AI compute (sum of 3 codes)",
-    "ai_compute_gc": "AI compute, Greater-China bloc (CHN+HKG+TWN merged)",
+    "ai_compute_chnhkg": "AI compute, China+HKG bloc (TWN separate)",
 }
 
 SERIES = ["#2a78d6", "#008300", "#e87ba4", "#eda100", "#1baf7a", "#eb6834", "#4a3aa7", "#e34948"]
