@@ -31,11 +31,13 @@ YEAR = "2024"
 TOP_N = 9               # countries per side; rest folds into "Other"
 OUT_DIR = cfg.ROOT / "exports"
 
-# consistent country colours (dataviz palette; colour follows the entity)
-COLOR = {"TWN": "#1baf7a", "CHN": "#e34948", "HKG": "#e87ba4", "KOR": "#eda100",
-         "JPN": "#4a3aa7", "USA": "#2a78d6", "MEX": "#eb6834", "NLD": "#008300",
-         "DEU": "#6da76d", "SGP": "#c98500", "MYS": "#d95926", "VNM": "#199e70",
-         "THA": "#d55181", "IRL": "#57c785", "Other": "#b5b3ac"}
+# consistent country colours -- one hue family per major country so none collide
+# (CHN red, USA blue, TWN green, KOR amber, JPN violet, HKG pink, MEX orange,
+#  NLD brown, DEU olive, SGP cyan, MYS crimson, VNM lime, THA blue-gray)
+COLOR = {"CHN": "#d7191c", "USA": "#2a78d6", "TWN": "#00a878", "KOR": "#eda100",
+         "JPN": "#7b3fbf", "HKG": "#f06ba8", "MEX": "#f4692e", "NLD": "#8c510a",
+         "DEU": "#708238", "SGP": "#17becf", "MYS": "#c2185b", "VNM": "#84bd00",
+         "THA": "#607d8b", "IRL": "#bdb76b", "Other": "#b5b3ac"}
 FALLBACK = "#898781"
 SURFACE, INK, INK2, MUTED = "#fcfcfb", "#0b0b0b", "#52514e", "#898781"
 
@@ -95,15 +97,19 @@ def top_fold(flows):
 
 
 def ribbon(ax, x0, x1, y0_top, y1_top, h, color):
+    # thin ribbons get near-full opacity and a minimum visual thickness so small
+    # but real flows (e.g. Japan's wafer exports) stay visible
+    h_draw = max(h, 0.0022)
+    alpha = 0.85 if h < 0.008 else 0.55
     cx = (x1 - x0) * 0.42
     verts = [(x0, y0_top), (x0 + cx, y0_top), (x1 - cx, y1_top), (x1, y1_top),
-             (x1, y1_top - h), (x1 - cx, y1_top - h), (x0 + cx, y0_top - h),
-             (x0, y0_top - h), (x0, y0_top)]
+             (x1, y1_top - h_draw), (x1 - cx, y1_top - h_draw),
+             (x0 + cx, y0_top - h_draw), (x0, y0_top - h_draw), (x0, y0_top)]
     codes = [MplPath.MOVETO, MplPath.CURVE4, MplPath.CURVE4, MplPath.CURVE4,
              MplPath.LINETO, MplPath.CURVE4, MplPath.CURVE4, MplPath.CURVE4,
              MplPath.CLOSEPOLY]
     ax.add_patch(PathPatch(MplPath(verts, codes), facecolor=color,
-                           edgecolor="none", alpha=0.55, zorder=1))
+                           edgecolor="none", alpha=alpha, zorder=1))
 
 
 def draw_stage(fname, title, codes_txt, flows):  # unused: plain versions retired
@@ -154,7 +160,7 @@ def draw_stage(fname, title, codes_txt, flows):  # unused: plain versions retire
             y1 = im_pos[t][0] - in_off[t]
             out_off[o] += h
             in_off[t] += h
-            if h > 0.004:                        # skip invisible slivers (drawn as node mass)
+            if h > 0.0012:                        # skip invisible slivers (drawn as node mass)
                 ribbon(ax, x0n + nw, x1n, y0, y1, h, COLOR.get(o, FALLBACK))
 
     for c, (y, h) in ex_pos.items():
@@ -312,7 +318,7 @@ def draw_hub_chart(fname, title, code_or_baskets, kind):
             y1 = dst_pos[dk][0] - in_off[dk]
             out_off[sk] += h
             in_off[dk] += h
-            if h > 0.004:
+            if h > 0.0012:
                 ribbon(ax, xs[gap] + nw, xs[gap + 1], y0, y1, h, color_of(sk, dk))
 
     band(0, ex_pos, hubR_pos,
@@ -365,25 +371,28 @@ def draw_chain_overview(input_stages, seq_stages, MODE="dollar"):
     materials, wafers, litho/optics, equipment) are PARALLEL, converging on the fab
     checkpoint; chips -> parts -> baseboards -> servers then run sequentially.
     MODE governs vertical scale: 'dollar' (one $ scale), 'log' (heights ~ log10 of
-    flow-set total), 'normalized' (equal heights / full column per stage)."""
-    TOPI, TOPG = 4, 5
+    flow-set total), 'normalized' (equal heights / full column per stage).
+    Countries below FOLD_MIN ($B, side total) fold into 'Other' -- an absolute
+    threshold, so a small stage (raw materials) may legitimately show no
+    individual countries at chain scale."""
+    FOLD_MIN = 5.0
 
-    def fold(flows, n):
+    def fold(flows):
         ex = pd.Series(dtype=float)
         im = pd.Series(dtype=float)
         for (o, t), v in flows.items():
             ex[o] = ex.get(o, 0.0) + v
             im[t] = im.get(t, 0.0) + v
-        ko = set(ex.sort_values(ascending=False).head(n).index)
-        kt = set(im.sort_values(ascending=False).head(n).index)
+        ko = set(ex[ex >= FOLD_MIN].index)
+        kt = set(im[im >= FOLD_MIN].index)
         f = {}
         for (o, t), v in flows.items():
-            f[(o if o in ko else "Other", t if t in kt else "Other")] = \
-                f.get((o if o in ko else "Other", t if t in kt else "Other"), 0.0) + v
+            key = (o if o in ko else "Other", t if t in kt else "Other")
+            f[key] = f.get(key, 0.0) + v
         return f
 
-    inputs = [(lab, fold(fl, TOPI)) for lab, fl in input_stages]
-    seqs = [(lab, fold(fl, TOPG)) for lab, fl in seq_stages]
+    inputs = [(lab, fold(fl)) for lab, fl in input_stages]
+    seqs = [(lab, fold(fl)) for lab, fl in seq_stages]
     in_totals = [sum(f.values()) for _, f in inputs]
     seq_totals = [sum(f.values()) for _, f in seqs]
 
@@ -487,7 +496,7 @@ def draw_chain_overview(input_stages, seq_stages, MODE="dollar"):
                 y1 = fab_pos[t][0] - fab_in_off[t]
                 out_off[o] += h
                 fab_in_off[t] += h
-                if h > 0.0035:
+                if h > 0.0012:
                     ribbon(ax, x_in + nw, xs[0], y0, y1, h, COLOR.get(o, FALLBACK))
 
     # sequential ribbons
@@ -505,15 +514,18 @@ def draw_chain_overview(input_stages, seq_stages, MODE="dollar"):
                 y1 = dst[t][0] - in_off[t]
                 out_off[o] += h
                 in_off[t] += h
-                if h > 0.0035:
+                if h > 0.0012:
                     ribbon(ax, xs[g] + nw, xs[g + 1], y0, y1, h, COLOR.get(o, FALLBACK))
 
-    # nodes
+    # nodes (+ country labels wherever there is room)
     for lab, gpos, sc in in_group_pos:
         for n_, (y, h) in gpos.items():
             ax.add_patch(plt.Rectangle((x_in, y - h), nw, h,
                                        facecolor=COLOR.get(n_, FALLBACK),
                                        edgecolor=SURFACE, lw=0.4, zorder=3))
+            if h > 0.012:
+                ax.text(x_in - 0.005, y - h / 2, n_, ha="right", va="center",
+                        fontsize=7.5, color=INK2, zorder=4)
         top = max(y for y, h in gpos.values())
         ax.text(x_in, top + 0.012, lab, ha="left", fontsize=8.5, color=INK, weight="bold")
     for c, pos in enumerate(col_pos):
@@ -521,6 +533,9 @@ def draw_chain_overview(input_stages, seq_stages, MODE="dollar"):
             ax.add_patch(plt.Rectangle((xs[c], y - h), nw, h,
                                        facecolor=COLOR.get(n_, FALLBACK),
                                        edgecolor=SURFACE, lw=0.4, zorder=3))
+            if h > 0.015:
+                ax.text(xs[c] + nw / 2, y + 0.006, n_, ha="center", va="bottom",
+                        fontsize=7, color=INK2, zorder=4)
 
     # captions
     ax.text((x_in + xs[0]) / 2, 1.10, "parallel inputs into fabs", ha="center",
@@ -550,7 +565,8 @@ def draw_chain_overview(input_stages, seq_stages, MODE="dollar"):
                  f"fabs; chips flow on to servers ({scale_note})",
                  fontsize=13, color=INK, y=0.985)
     ax.text(0.5, -0.155, "Ribbon colour = exporting country (legend above); columns are "
-            "checkpoints (buy left, sell right). Smallest corridors not drawn. No "
+            f"checkpoints (buy left, sell right). Countries under {FOLD_MIN:.0f}B on a "
+            "side fold into Other, so small stages may show few named countries. No "
             "cross-stage absorption implied. Sources: docs/tech-ai-taxonomy.md; Atlas "
             "HS2012 bilateral / monthly panel.", ha="center", fontsize=8, color=MUTED)
     out = OUT_DIR / f"supply_chain_overview_{MODE}_{YEAR}.png"
@@ -644,7 +660,7 @@ def draw_overview(stage_flows, MODE="dollar"):  # unused: replaced by draw_chain
                 y1 = node_pos[g + 1][t][0] - in_off[t]
                 out_off[o] += h
                 in_off[t] += h
-                if h > 0.0035:
+                if h > 0.0012:
                     ribbon(ax, xs[g] + nw, xs[g + 1], y0, y1, h, COLOR.get(o, FALLBACK))
 
     for c in range(n_cols):
