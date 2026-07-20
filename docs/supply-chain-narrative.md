@@ -26,6 +26,16 @@ the chips stage.
 | 7 | Finished AI servers | **847150** | $122B (→$262B in 2025) | Mexico and Taiwan → the US, which absorbs ~40% of world imports of the compute codes |
 | 8 | The rest of the data center: switches, optics, power, storage | 851762/851770, 854470/900110, 850440, 847170, 853400 | ~$450B (Tier B basket) | China, Mexico, Malaysia, Thailand → US and everywhere |
 
+The same map as flow charts — one per stage, top countries on each side, ribbon
+width = 2024 dollars (`exports/supply_chain_*_2024.png`, regenerate with
+`python scripts/export_supply_chain_sankey.py`):
+
+![equipment](../exports/supply_chain_1_equipment_2024.png)
+![chips](../exports/supply_chain_2_chips_2024.png)
+![parts](../exports/supply_chain_3_parts_2024.png)
+![baseboards](../exports/supply_chain_4_baseboards_2024.png)
+![servers](../exports/supply_chain_5_servers_2024.png)
+
 Two facts about this map shape everything downstream. First, **each stage lives in
 different countries**, so the chain *is* a sequence of border crossings: Japanese
 wafers and Dutch machines into Taiwanese fabs; Taiwanese chips into Korean-memory-
