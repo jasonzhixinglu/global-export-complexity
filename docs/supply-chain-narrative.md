@@ -28,17 +28,23 @@ the chips stage.
 
 The same map as flow charts (`exports/supply_chain_*_2024.png`, regenerate with
 `python scripts/export_supply_chain_sankey.py`): a multi-column overview of all
-eight stages (each stage normalized to full height — totals differ 70x), one
-detailed chart per stage with true within-stage scale, and for the three compute
-codes a four-column version routing the flows through the factor model's export
-and import hubs.
+eight stages in three scale versions (dollar — nominally comparable widths
+everywhere; log — column height tracks log10 of the stage total; normalized —
+every stage full height, shares only), one detailed two-column chart per stage
+with true within-stage scale, and for every stage a four-column version routing
+the flows through factor-model hubs (exporters -> export hubs -> import hubs ->
+importers; TV-MFM for the three compute codes, annual constant-loading MFM
+upstream).
 
-![overview](../exports/supply_chain_overview_2024.png)
+![overview dollar](../exports/supply_chain_overview_dollar_2024.png)
+![overview log](../exports/supply_chain_overview_log_2024.png)
+![overview normalized](../exports/supply_chain_overview_normalized_2024.png)
 ![raw materials](../exports/supply_chain_1_raw_materials_2024.png)
 ![wafers](../exports/supply_chain_2_wafers_2024.png)
 ![litho optics](../exports/supply_chain_3_litho_optics_2024.png)
 ![equipment](../exports/supply_chain_4_equipment_2024.png)
 ![chips](../exports/supply_chain_5_chips_2024.png)
+![chips through hubs](../exports/supply_chain_5_chips_hubs_2024.png)
 ![parts](../exports/supply_chain_6_parts_2024.png)
 ![baseboards](../exports/supply_chain_7_baseboards_2024.png)
 ![servers](../exports/supply_chain_8_servers_2024.png)

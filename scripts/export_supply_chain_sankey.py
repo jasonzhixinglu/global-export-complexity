@@ -181,18 +181,76 @@ def draw_stage(fname, title, codes_txt, flows):
     print(f"-> {out}  (${total:.0f}B)")
 
 
-def draw_stage_with_hubs(fname, title, code):
-    """Four-column chart for a panel code: exporters -> export hubs -> import hubs
-    -> importers. Middle columns come from the era-anchored TV-MFM (2024 mean of
-    monthly loadings and F, negative loadings clipped at 0); hub-pair dollars are
-    the model-implied decomposition renormalized to the year's actual total, so
-    this is an interpretation layer, not raw data."""
+def varimax(L, iters=200, tol=1e-8):
+    p, k = L.shape
+    O = np.eye(k)
+    var = 0.0
+    for _ in range(iters):
+        B = L @ O
+        U, sv, Vt = np.linalg.svd(L.T @ (B**3 - B @ np.diag((B**2).sum(0)) / p))
+        O = U @ Vt
+        if sv.sum() < var * (1 + tol):
+            break
+        var = sv.sum()
+    return O
+
+
+def hubs_from_panel(code):
+    """Hub inputs from the era-anchored TV-MFM: 2024 means of monthly loadings/F."""
     s = json.load(open(cfg.RESULTS_DIR / "mfm" / "tvmfm" / "by_country" / code / "stats.json"))
     months = [p for p in s["periods"] if p.startswith(YEAR)]
     countries = s["countries"]
     R = np.mean([np.array(s["R_by_period"][m]) for m in months], axis=0).clip(min=0)
     C = np.mean([np.array(s["C_by_period"][m]) for m in months], axis=0).clip(min=0)
     F = np.mean([np.array(s["F_by_period"][m]) for m in months], axis=0)
+    return countries, R, C, F, "era-anchored TV-MFM, 2024 monthly means"
+
+
+def hubs_from_json(baskets, k=4):
+    """Hub inputs for upstream stages: constant-loading MFM (k=r=4, $B levels,
+    varimax) on the ANNUAL bilateral matrices 2020-2024 from the dashboard data --
+    same estimator as results/mfm/annual, no monthly panel exists upstream."""
+    d = json.load(open(cfg.ROOT / "dashboard" / "public" / "data" / "techai_bilateral.json"))
+    flows = {}
+    for b in baskets:
+        for o, dests in d["value"].get(b, {}).items():
+            for t, yrs in dests.items():
+                for y, v in yrs.items():
+                    if 2020 <= int(y) <= 2024 and o != t and v:
+                        flows[(int(y), o, t)] = flows.get((int(y), o, t), 0.0) + v
+    countries = sorted({o for (_, o, _) in flows} | {t for (_, _, t) in flows})
+    idx = {c: i for i, c in enumerate(countries)}
+    years = sorted({y for (y, _, _) in flows})
+    Y = np.zeros((len(years), len(countries), len(countries)))
+    for (y, o, t), v in flows.items():
+        Y[years.index(y), idx[o], idx[t]] = v
+    p = q = len(countries)
+    M_R = np.einsum("sij,skj->ik", Y, Y)
+    M_C = np.einsum("sji,sjk->ik", Y, Y)
+    _, vr = np.linalg.eigh(M_R)
+    _, vc = np.linalg.eigh(M_C)
+    R = vr[:, -k:][:, ::-1] * np.sqrt(p)
+    C = vc[:, -k:][:, ::-1] * np.sqrt(q)
+    R, C = R @ varimax(R), C @ varimax(C)
+    for L in (R, C):                              # dominant member positive
+        for j in range(k):
+            if L[np.abs(L[:, j]).argmax(), j] < 0:
+                L[:, j] *= -1
+    F = R.T @ Y[-1] @ C / (p * q)                 # 2024 factor matrix
+    return countries, R.clip(min=0), C.clip(min=0), F, \
+        "constant-loading annual MFM 2020-24 (no monthly panel upstream)"
+
+
+def draw_hub_chart(fname, title, code_or_baskets, kind):
+    """Four-column chart: exporters -> export hubs -> import hubs -> importers.
+    Hub-pair dollars are the model-implied decomposition renormalized to the
+    year's actual total -- an interpretation layer, not raw data."""
+    if kind == "panel":
+        countries, R, C, F, src = hubs_from_panel(code_or_baskets)
+        total_actual = sum(flows_panel(code_or_baskets).values())
+    else:
+        countries, R, C, F, src = hubs_from_json(code_or_baskets)
+        total_actual = sum(flows_json(code_or_baskets).values())
     K = R.shape[1]
     hubR = [f"{countries[int(R[:, a].argmax())]}-led" for a in range(K)]
     hubC = [f"{countries[int(C[:, b].argmax())]}-led" for b in range(K)]
@@ -202,7 +260,6 @@ def draw_stage_with_hubs(fname, title, code):
     Rsum, Csum = R.sum(0), C.sum(0)
     V = np.outer(Rsum, Csum) * F                 # hub-pair fitted totals
     V = V.clip(min=0)
-    total_actual = sum(flows_panel(code).values())
     V *= total_actual / V.sum()
     E = (R / np.where(Rsum > 0, Rsum, 1)) [:, :] * V.sum(1)   # exporter -> exp hub
     I = (C / np.where(Csum > 0, Csum, 1)) [:, :] * V.sum(0)   # imp hub -> importer
@@ -292,20 +349,21 @@ def draw_stage_with_hubs(fname, title, code):
                    (xs[2] + nw / 2, "import hubs"), (xs[3] + nw, "importers ($B)")):
         ax.text(x, 1.045, lab, ha="center", fontsize=9, color=MUTED)
     ax.set_title(f"{title} — through the factor model's hubs ({YEAR})\n"
-                 f"country -> hub attribution from TV-MFM loadings; hub-to-hub = F; "
+                 f"country -> hub attribution from loadings; hub-to-hub = F; "
                  f"total ${total_actual:.0f}B", fontsize=11, color=INK, pad=16)
-    ax.text(0.5, -0.055, "Model-implied decomposition (era-anchored TV-MFM, 2024 means; "
-            "negative loadings clipped; renormalized to actual total). Hub named by its "
-            "dominant member.", ha="center", fontsize=7.5, color=MUTED)
+    ax.text(0.5, -0.055, f"Model-implied decomposition ({src}; negative loadings "
+            "clipped; renormalized to actual total). Hub named by its dominant member.",
+            ha="center", fontsize=7.5, color=MUTED)
     out = OUT_DIR / f"supply_chain_{fname}_hubs_{YEAR}.png"
     fig.savefig(out, dpi=150, bbox_inches="tight", facecolor=SURFACE)
     plt.close(fig)
     print(f"-> {out}")
 
 
-def draw_overview(stage_flows):
-    """Multi-column chain: checkpoint columns, one stage per gap. Each gap is
-    normalized to full height (stage totals differ 70x); totals printed per stage."""
+def draw_overview(stage_flows, MODE="dollar"):
+    """Multi-column chain: checkpoint columns, one stage per gap. ONE common dollar
+    scale across all stages, so band widths are nominally comparable everywhere --
+    the chain visibly amplifies from $13B of raw materials to $926B of chips."""
     TOPG = 5
     H = 0.82
     folded = []
@@ -332,8 +390,15 @@ def draw_overview(stage_flows):
             inv[t] = inv.get(t, 0.0) + v
     order = [c for c in inv.sort_values(ascending=False).index if c != "Other"] + ["Other"]
 
-    scales = [H / sum(f.values()) for f in folded]
-    pad = 0.014
+    totals = [sum(f.values()) for f in folded]
+    if MODE == "dollar":            # one common $ scale: widths nominal everywhere
+        scales = [H / max(totals)] * len(folded)
+    elif MODE == "log":             # column height ~ log10($B): compromise
+        heights = [H * np.log10(t) / np.log10(max(totals)) for t in totals]
+        scales = [h / t for h, t in zip(heights, totals)]
+    else:                           # normalized: every stage full height
+        scales = [H / t for t in totals]
+    pad = 0.008 if MODE == "dollar" else 0.012
 
     def col_nodes(c):
         out_v, in_v = {}, {}
@@ -380,7 +445,7 @@ def draw_overview(stage_flows):
                 y1 = node_pos[g + 1][t][0] - in_off[t]
                 out_off[o] += h
                 in_off[t] += h
-                if h > 0.011:
+                if h > 0.0035:
                     ribbon(ax, xs[g] + nw, xs[g + 1], y0, y1, h, COLOR.get(o, FALLBACK))
 
     for c in range(n_cols):
@@ -400,15 +465,17 @@ def draw_overview(stage_flows):
         ax.text(xm, yb - 0.032, f"${sum(f.values()):.0f}B", ha="center", fontsize=9,
                 color=INK2)
 
+    scale_note = {"dollar": "one dollar scale — band width nominally comparable everywhere",
+                  "log": "column height ~ log10 of stage total — a compromise scale",
+                  "normalized": "each stage normalized to full height — shares only"}[MODE]
     fig.suptitle("The AI-compute supply chain, 2024 — eight stages of bilateral trade "
-                 "(each stage normalized to full height; totals above)",
-                 fontsize=13, color=INK, y=0.99)
+                 f"({scale_note})", fontsize=13, color=INK, y=0.99)
     ax.text(0.5, -0.08, "Ribbon colour = exporting country; each column is a checkpoint "
-            "(country sells the right-hand stage, buys the left-hand stage). Widths comparable "
-            "WITHIN a stage only. No cross-stage absorption implied. Sources: "
-            "docs/tech-ai-taxonomy.md codes; Atlas HS2012 bilateral / monthly panel.",
-            ha="center", fontsize=8, color=MUTED)
-    out = OUT_DIR / f"supply_chain_overview_{YEAR}.png"
+            "(country sells the right-hand stage, buys the left-hand stage). Smallest "
+            "corridors not drawn (see per-stage charts for detail). No cross-stage "
+            "absorption implied. Sources: docs/tech-ai-taxonomy.md codes; Atlas HS2012 "
+            "bilateral / monthly panel.", ha="center", fontsize=8, color=MUTED)
+    out = OUT_DIR / f"supply_chain_overview_{MODE}_{YEAR}.png"
     fig.savefig(out, dpi=150, bbox_inches="tight", facecolor=SURFACE)
     plt.close(fig)
     print(f"-> {out}")
@@ -421,9 +488,9 @@ def main():
         flows = flows_json(arg) if kind == "json" else flows_panel(arg)
         all_flows.append(flows)
         draw_stage(fname, title, codes_txt, flows)
-        if kind == "panel":
-            draw_stage_with_hubs(fname, title, arg)
-    draw_overview(all_flows)
+        draw_hub_chart(fname, title, arg, kind)
+    for mode in ("dollar", "log", "normalized"):
+        draw_overview(all_flows, mode)
 
 
 if __name__ == "__main__":
