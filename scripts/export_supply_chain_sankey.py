@@ -106,7 +106,7 @@ def ribbon(ax, x0, x1, y0_top, y1_top, h, color):
                            edgecolor="none", alpha=0.55, zorder=1))
 
 
-def draw_stage(fname, title, codes_txt, flows):
+def draw_stage(fname, title, codes_txt, flows):  # unused: plain versions retired
     flows = top_fold(flows)
     total = sum(flows.values())
     ex_tot = pd.Series(dtype=float)
@@ -484,10 +484,11 @@ def draw_overview(stage_flows, MODE="dollar"):
 def main():
     OUT_DIR.mkdir(exist_ok=True)
     all_flows = []
+    # Plain (2-column) per-stage charts retired: the rank-4 hub decomposition fits
+    # at R^2 0.95-0.99, so the hub-routed versions carry the flows faithfully.
     for fname, title, codes_txt, (kind, arg) in STAGES:
         flows = flows_json(arg) if kind == "json" else flows_panel(arg)
         all_flows.append(flows)
-        draw_stage(fname, title, codes_txt, flows)
         draw_hub_chart(fname, title, arg, kind)
     for mode in ("dollar", "log", "normalized"):
         draw_overview(all_flows, mode)
