@@ -31,13 +31,17 @@ YEAR = "2024"
 TOP_N = 9               # countries per side; rest folds into "Other"
 OUT_DIR = cfg.ROOT / "exports"
 
+# China and Hong Kong are merged into one entity CHK in ALL charts (intra-bloc
+# flows excluded); USA and Mexico stay separate.
+BLOC = {"CHN": "CHK", "HKG": "CHK"}
+
 # consistent country colours -- one hue family per major country so none collide
-# (CHN red, USA blue, TWN green, KOR amber, JPN violet, HKG pink, MEX orange,
+# (CHK red, USA blue, TWN green, KOR amber, JPN violet, MEX orange,
 #  NLD brown, DEU olive, SGP cyan, MYS crimson, VNM lime, THA blue-gray)
-COLOR = {"CHN": "#d7191c", "USA": "#2a78d6", "TWN": "#00a878", "KOR": "#eda100",
-         "JPN": "#7b3fbf", "HKG": "#f06ba8", "MEX": "#f4692e", "NLD": "#8c510a",
-         "DEU": "#708238", "SGP": "#17becf", "MYS": "#c2185b", "VNM": "#84bd00",
-         "THA": "#607d8b", "IRL": "#bdb76b", "Other": "#b5b3ac"}
+COLOR = {"CHK": "#d7191c", "USA": "#2a78d6", "TWN": "#00a878", "KOR": "#eda100",
+         "JPN": "#7b3fbf", "HKG": "#f06ba8", "CHN": "#d7191c", "MEX": "#f4692e",
+         "NLD": "#8c510a", "DEU": "#708238", "SGP": "#17becf", "MYS": "#c2185b",
+         "VNM": "#84bd00", "THA": "#607d8b", "IRL": "#bdb76b", "Other": "#b5b3ac"}
 FALLBACK = "#898781"
 SURFACE, INK, INK2, MUTED = "#fcfcfb", "#0b0b0b", "#52514e", "#898781"
 
@@ -60,6 +64,15 @@ STAGES = [
 ]
 
 
+def apply_bloc(flows):
+    out = {}
+    for (o, t), v in flows.items():
+        o2, t2 = BLOC.get(o, o), BLOC.get(t, t)
+        if o2 != t2:
+            out[(o2, t2)] = out.get((o2, t2), 0.0) + v
+    return out
+
+
 def flows_json(baskets):
     d = json.load(open(cfg.ROOT / "dashboard" / "public" / "data" / "techai_bilateral.json"))
     agg = {}
@@ -69,14 +82,14 @@ def flows_json(baskets):
                 v = yrs.get(YEAR)
                 if v and o != t:
                     agg[(o, t)] = agg.get((o, t), 0.0) + v
-    return agg
+    return apply_bloc(agg)
 
 
 def flows_panel(code):
     p = pd.read_parquet(cfg.DATA_DIR / "derived" / "panel_ai_compute_monthly.parquet")
     p = p[(p.code == code) & (p.period.str[:4] == YEAR)]
     g = p.groupby(["exporter", "importer"]).value.sum() / 1e9
-    return {k: float(v) for k, v in g.items()}
+    return apply_bloc({k: float(v) for k, v in g.items()})
 
 
 def top_fold(flows):
@@ -202,8 +215,9 @@ def varimax(L, iters=200, tol=1e-8):
 
 
 def hubs_from_panel(code):
-    """Hub inputs from the era-anchored TV-MFM: 2024 means of monthly loadings/F."""
-    s = json.load(open(cfg.RESULTS_DIR / "mfm" / "tvmfm" / "by_country" / code / "stats.json"))
+    """Hub inputs from the era-anchored TV-MFM (China+HKG bloc variant): 2024 means
+    of monthly loadings/F."""
+    s = json.load(open(cfg.RESULTS_DIR / "mfm" / "tvmfm" / "chn_hkg_bloc" / code / "stats.json"))
     months = [p for p in s["periods"] if p.startswith(YEAR)]
     countries = s["countries"]
     R = np.mean([np.array(s["R_by_period"][m]) for m in months], axis=0).clip(min=0)
@@ -222,8 +236,9 @@ def hubs_from_json(baskets, k=4):
         for o, dests in d["value"].get(b, {}).items():
             for t, yrs in dests.items():
                 for y, v in yrs.items():
-                    if 2020 <= int(y) <= 2024 and o != t and v:
-                        flows[(int(y), o, t)] = flows.get((int(y), o, t), 0.0) + v
+                    o2, t2 = BLOC.get(o, o), BLOC.get(t, t)
+                    if 2020 <= int(y) <= 2024 and o2 != t2 and v:
+                        flows[(int(y), o2, t2)] = flows.get((int(y), o2, t2), 0.0) + v
     countries = sorted({o for (_, o, _) in flows} | {t for (_, _, t) in flows})
     idx = {c: i for i, c in enumerate(countries)}
     years = sorted({y for (y, _, _) in flows})
@@ -358,7 +373,7 @@ def draw_hub_chart(fname, title, code_or_baskets, kind):
                  f"country -> hub attribution from loadings; hub-to-hub = F; "
                  f"total ${total_actual:.0f}B", fontsize=11, color=INK, pad=16)
     ax.text(0.5, -0.055, f"Model-implied decomposition ({src}; negative loadings "
-            "clipped; renormalized to actual total). Hub named by its dominant member.",
+            "clipped; renormalized to actual total). China+Hong Kong merged (CHK). Hub named by its dominant member.",
             ha="center", fontsize=7.5, color=MUTED)
     out = OUT_DIR / f"supply_chain_{fname}_hubs_{YEAR}.png"
     fig.savefig(out, dpi=150, bbox_inches="tight", facecolor=SURFACE)
@@ -375,7 +390,7 @@ def draw_chain_overview(input_stages, seq_stages, MODE="dollar"):
     Countries below FOLD_MIN ($B, side total) fold into 'Other' -- an absolute
     threshold, so a small stage (raw materials) may legitimately show no
     individual countries at chain scale."""
-    FOLD_MIN = 5.0
+    FOLD_MIN = 10.0     # coarser fold: fewer named countries, fewer ribbons
 
     def fold(flows):
         ex = pd.Series(dtype=float)
@@ -563,7 +578,7 @@ def draw_chain_overview(input_stages, seq_stages, MODE="dollar"):
 
     # colour legend (consistent everywhere: CHN red, USA blue, ...)
     lx = 0.045
-    for n_ in ["CHN", "USA", "TWN", "KOR", "JPN", "HKG", "MEX", "NLD", "DEU",
+    for n_ in ["CHK", "USA", "TWN", "KOR", "JPN", "MEX", "NLD", "DEU",
                "SGP", "MYS", "VNM", "Other"]:
         ax.add_patch(plt.Rectangle((lx, -0.135), 0.010, 0.026,
                                    facecolor=COLOR.get(n_, FALLBACK), edgecolor="none"))
@@ -576,7 +591,7 @@ def draw_chain_overview(input_stages, seq_stages, MODE="dollar"):
                  f"fabs; chips flow on to servers ({scale_note})",
                  fontsize=13, color=INK, y=0.985)
     ax.text(0.5, -0.155, "Ribbon colour = exporting country (legend above); columns are "
-            f"checkpoints (buy left, sell right). Countries under {FOLD_MIN:.0f}B on a "
+            f"checkpoints (buy left, sell right). China+Hong Kong merged (CHK). Countries under {FOLD_MIN:.0f}B on a "
             "side fold into Other, so small stages may show few named countries. No "
             "cross-stage absorption implied. Sources: docs/tech-ai-taxonomy.md; Atlas "
             "HS2012 bilateral / monthly panel.", ha="center", fontsize=8, color=MUTED)

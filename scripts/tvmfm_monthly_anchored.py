@@ -55,6 +55,9 @@ ANALYSES = {
     "847330": (["847330"], {}, "by_country"),
     "ai_compute": (ALL_CODES, {}, "by_country"),
     "ai_compute_chnhkg": (ALL_CODES, CHNHKG_BLOC, "chn_hkg_bloc"),
+    "847150_chnhkg": (["847150"], CHNHKG_BLOC, "chn_hkg_bloc"),
+    "847180_chnhkg": (["847180"], CHNHKG_BLOC, "chn_hkg_bloc"),
+    "847330_chnhkg": (["847330"], CHNHKG_BLOC, "chn_hkg_bloc"),
     "ai_compute_2blocs": (ALL_CODES, TWO_BLOCS, "chnhkg_usamex_blocs"),
 }
 TITLES = {
@@ -63,6 +66,9 @@ TITLES = {
     "847330": "HS 847330 (parts / GPU cards)",
     "ai_compute": "AI compute (sum of 3 codes)",
     "ai_compute_chnhkg": "AI compute, China+HKG bloc (TWN separate)",
+    "847150_chnhkg": "HS 847150 (AI servers), China+HKG bloc",
+    "847180_chnhkg": "HS 847180 (baseboards), China+HKG bloc",
+    "847330_chnhkg": "HS 847330 (parts), China+HKG bloc",
     "ai_compute_2blocs": "AI compute, CHN+HKG and USA+MEX blocs",
 }
 
