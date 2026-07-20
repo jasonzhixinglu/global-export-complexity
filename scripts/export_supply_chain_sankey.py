@@ -360,7 +360,206 @@ def draw_hub_chart(fname, title, code_or_baskets, kind):
     print(f"-> {out}")
 
 
-def draw_overview(stage_flows, MODE="dollar"):
+def draw_chain_overview(input_stages, seq_stages, MODE="dollar"):
+    """Chain overview with correct topology: the four upstream input streams (raw
+    materials, wafers, litho/optics, equipment) are PARALLEL, converging on the fab
+    checkpoint; chips -> parts -> baseboards -> servers then run sequentially.
+    MODE governs vertical scale: 'dollar' (one $ scale), 'log' (heights ~ log10 of
+    flow-set total), 'normalized' (equal heights / full column per stage)."""
+    TOPI, TOPG = 4, 5
+
+    def fold(flows, n):
+        ex = pd.Series(dtype=float)
+        im = pd.Series(dtype=float)
+        for (o, t), v in flows.items():
+            ex[o] = ex.get(o, 0.0) + v
+            im[t] = im.get(t, 0.0) + v
+        ko = set(ex.sort_values(ascending=False).head(n).index)
+        kt = set(im.sort_values(ascending=False).head(n).index)
+        f = {}
+        for (o, t), v in flows.items():
+            f[(o if o in ko else "Other", t if t in kt else "Other")] = \
+                f.get((o if o in ko else "Other", t if t in kt else "Other"), 0.0) + v
+        return f
+
+    inputs = [(lab, fold(fl, TOPI)) for lab, fl in input_stages]
+    seqs = [(lab, fold(fl, TOPG)) for lab, fl in seq_stages]
+    in_totals = [sum(f.values()) for _, f in inputs]
+    seq_totals = [sum(f.values()) for _, f in seqs]
+
+    H = 0.86
+    if MODE == "dollar":
+        s_common = H / max(seq_totals)
+        in_scales = [s_common] * len(inputs)
+        seq_scales = [s_common] * len(seqs)
+    elif MODE == "log":
+        logs = [np.log10(t) for t in in_totals]
+        blk = [H * l / sum(logs) * 0.92 for l in logs]
+        in_scales = [b / t for b, t in zip(blk, in_totals)]
+        seq_scales = [H * np.log10(t) / np.log10(max(seq_totals)) / t for t in seq_totals]
+    else:
+        in_scales = [H / len(inputs) * 0.92 / t for t in in_totals]
+        seq_scales = [H / t for t in seq_totals]
+
+    x_in = 0.045
+    xs = np.linspace(0.30, 0.955, len(seqs) + 1)   # fab checkpoint .. final importers
+    nw = 0.008
+    pad = 0.010
+
+    def order_of(f):
+        tot = pd.Series(dtype=float)
+        for (o, t), v in f.items():
+            tot[o] = tot.get(o, 0.0) + v
+        names = list(tot.sort_values(ascending=False).index)
+        if "Other" in names:
+            names.remove("Other")
+            names.append("Other")
+        return names
+
+    # ---- input block: 4 groups stacked on the left
+    y_cursor = 0.5 + (sum(t * s for t, s in zip(in_totals, in_scales))
+                      + 0.05 * (len(inputs) - 1)) / 2
+    in_group_pos = []                      # per group: (label, {exp: (ytop, h)}, scale)
+    for (lab, f), sc in zip(inputs, in_scales):
+        names = order_of(f)
+        pos, y = {}, y_cursor
+        for n_ in names:
+            h = sum(v for (o, t), v in f.items() if o == n_) * sc
+            pos[n_] = (y, h)
+            y -= h + pad * 0.6
+        in_group_pos.append((lab, pos, sc))
+        y_cursor = y - 0.05 + pad * 0.6
+
+    # ---- fab checkpoint column: in = all four input streams; out = chips
+    fab_in = {}
+    for (lab, f), sc in zip(inputs, in_scales):
+        for (o, t), v in f.items():
+            fab_in[t] = fab_in.get(t, 0.0) + v * sc
+    chips_f = seqs[0][1]
+    fab_out = {}
+    for (o, t), v in chips_f.items():
+        fab_out[o] = fab_out.get(o, 0.0) + v * seq_scales[0]
+    fab_names = [n for n in order_of({(k, k): v for k, v in
+                                      {**fab_in, **fab_out}.items()})]
+    # order fab column by combined size
+    fab_sz = {n: max(fab_in.get(n, 0.0), fab_out.get(n, 0.0)) for n in
+              set(fab_in) | set(fab_out)}
+    fab_names = sorted(fab_sz, key=lambda n: (n == "Other", -fab_sz[n]))
+    fab_pos, y = {}, 0.5 + (sum(fab_sz.values()) + pad * (len(fab_sz) - 1)) / 2
+    for n_ in fab_names:
+        fab_pos[n_] = (y, fab_sz[n_])
+        y -= fab_sz[n_] + pad
+
+    # ---- downstream checkpoint columns
+    col_pos = [fab_pos]
+    for g in range(1, len(seqs) + 1):
+        out_v, in_v = {}, {}
+        if g < len(seqs):
+            for (o, t), v in seqs[g][1].items():
+                out_v[o] = out_v.get(o, 0.0) + v * seq_scales[g]
+        for (o, t), v in seqs[g - 1][1].items():
+            in_v[t] = in_v.get(t, 0.0) + v * seq_scales[g - 1]
+        sz = {n: max(out_v.get(n, 0.0), in_v.get(n, 0.0)) for n in set(out_v) | set(in_v)}
+        names = sorted(sz, key=lambda n: (n == "Other", -sz[n]))
+        pos, y = {}, 0.5 + (sum(sz.values()) + pad * (len(sz) - 1)) / 2
+        for n_ in names:
+            pos[n_] = (y, sz[n_])
+            y -= sz[n_] + pad
+        col_pos.append(pos)
+
+    fig, ax = plt.subplots(figsize=(22, 10))
+    ax.set_xlim(0, 1)
+    ax.set_ylim(-0.16, 1.14)
+    ax.axis("off")
+    fig.patch.set_facecolor(SURFACE)
+
+    # input ribbons -> fab column (shared in-offsets, group by group)
+    fab_in_off = {n: 0.0 for n in fab_pos}
+    for (lab, f), (lab2, gpos, sc) in zip(inputs, in_group_pos):
+        out_off = {n: 0.0 for n in gpos}
+        for o in gpos:
+            for t in fab_pos:
+                v = f.get((o, t), 0.0)
+                if v <= 0:
+                    continue
+                h = v * sc
+                y0 = gpos[o][0] - out_off[o]
+                y1 = fab_pos[t][0] - fab_in_off[t]
+                out_off[o] += h
+                fab_in_off[t] += h
+                if h > 0.0035:
+                    ribbon(ax, x_in + nw, xs[0], y0, y1, h, COLOR.get(o, FALLBACK))
+
+    # sequential ribbons
+    for g, (lab, f) in enumerate(seqs):
+        src, dst = col_pos[g], col_pos[g + 1]
+        out_off = {n: 0.0 for n in src}
+        in_off = {n: 0.0 for n in dst}
+        for o in src:
+            for t in dst:
+                v = f.get((o, t), 0.0)
+                if v <= 0:
+                    continue
+                h = v * seq_scales[g]
+                y0 = src[o][0] - out_off[o]
+                y1 = dst[t][0] - in_off[t]
+                out_off[o] += h
+                in_off[t] += h
+                if h > 0.0035:
+                    ribbon(ax, xs[g] + nw, xs[g + 1], y0, y1, h, COLOR.get(o, FALLBACK))
+
+    # nodes
+    for lab, gpos, sc in in_group_pos:
+        for n_, (y, h) in gpos.items():
+            ax.add_patch(plt.Rectangle((x_in, y - h), nw, h,
+                                       facecolor=COLOR.get(n_, FALLBACK),
+                                       edgecolor=SURFACE, lw=0.4, zorder=3))
+        top = max(y for y, h in gpos.values())
+        ax.text(x_in, top + 0.012, lab, ha="left", fontsize=8.5, color=INK, weight="bold")
+    for c, pos in enumerate(col_pos):
+        for n_, (y, h) in pos.items():
+            ax.add_patch(plt.Rectangle((xs[c], y - h), nw, h,
+                                       facecolor=COLOR.get(n_, FALLBACK),
+                                       edgecolor=SURFACE, lw=0.4, zorder=3))
+
+    # captions
+    ax.text((x_in + xs[0]) / 2, 1.10, "parallel inputs into fabs", ha="center",
+            fontsize=10, color=INK, weight="bold")
+    ax.text((x_in + xs[0]) / 2, 1.068,   # no '$' here: paired $ triggers mathtext
+            "  |  ".join(f"{lab} {t:.0f}B" for (lab, _), t in zip(inputs, in_totals)),
+            ha="center", fontsize=7.5, color=INK2)
+    for g, ((lab, _), t) in enumerate(zip(seqs, seq_totals)):
+        xm = (xs[g] + xs[g + 1] + nw) / 2
+        yb = 1.10 if g % 2 == 0 else 1.045
+        ax.text(xm, yb, lab, ha="center", fontsize=9.5, color=INK, weight="bold")
+        ax.text(xm, yb - 0.032, f"${t:.0f}B", ha="center", fontsize=9, color=INK2)
+    ax.text(xs[0] + nw / 2, -0.035, "fab countries", ha="center", fontsize=8.5, color=MUTED)
+
+    # colour legend (consistent everywhere: CHN red, USA blue, ...)
+    lx = 0.045
+    for n_ in ["CHN", "USA", "TWN", "KOR", "JPN", "HKG", "MEX", "NLD", "DEU",
+               "SGP", "MYS", "VNM", "Other"]:
+        ax.add_patch(plt.Rectangle((lx, -0.135), 0.010, 0.026,
+                                   facecolor=COLOR.get(n_, FALLBACK), edgecolor="none"))
+        ax.text(lx + 0.014, -0.122, n_, fontsize=8.5, color=INK2, va="center")
+        lx += 0.062
+    scale_note = {"dollar": "one dollar scale — band widths nominally comparable everywhere",
+                  "log": "flow-set heights ~ log10 of totals — a compromise scale",
+                  "normalized": "stages equalized — shares only"}[MODE]
+    fig.suptitle("The AI-compute supply chain, 2024 — parallel inputs converge on the "
+                 f"fabs; chips flow on to servers ({scale_note})",
+                 fontsize=13, color=INK, y=0.985)
+    ax.text(0.5, -0.155, "Ribbon colour = exporting country (legend above); columns are "
+            "checkpoints (buy left, sell right). Smallest corridors not drawn. No "
+            "cross-stage absorption implied. Sources: docs/tech-ai-taxonomy.md; Atlas "
+            "HS2012 bilateral / monthly panel.", ha="center", fontsize=8, color=MUTED)
+    out = OUT_DIR / f"supply_chain_overview_{MODE}_{YEAR}.png"
+    fig.savefig(out, dpi=150, bbox_inches="tight", facecolor=SURFACE)
+    plt.close(fig)
+    print(f"-> {out}")
+
+
+def draw_overview(stage_flows, MODE="dollar"):  # unused: replaced by draw_chain_overview
     """Multi-column chain: checkpoint columns, one stage per gap. ONE common dollar
     scale across all stages, so band widths are nominally comparable everywhere --
     the chain visibly amplifies from $13B of raw materials to $926B of chips."""
@@ -490,8 +689,12 @@ def main():
         flows = flows_json(arg) if kind == "json" else flows_panel(arg)
         all_flows.append(flows)
         draw_hub_chart(fname, title, arg, kind)
+    input_stages = [("raw materials", all_flows[0]), ("wafers", all_flows[1]),
+                    ("litho & optics", all_flows[2]), ("fab equipment", all_flows[3])]
+    seq_stages = [("chips", all_flows[4]), ("parts & modules", all_flows[5]),
+                  ("baseboards", all_flows[6]), ("AI servers", all_flows[7])]
     for mode in ("dollar", "log", "normalized"):
-        draw_overview(all_flows, mode)
+        draw_chain_overview(input_stages, seq_stages, mode)
 
 
 if __name__ == "__main__":
