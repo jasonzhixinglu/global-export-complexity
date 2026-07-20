@@ -39,14 +39,22 @@ COLOR = {"TWN": "#1baf7a", "CHN": "#e34948", "HKG": "#e87ba4", "KOR": "#eda100",
 FALLBACK = "#898781"
 SURFACE, INK, INK2, MUTED = "#fcfcfb", "#0b0b0b", "#52514e", "#898781"
 
+# The OECD 'photo' basket (photosensitive devices, $66B) is excluded: it is
+# dominated by solar PV cells -- a fab OUTPUT, not an input to the AI chain.
 STAGES = [
-    ("1_equipment", "Stage 1-3 — Fab equipment & inputs", "8486xx + optics, wafers, materials",
-     ("json", ["equip", "raw", "foundry", "wafer", "photo"])),
-    ("2_chips", "Stage 4 — Chips (logic, memory, discretes)", "8542xx, 8541xx, media",
+    ("1_raw_materials", "Stage 1 — Raw materials", "silicon 280461, rare gases, Ga/Ge, chemicals",
+     ("json", ["raw"])),
+    ("2_wafers", "Stage 2 — Wafers & wafer inputs", "381800, 3701xx/370790",
+     ("json", ["wafer"])),
+    ("3_litho_optics", "Stage 3 — Lithography & optics inputs", "9001xx/9002xx, 901210/90, 903141",
+     ("json", ["foundry"])),
+    ("4_equipment", "Stage 4 — Fab equipment", "8486xx, metrology, fab plant",
+     ("json", ["equip"])),
+    ("5_chips", "Stage 5 — Chips (logic, memory, discretes)", "8542xx, 8541xx, media",
      ("json", ["chips"])),
-    ("3_parts", "Stage 5 — Parts & GPU modules", "HS 847330", ("panel", "847330")),
-    ("4_baseboards", "Stage 6 — Baseboards / other units", "HS 847180", ("panel", "847180")),
-    ("5_servers", "Stage 7 — Finished AI servers", "HS 847150", ("panel", "847150")),
+    ("6_parts", "Stage 6 — Parts & GPU modules", "HS 847330", ("panel", "847330")),
+    ("7_baseboards", "Stage 7 — Baseboards / other units", "HS 847180", ("panel", "847180")),
+    ("8_servers", "Stage 8 — Finished AI servers", "HS 847150", ("panel", "847150")),
 ]
 
 
@@ -173,11 +181,249 @@ def draw_stage(fname, title, codes_txt, flows):
     print(f"-> {out}  (${total:.0f}B)")
 
 
+def draw_stage_with_hubs(fname, title, code):
+    """Four-column chart for a panel code: exporters -> export hubs -> import hubs
+    -> importers. Middle columns come from the era-anchored TV-MFM (2024 mean of
+    monthly loadings and F, negative loadings clipped at 0); hub-pair dollars are
+    the model-implied decomposition renormalized to the year's actual total, so
+    this is an interpretation layer, not raw data."""
+    s = json.load(open(cfg.RESULTS_DIR / "mfm" / "tvmfm" / "by_country" / code / "stats.json"))
+    months = [p for p in s["periods"] if p.startswith(YEAR)]
+    countries = s["countries"]
+    R = np.mean([np.array(s["R_by_period"][m]) for m in months], axis=0).clip(min=0)
+    C = np.mean([np.array(s["C_by_period"][m]) for m in months], axis=0).clip(min=0)
+    F = np.mean([np.array(s["F_by_period"][m]) for m in months], axis=0)
+    K = R.shape[1]
+    hubR = [f"{countries[int(R[:, a].argmax())]}-led" for a in range(K)]
+    hubC = [f"{countries[int(C[:, b].argmax())]}-led" for b in range(K)]
+    hub_color_R = [COLOR.get(countries[int(R[:, a].argmax())], FALLBACK) for a in range(K)]
+    hub_color_C = [COLOR.get(countries[int(C[:, b].argmax())], FALLBACK) for b in range(K)]
+
+    Rsum, Csum = R.sum(0), C.sum(0)
+    V = np.outer(Rsum, Csum) * F                 # hub-pair fitted totals
+    V = V.clip(min=0)
+    total_actual = sum(flows_panel(code).values())
+    V *= total_actual / V.sum()
+    E = (R / np.where(Rsum > 0, Rsum, 1)) [:, :] * V.sum(1)   # exporter -> exp hub
+    I = (C / np.where(Csum > 0, Csum, 1)) [:, :] * V.sum(0)   # imp hub -> importer
+
+    def fold_side(M):
+        tot = pd.Series(M.sum(1), index=countries)
+        keep = set(tot.sort_values(ascending=False).head(TOP_N).index)
+        rows, names = {}, []
+        for i, c in enumerate(countries):
+            key = c if c in keep else "Other"
+            rows[key] = rows.get(key, np.zeros(M.shape[1])) + M[i]
+        names = [c for c in tot.sort_values(ascending=False).index if c in keep] + ["Other"]
+        return names, rows
+
+    ex_names, ex_rows = fold_side(E)
+    im_names, im_rows = fold_side(I)
+
+    pad = 0.02
+    scale = (1.0 - pad * (max(len(ex_names), K) - 1)) / total_actual
+    xs = [0.14, 0.42, 0.58, 0.86]
+    nw = 0.012
+
+    def stack(names, sizes, x_idx):
+        pos, y = {}, 1.0
+        for n in names:
+            h = sizes[n] * scale
+            pos[n] = (y, h)
+            y -= h + pad
+        return pos
+
+    ex_pos = stack(ex_names, {n: ex_rows[n].sum() for n in ex_names}, 0)
+    hubR_pos = stack(range(K), {a: V.sum(1)[a] for a in range(K)}, 1)
+    hubC_pos = stack(range(K), {b: V.sum(0)[b] for b in range(K)}, 2)
+    im_pos = stack(im_names, {n: im_rows[n].sum() for n in im_names}, 3)
+
+    fig, ax = plt.subplots(figsize=(12, 6.5))
+    ax.set_xlim(0, 1)
+    ax.set_ylim(-0.06, 1.06)
+    ax.axis("off")
+    fig.patch.set_facecolor(SURFACE)
+
+    def band(gap, src_pos, dst_pos, links, color_of):
+        out_off = {k: 0.0 for k in src_pos}
+        in_off = {k: 0.0 for k in dst_pos}
+        for sk, dk, v in links:
+            h = v * scale
+            if h <= 0:
+                continue
+            y0 = src_pos[sk][0] - out_off[sk]
+            y1 = dst_pos[dk][0] - in_off[dk]
+            out_off[sk] += h
+            in_off[dk] += h
+            if h > 0.004:
+                ribbon(ax, xs[gap] + nw, xs[gap + 1], y0, y1, h, color_of(sk, dk))
+
+    band(0, ex_pos, hubR_pos,
+         [(n, a, ex_rows[n][a]) for n in ex_names for a in range(K)],
+         lambda n, a: COLOR.get(n, FALLBACK))
+    band(1, hubR_pos, hubC_pos,
+         [(a, b, V[a, b]) for a in range(K) for b in range(K)],
+         lambda a, b: hub_color_R[a])
+    band(2, hubC_pos, im_pos,
+         [(b, n, im_rows[n][b]) for b in range(K) for n in im_names],
+         lambda b, n: hub_color_C[b])
+
+    for pos, names, colors, side in ((ex_pos, ex_names, None, "L"),
+                                     (im_pos, im_names, None, "R")):
+        for n in names:
+            y, h = pos[n]
+            ax.add_patch(plt.Rectangle((xs[0] if side == "L" else xs[3], y - h), nw, h,
+                                       facecolor=COLOR.get(n, FALLBACK),
+                                       edgecolor=SURFACE, lw=0.5, zorder=3))
+            x = xs[0] - 0.008 if side == "L" else xs[3] + nw + 0.008
+            tot = (ex_rows if side == "L" else im_rows)[n].sum()
+            ax.text(x, y - h / 2, f"{n}  {tot:.1f}", ha="right" if side == "L" else "left",
+                    va="center", fontsize=9, color=INK2)
+    for pos, labels, colors, x in ((hubR_pos, hubR, hub_color_R, xs[1]),
+                                   (hubC_pos, hubC, hub_color_C, xs[2])):
+        for k, (y, h) in pos.items():
+            ax.add_patch(plt.Rectangle((x, y - h), nw, h, facecolor=colors[k],
+                                       edgecolor=SURFACE, lw=0.5, zorder=3))
+            if h > 0.015:
+                ax.text(x + nw / 2, y + 0.006, labels[k], ha="center", va="bottom",
+                        fontsize=8, color=INK2)
+
+    for x, lab in ((xs[0], "exporters ($B)"), (xs[1] + nw / 2, "export hubs"),
+                   (xs[2] + nw / 2, "import hubs"), (xs[3] + nw, "importers ($B)")):
+        ax.text(x, 1.045, lab, ha="center", fontsize=9, color=MUTED)
+    ax.set_title(f"{title} — through the factor model's hubs ({YEAR})\n"
+                 f"country -> hub attribution from TV-MFM loadings; hub-to-hub = F; "
+                 f"total ${total_actual:.0f}B", fontsize=11, color=INK, pad=16)
+    ax.text(0.5, -0.055, "Model-implied decomposition (era-anchored TV-MFM, 2024 means; "
+            "negative loadings clipped; renormalized to actual total). Hub named by its "
+            "dominant member.", ha="center", fontsize=7.5, color=MUTED)
+    out = OUT_DIR / f"supply_chain_{fname}_hubs_{YEAR}.png"
+    fig.savefig(out, dpi=150, bbox_inches="tight", facecolor=SURFACE)
+    plt.close(fig)
+    print(f"-> {out}")
+
+
+def draw_overview(stage_flows):
+    """Multi-column chain: checkpoint columns, one stage per gap. Each gap is
+    normalized to full height (stage totals differ 70x); totals printed per stage."""
+    TOPG = 5
+    H = 0.82
+    folded = []
+    for flows in stage_flows:
+        ex = pd.Series(dtype=float)
+        im = pd.Series(dtype=float)
+        for (o, t), v in flows.items():
+            ex[o] = ex.get(o, 0.0) + v
+            im[t] = im.get(t, 0.0) + v
+        ko = set(ex.sort_values(ascending=False).head(TOPG).index)
+        kt = set(im.sort_values(ascending=False).head(TOPG).index)
+        f = {}
+        for (o, t), v in flows.items():
+            key = (o if o in ko else "Other", t if t in kt else "Other")
+            f[key] = f.get(key, 0.0) + v
+        folded.append(f)
+
+    n_cols = len(folded) + 1
+    # global stacking order by total involvement, Other last
+    inv = pd.Series(dtype=float)
+    for f in folded:
+        for (o, t), v in f.items():
+            inv[o] = inv.get(o, 0.0) + v
+            inv[t] = inv.get(t, 0.0) + v
+    order = [c for c in inv.sort_values(ascending=False).index if c != "Other"] + ["Other"]
+
+    scales = [H / sum(f.values()) for f in folded]
+    pad = 0.014
+
+    def col_nodes(c):
+        out_v, in_v = {}, {}
+        if c < len(folded):
+            for (o, t), v in folded[c].items():
+                out_v[o] = out_v.get(o, 0.0) + v * scales[c]
+        if c > 0:
+            for (o, t), v in folded[c - 1].items():
+                in_v[t] = in_v.get(t, 0.0) + v * scales[c - 1]
+        names = [n for n in order if n in out_v or n in in_v]
+        return {n: max(out_v.get(n, 0.0), in_v.get(n, 0.0)) for n in names}
+
+    node_pos = []
+    for c in range(n_cols):
+        sizes = col_nodes(c)
+        total_h = sum(sizes.values()) + pad * (len(sizes) - 1)
+        y = 0.5 + total_h / 2
+        pos = {}
+        for n in order:
+            if n not in sizes:
+                continue
+            pos[n] = (y, sizes[n])
+            y -= sizes[n] + pad
+        node_pos.append(pos)
+
+    xs = np.linspace(0.03, 0.97, n_cols)
+    nw = 0.007
+    fig, ax = plt.subplots(figsize=(22, 9))
+    ax.set_xlim(0, 1)
+    ax.set_ylim(-0.09, 1.20)
+    ax.axis("off")
+    fig.patch.set_facecolor(SURFACE)
+
+    for g, f in enumerate(folded):
+        out_off = {n: 0.0 for n in node_pos[g]}
+        in_off = {n: 0.0 for n in node_pos[g + 1]}
+        for o in order:
+            for t in order:
+                v = f.get((o, t), 0.0)
+                if v <= 0:
+                    continue
+                h = v * scales[g]
+                y0 = node_pos[g][o][0] - out_off[o]
+                y1 = node_pos[g + 1][t][0] - in_off[t]
+                out_off[o] += h
+                in_off[t] += h
+                if h > 0.011:
+                    ribbon(ax, xs[g] + nw, xs[g + 1], y0, y1, h, COLOR.get(o, FALLBACK))
+
+    for c in range(n_cols):
+        for n, (y, h) in node_pos[c].items():
+            ax.add_patch(plt.Rectangle((xs[c], y - h), nw, h,
+                                       facecolor=COLOR.get(n, FALLBACK),
+                                       edgecolor=SURFACE, lw=0.4, zorder=3))
+            if h > 0.03:
+                ax.text(xs[c] + nw / 2, y + 0.008, n, ha="center", va="bottom",
+                        fontsize=7.5, color=INK2, zorder=4)
+
+    for g, ((_, title, codes_txt, _), f) in enumerate(zip(STAGES, folded)):
+        xm = (xs[g] + xs[g + 1] + nw) / 2
+        short = title.split("— ")[1]
+        yb = 1.16 if g % 2 == 0 else 1.075     # stagger captions to avoid collisions
+        ax.text(xm, yb, short, ha="center", fontsize=9.5, color=INK, weight="bold")
+        ax.text(xm, yb - 0.032, f"${sum(f.values()):.0f}B", ha="center", fontsize=9,
+                color=INK2)
+
+    fig.suptitle("The AI-compute supply chain, 2024 — eight stages of bilateral trade "
+                 "(each stage normalized to full height; totals above)",
+                 fontsize=13, color=INK, y=0.99)
+    ax.text(0.5, -0.08, "Ribbon colour = exporting country; each column is a checkpoint "
+            "(country sells the right-hand stage, buys the left-hand stage). Widths comparable "
+            "WITHIN a stage only. No cross-stage absorption implied. Sources: "
+            "docs/tech-ai-taxonomy.md codes; Atlas HS2012 bilateral / monthly panel.",
+            ha="center", fontsize=8, color=MUTED)
+    out = OUT_DIR / f"supply_chain_overview_{YEAR}.png"
+    fig.savefig(out, dpi=150, bbox_inches="tight", facecolor=SURFACE)
+    plt.close(fig)
+    print(f"-> {out}")
+
+
 def main():
     OUT_DIR.mkdir(exist_ok=True)
+    all_flows = []
     for fname, title, codes_txt, (kind, arg) in STAGES:
         flows = flows_json(arg) if kind == "json" else flows_panel(arg)
+        all_flows.append(flows)
         draw_stage(fname, title, codes_txt, flows)
+        if kind == "panel":
+            draw_stage_with_hubs(fname, title, arg)
+    draw_overview(all_flows)
 
 
 if __name__ == "__main__":
