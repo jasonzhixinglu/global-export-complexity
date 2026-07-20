@@ -29,13 +29,16 @@ the chips stage.
 The same map as flow charts (`exports/supply_chain_*_2024.png`, regenerate with
 `python scripts/export_supply_chain_sankey.py`): a multi-column overview of all
 eight stages in two scale versions (dollar and normalized; a log version was
-tried and retired — it wholesale-inflates small, Other-dominated stages), plus
-one four-column chart per stage
+tried and retired — it wholesale-inflates small, Other-dominated stages), a
+country-network graph (nodes = countries, edges = flows by stage — the view
+that shows an integrated assembler like Mexico correctly: chips and parts in,
+servers out at one node), plus one four-column chart per stage
 routing the flows through factor-model hubs (exporters -> export hubs -> import
 hubs -> importers; TV-MFM hubs for the three compute codes, annual
 constant-loading MFM upstream; hub decompositions fit at R^2 0.95-0.99, so
 these carry the flows faithfully).
 
+![network](../exports/supply_chain_network_2024.png)
 ![overview dollar](../exports/supply_chain_overview_dollar_2024.png)
 ![overview normalized](../exports/supply_chain_overview_normalized_2024.png)
 ![raw materials](../exports/supply_chain_1_raw_materials_hubs_2024.png)

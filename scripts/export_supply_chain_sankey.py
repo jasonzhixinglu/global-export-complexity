@@ -618,6 +618,82 @@ def draw_chain_overview(input_stages, seq_stages, MODE="dollar"):
     print(f"-> {out}")
 
 
+def draw_network(stage_groups):
+    """Country-node network graph: one node per country (all stages together), so an
+    integrated assembler's full mix is visible at one node (Mexico: chips+parts in,
+    servers out). Edges = bilateral flows >= EDGE_MIN, coloured by product stage,
+    width ~ sqrt(dollars); node area ~ total involvement. Complements the staged
+    flow charts, which cannot show in-country transformation."""
+    from matplotlib.patches import FancyArrowPatch, Circle
+    EDGE_MIN = 5.0
+    POS = {"USA": (0.13, 0.56), "MEX": (0.10, 0.28), "DEU": (0.27, 0.86),
+           "NLD": (0.41, 0.92), "JPN": (0.88, 0.84), "KOR": (0.79, 0.71),
+           "TWN": (0.86, 0.50), "CHK": (0.64, 0.62), "VNM": (0.57, 0.40),
+           "MYS": (0.73, 0.30), "SGP": (0.60, 0.20), "THA": (0.76, 0.14),
+           "Other": (0.33, 0.12)}
+    SCOL = {"fab inputs": "#898781", "chips": "#7b3fbf", "parts": "#2a78d6",
+            "baseboards": "#00a878", "servers": "#eb6834"}
+
+    def fold(fl):
+        out = {}
+        for (o, t), v in fl.items():
+            o2 = o if o in POS else "Other"
+            t2 = t if t in POS else "Other"
+            if o2 != t2:
+                out[(o2, t2)] = out.get((o2, t2), 0.0) + v
+        return out
+
+    groups = {lab: fold(fl) for lab, fl in stage_groups.items()}
+    inv = {n: 0.0 for n in POS}
+    for fl in groups.values():
+        for (o, t), v in fl.items():
+            inv[o] += v
+            inv[t] += v
+
+    fig, ax = plt.subplots(figsize=(13, 9))
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1.02)
+    ax.axis("off")
+    fig.patch.set_facecolor(SURFACE)
+
+    # edges: big first so small stay visible on top; slight per-stage curvature so
+    # parallel stage-flows between the same pair do not cover each other
+    rads = {lab: r for lab, r in zip(groups, (-0.28, -0.14, 0.0, 0.14, 0.28))}
+    edges = [(lab, o, t, v) for lab, fl in groups.items() for (o, t), v in fl.items()
+             if v >= EDGE_MIN]
+    for lab, o, t, v in sorted(edges, key=lambda e: -e[3]):
+        (x0, y0), (x1, y1) = POS[o], POS[t]
+        ax.add_patch(FancyArrowPatch((x0, y0), (x1, y1),
+                     connectionstyle=f"arc3,rad={rads[lab]}",
+                     arrowstyle="-|>", mutation_scale=9 + 1.1 * np.sqrt(v),
+                     lw=0.55 * np.sqrt(v), color=SCOL[lab], alpha=0.5,
+                     shrinkA=16, shrinkB=17, zorder=2))
+
+    for n, (x, y) in POS.items():
+        r = 0.012 + 0.0022 * np.sqrt(inv[n])
+        ax.add_patch(Circle((x, y), r, facecolor="#3a3936", edgecolor=SURFACE,
+                            lw=1.2, zorder=5))
+        ax.text(x, y, n, ha="center", va="center", fontsize=8.5, color="#ffffff",
+                zorder=6, weight="bold")
+        ax.text(x, y - r - 0.016, f"{inv[n]:.0f}B", ha="center", fontsize=7,
+                color=MUTED, zorder=6)
+
+    lx = 0.03
+    for lab, c in SCOL.items():
+        ax.plot([lx, lx + 0.03], [0.995, 0.995], color=c, lw=4, alpha=0.7)
+        ax.text(lx + 0.036, 0.995, lab, fontsize=8.5, color=INK2, va="center")
+        lx += 0.045 + 0.0085 * len(lab)
+    ax.set_title("The AI-compute supply chain as a country network, 2024 — "
+                 "edges by product stage, width ~ $", fontsize=12.5, color=INK,
+                 pad=18, loc="left")
+    ax.text(0.99, 0.995, f"flows >= {EDGE_MIN:.0f}B; node label = total involvement; "
+            "CHK = China+HK", ha="right", fontsize=7.5, color=MUTED)
+    out = OUT_DIR / f"supply_chain_network_{YEAR}.png"
+    fig.savefig(out, dpi=150, bbox_inches="tight", facecolor=SURFACE)
+    plt.close(fig)
+    print(f"-> {out}")
+
+
 def draw_overview(stage_flows, MODE="dollar"):  # unused: replaced by draw_chain_overview
     """Multi-column chain: checkpoint columns, one stage per gap. ONE common dollar
     scale across all stages, so band widths are nominally comparable everywhere --
@@ -759,6 +835,13 @@ def main():
                   ("AI servers", all_flows[7])]
     for mode in ("dollar", "normalized"):   # log retired: inflates small (Other-heavy) stages
         draw_chain_overview(input_stages, seq_stages, mode)
+    fab_inputs = {}
+    for f in all_flows[:4]:
+        for k, v in f.items():
+            fab_inputs[k] = fab_inputs.get(k, 0.0) + v
+    draw_network({"fab inputs": fab_inputs, "chips": all_flows[4],
+                  "parts": all_flows[5], "baseboards": all_flows[6],
+                  "servers": all_flows[7]})
 
 
 if __name__ == "__main__":
