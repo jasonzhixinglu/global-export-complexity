@@ -28,16 +28,16 @@ the chips stage.
 
 The same map as flow charts (`exports/supply_chain_*_2024.png`, regenerate with
 `python scripts/export_supply_chain_sankey.py`): a multi-column overview of all
-eight stages in three scale versions (dollar — nominally comparable widths
-everywhere; log — column height tracks log10 of the stage total; normalized —
-every stage full height, shares only), plus one four-column chart per stage
+eight stages in two scale versions (dollar — nominally comparable widths
+everywhere; normalized — stages equalized, shares only; a log version was tried
+and retired: log of stage totals wholesale-inflates small, Other-dominated
+stages), plus one four-column chart per stage
 routing the flows through factor-model hubs (exporters -> export hubs -> import
 hubs -> importers; TV-MFM hubs for the three compute codes, annual
 constant-loading MFM upstream; hub decompositions fit at R^2 0.95-0.99, so
 these carry the flows faithfully).
 
 ![overview dollar](../exports/supply_chain_overview_dollar_2024.png)
-![overview log](../exports/supply_chain_overview_log_2024.png)
 ![overview normalized](../exports/supply_chain_overview_normalized_2024.png)
 ![raw materials](../exports/supply_chain_1_raw_materials_hubs_2024.png)
 ![wafers](../exports/supply_chain_2_wafers_hubs_2024.png)
@@ -47,6 +47,11 @@ these carry the flows faithfully).
 ![parts](../exports/supply_chain_6_parts_hubs_2024.png)
 ![baseboards](../exports/supply_chain_7_baseboards_hubs_2024.png)
 ![servers](../exports/supply_chain_8_servers_hubs_2024.png)
+![servers 2025](../exports/supply_chain_8_servers_hubs_2025.png)
+
+All charts merge China+Hong Kong (CHK; intra-bloc flows excluded). Stages 1-5 are
+Atlas HS2012 annual bilateral data (ends 2024); stages 6-8 are the Comtrade+TDM
+monthly panel, which also provides 2025 versions of those three charts.
 
 Two facts about this map shape everything downstream. First, **each stage lives in
 different countries**, so the chain *is* a sequence of border crossings: Japanese
