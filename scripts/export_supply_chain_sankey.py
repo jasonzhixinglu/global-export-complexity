@@ -425,56 +425,67 @@ def draw_chain_overview(input_stages, seq_stages, MODE="dollar"):
             names.append("Other")
         return names
 
-    # ---- input block: 4 groups stacked on the left
-    y_cursor = 0.5 + (sum(t * s for t, s in zip(in_totals, in_scales))
-                      + 0.05 * (len(inputs) - 1)) / 2
-    in_group_pos = []                      # per group: (label, {exp: (ytop, h)}, scale)
-    for (lab, f), sc in zip(inputs, in_scales):
-        names = order_of(f)
-        pos, y = {}, y_cursor
-        for n_ in names:
-            h = sum(v for (o, t), v in f.items() if o == n_) * sc
-            pos[n_] = (y, h)
-            y -= h + pad * 0.6
-        in_group_pos.append((lab, pos, sc))
-        y_cursor = y - 0.05 + pad * 0.6
+    def build_layout(in_scales, seq_scales):
+        """Node layout for all columns; returns positions + tallest column span."""
+        y_cursor = 0.5 + (sum(t * s for t, s in zip(in_totals, in_scales))
+                          + 0.05 * (len(inputs) - 1)) / 2
+        in_top = y_cursor
+        in_group_pos = []                  # per group: (label, {exp: (ytop, h)}, scale)
+        for (lab, f), sc in zip(inputs, in_scales):
+            names = order_of(f)
+            pos, y = {}, y_cursor
+            for n_ in names:
+                h = sum(v for (o, t), v in f.items() if o == n_) * sc
+                pos[n_] = (y, h)
+                y -= h + pad * 0.6
+            in_group_pos.append((lab, pos, sc))
+            y_cursor = y - 0.05 + pad * 0.6
+        spans = [in_top - (y_cursor + 0.05)]
 
-    # ---- fab checkpoint column: in = all four input streams; out = chips
-    fab_in = {}
-    for (lab, f), sc in zip(inputs, in_scales):
-        for (o, t), v in f.items():
-            fab_in[t] = fab_in.get(t, 0.0) + v * sc
-    chips_f = seqs[0][1]
-    fab_out = {}
-    for (o, t), v in chips_f.items():
-        fab_out[o] = fab_out.get(o, 0.0) + v * seq_scales[0]
-    fab_names = [n for n in order_of({(k, k): v for k, v in
-                                      {**fab_in, **fab_out}.items()})]
-    # order fab column by combined size
-    fab_sz = {n: max(fab_in.get(n, 0.0), fab_out.get(n, 0.0)) for n in
-              set(fab_in) | set(fab_out)}
-    fab_names = sorted(fab_sz, key=lambda n: (n == "Other", -fab_sz[n]))
-    fab_pos, y = {}, 0.5 + (sum(fab_sz.values()) + pad * (len(fab_sz) - 1)) / 2
-    for n_ in fab_names:
-        fab_pos[n_] = (y, fab_sz[n_])
-        y -= fab_sz[n_] + pad
+        fab_in = {}
+        for (lab, f), sc in zip(inputs, in_scales):
+            for (o, t), v in f.items():
+                fab_in[t] = fab_in.get(t, 0.0) + v * sc
+        fab_out = {}
+        for (o, t), v in seqs[0][1].items():
+            fab_out[o] = fab_out.get(o, 0.0) + v * seq_scales[0]
+        fab_sz = {n: max(fab_in.get(n, 0.0), fab_out.get(n, 0.0)) for n in
+                  set(fab_in) | set(fab_out)}
+        fab_names = sorted(fab_sz, key=lambda n: (n == "Other", -fab_sz[n]))
+        T = sum(fab_sz.values()) + pad * (len(fab_sz) - 1)
+        spans.append(T)
+        fab_pos, y = {}, 0.5 + T / 2
+        for n_ in fab_names:
+            fab_pos[n_] = (y, fab_sz[n_])
+            y -= fab_sz[n_] + pad
 
-    # ---- downstream checkpoint columns
-    col_pos = [fab_pos]
-    for g in range(1, len(seqs) + 1):
-        out_v, in_v = {}, {}
-        if g < len(seqs):
-            for (o, t), v in seqs[g][1].items():
-                out_v[o] = out_v.get(o, 0.0) + v * seq_scales[g]
-        for (o, t), v in seqs[g - 1][1].items():
-            in_v[t] = in_v.get(t, 0.0) + v * seq_scales[g - 1]
-        sz = {n: max(out_v.get(n, 0.0), in_v.get(n, 0.0)) for n in set(out_v) | set(in_v)}
-        names = sorted(sz, key=lambda n: (n == "Other", -sz[n]))
-        pos, y = {}, 0.5 + (sum(sz.values()) + pad * (len(sz) - 1)) / 2
-        for n_ in names:
-            pos[n_] = (y, sz[n_])
-            y -= sz[n_] + pad
-        col_pos.append(pos)
+        col_pos = [fab_pos]
+        for g in range(1, len(seqs) + 1):
+            out_v, in_v = {}, {}
+            if g < len(seqs):
+                for (o, t), v in seqs[g][1].items():
+                    out_v[o] = out_v.get(o, 0.0) + v * seq_scales[g]
+            for (o, t), v in seqs[g - 1][1].items():
+                in_v[t] = in_v.get(t, 0.0) + v * seq_scales[g - 1]
+            sz = {n: max(out_v.get(n, 0.0), in_v.get(n, 0.0))
+                  for n in set(out_v) | set(in_v)}
+            names = sorted(sz, key=lambda n: (n == "Other", -sz[n]))
+            T = sum(sz.values()) + pad * (len(sz) - 1)
+            spans.append(T)
+            pos, y = {}, 0.5 + T / 2
+            for n_ in names:
+                pos[n_] = (y, sz[n_])
+                y -= sz[n_] + pad
+            col_pos.append(pos)
+        return in_group_pos, col_pos, max(spans)
+
+    in_group_pos, col_pos, span = build_layout(in_scales, seq_scales)
+    if span > 0.96:                        # tallest column would clip: shrink to fit
+        f = 0.96 / span
+        in_scales = [s * f for s in in_scales]
+        seq_scales = [s * f for s in seq_scales]
+        in_group_pos, col_pos, span = build_layout(in_scales, seq_scales)
+    fab_pos = col_pos[0]
 
     fig, ax = plt.subplots(figsize=(22, 10))
     ax.set_xlim(0, 1)
