@@ -286,6 +286,20 @@ def draw_hub_chart(fname, title, code_or_baskets, kind, year=YEAR):
     V *= total_actual / V.sum()
     E = (R / np.where(Rsum > 0, Rsum, 1)) [:, :] * V.sum(1)   # exporter -> exp hub
     I = (C / np.where(Csum > 0, Csum, 1)) [:, :] * V.sum(0)   # imp hub -> importer
+    # rescale outer columns to ACTUAL country totals (model attribution can misstate
+    # e.g. Mexico by 2x); hub columns keep model proportions, nodes absorb the gap
+    fl = flows_panel(code_or_baskets, year) if kind == "panel" else flows_json(code_or_baskets)
+    act_ex, act_im = {}, {}
+    for (o, t), v in fl.items():
+        act_ex[o] = act_ex.get(o, 0.0) + v
+        act_im[t] = act_im.get(t, 0.0) + v
+    for i, c in enumerate(countries):
+        rs = E[i].sum()
+        if rs > 0:
+            E[i] *= act_ex.get(c, 0.0) / rs
+        cs = I[i].sum()
+        if cs > 0:
+            I[i] *= act_im.get(c, 0.0) / cs
 
     def fold_side(M):
         tot = pd.Series(M.sum(1), index=countries)
@@ -374,9 +388,8 @@ def draw_hub_chart(fname, title, code_or_baskets, kind, year=YEAR):
     ax.set_title(f"{title} — through the factor model's hubs ({year})\n"
                  f"country -> hub attribution from loadings; hub-to-hub = F; "
                  f"total ${total_actual:.0f}B", fontsize=11, color=INK, pad=16)
-    ax.text(0.5, -0.055, f"Model-implied decomposition ({src}; negative loadings "
-            "clipped; renormalized to actual total). China+Hong Kong merged (CHK). "
-            f"Hub named by its dominant member. Data: {data_src}.",
+    ax.text(0.5, -0.055, f"Hub decomposition from the factor model ({src}); "
+            f"outer columns rescaled to actual totals. CHK = China+HK. Data: {data_src}.",
             ha="center", fontsize=7.5, color=MUTED)
     out = OUT_DIR / f"supply_chain_{fname}_hubs_{year}.png"
     fig.savefig(out, dpi=150, bbox_inches="tight", facecolor=SURFACE)
@@ -578,6 +591,8 @@ def draw_chain_overview(input_stages, seq_stages, MODE="dollar"):
         ax.text(xm, yb, lab, ha="center", fontsize=9.5, color=INK, weight="bold")
         ax.text(xm, yb - 0.032, f"${t:.0f}B", ha="center", fontsize=9, color=INK2)
     ax.text(xs[0] + nw / 2, -0.035, "fab countries", ha="center", fontsize=8.5, color=MUTED)
+    ax.text((xs[1] + xs[2]) / 2, -0.035, "assembly countries", ha="center",
+            fontsize=8.5, color=MUTED)
 
     # colour legend (consistent everywhere: CHN red, USA blue, ...)
     lx = 0.045
@@ -593,12 +608,9 @@ def draw_chain_overview(input_stages, seq_stages, MODE="dollar"):
     fig.suptitle("The AI-compute supply chain, 2024 — parallel inputs converge on the "
                  f"fabs; chips flow on to servers ({scale_note})",
                  fontsize=13, color=INK, y=0.985)
-    ax.text(0.5, -0.155, "Ribbon colour = exporting country (legend above); columns are "
-            f"checkpoints (buy left, sell right). China+Hong Kong merged (CHK). Countries under {FOLD_MIN:.0f}B on a "
-            "side fold into Other, so small stages may show few named countries. No "
-            "cross-stage absorption implied. 2024 = latest year covered by every stage. "
-            "Sources: stages 1-5 Atlas HS2012 ANNUAL bilateral (ends 2024); stages 6-8 "
-            "Comtrade+TDM monthly panel (2025 versions of those charts exist).",
+    ax.text(0.5, -0.155, "Ribbon colour = exporter; CHK = China+Hong Kong merged; "
+            f"countries under {FOLD_MIN:.0f}B/side fold into Other. Sources: Atlas annual "
+            "(stages 1-5), Comtrade+TDM monthly panel (compute stages).",
             ha="center", fontsize=8, color=MUTED)
     out = OUT_DIR / f"supply_chain_overview_{MODE}_{YEAR}.png"
     fig.savefig(out, dpi=150, bbox_inches="tight", facecolor=SURFACE)
@@ -736,12 +748,15 @@ def main():
         flows = flows_json(arg) if kind == "json" else flows_panel(arg)
         all_flows.append(flows)
         draw_hub_chart(fname, title, arg, kind)
-        if kind == "panel":
-            draw_hub_chart(fname, title, arg, kind, year="2025")
     input_stages = [("raw materials", all_flows[0]), ("wafers", all_flows[1]),
                     ("litho & optics", all_flows[2]), ("fab equipment", all_flows[3])]
-    seq_stages = [("chips", all_flows[4]), ("parts & modules", all_flows[5]),
-                  ("baseboards", all_flows[6]), ("AI servers", all_flows[7])]
+    inter = {}
+    for f in (all_flows[5], all_flows[6]):
+        for k, v in f.items():
+            inter[k] = inter.get(k, 0.0) + v
+    seq_stages = [("chips", all_flows[4]),
+                  ("intra-assembly trade (parts+baseboards)", inter),
+                  ("AI servers", all_flows[7])]
     for mode in ("dollar", "normalized"):   # log retired: inflates small (Other-heavy) stages
         draw_chain_overview(input_stages, seq_stages, mode)
 

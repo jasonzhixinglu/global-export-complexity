@@ -28,10 +28,9 @@ the chips stage.
 
 The same map as flow charts (`exports/supply_chain_*_2024.png`, regenerate with
 `python scripts/export_supply_chain_sankey.py`): a multi-column overview of all
-eight stages in two scale versions (dollar — nominally comparable widths
-everywhere; normalized — stages equalized, shares only; a log version was tried
-and retired: log of stage totals wholesale-inflates small, Other-dominated
-stages), plus one four-column chart per stage
+eight stages in two scale versions (dollar and normalized; a log version was
+tried and retired — it wholesale-inflates small, Other-dominated stages), plus
+one four-column chart per stage
 routing the flows through factor-model hubs (exporters -> export hubs -> import
 hubs -> importers; TV-MFM hubs for the three compute codes, annual
 constant-loading MFM upstream; hub decompositions fit at R^2 0.95-0.99, so
@@ -47,11 +46,14 @@ these carry the flows faithfully).
 ![parts](../exports/supply_chain_6_parts_hubs_2024.png)
 ![baseboards](../exports/supply_chain_7_baseboards_hubs_2024.png)
 ![servers](../exports/supply_chain_8_servers_hubs_2024.png)
-![servers 2025](../exports/supply_chain_8_servers_hubs_2025.png)
 
-All charts merge China+Hong Kong (CHK; intra-bloc flows excluded). Stages 1-5 are
-Atlas HS2012 annual bilateral data (ends 2024); stages 6-8 are the Comtrade+TDM
-monthly panel, which also provides 2025 versions of those three charts.
+All charts merge China+Hong Kong (CHK; intra-bloc flows excluded) and show 2024,
+the latest year covered by every stage. Stages 1-5 are Atlas HS2012 annual
+bilateral data; stages 6-8 the Comtrade+TDM monthly panel. In the overview,
+parts+baseboards form a single intra-assembly gap (trade among assembly
+countries), because in-country transformation is invisible to customs data —
+Mexico imports chips and parts and exports finished servers, performing the
+intermediate stages domestically.
 
 Two facts about this map shape everything downstream. First, **each stage lives in
 different countries**, so the chain *is* a sequence of border crossings: Japanese

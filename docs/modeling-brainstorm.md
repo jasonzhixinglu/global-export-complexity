@@ -131,3 +131,15 @@ industry. If it fails these, the model is wrong, not the priors.
 *Working decisions (details in results/mfm/ and the git log): dollar levels rather
 than logs; 12-month trailing estimation window; no seasonal adjustment; era-anchored
 hub labels with breaks at 2023-07 and 2025-04.*
+
+
+## 2026-07: Visualization — country-node network graphs (OPEN)
+
+The staged flow-of-funds charts have a structural limit: columns imply goods hop
+countries between stages, but integrated assemblers (Mexico: chips in, servers
+out) do the intermediate stages domestically, which customs data cannot show. A
+complementary chart type would put COUNTRIES as nodes (one node per country, laid
+out geographically or by role) and draw product flows as directed edges between
+them, coloured/styled by product stage — so a country's full input/output mix sits
+at one node instead of being scattered across checkpoints. Candidate first cut:
+top ~12 countries + Other, edges from the same stage flow data, edge width = $.
