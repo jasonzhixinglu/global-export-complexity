@@ -85,9 +85,9 @@ def flows_json(baskets):
     return apply_bloc(agg)
 
 
-def flows_panel(code):
+def flows_panel(code, year=YEAR):
     p = pd.read_parquet(cfg.DATA_DIR / "derived" / "panel_ai_compute_monthly.parquet")
-    p = p[(p.code == code) & (p.period.str[:4] == YEAR)]
+    p = p[(p.code == code) & (p.period.str[:4] == year)]
     g = p.groupby(["exporter", "importer"]).value.sum() / 1e9
     return apply_bloc({k: float(v) for k, v in g.items()})
 
@@ -214,16 +214,16 @@ def varimax(L, iters=200, tol=1e-8):
     return O
 
 
-def hubs_from_panel(code):
+def hubs_from_panel(code, year=YEAR):
     """Hub inputs from the era-anchored TV-MFM (China+HKG bloc variant): 2024 means
     of monthly loadings/F."""
     s = json.load(open(cfg.RESULTS_DIR / "mfm" / "tvmfm" / "chn_hkg_bloc" / code / "stats.json"))
-    months = [p for p in s["periods"] if p.startswith(YEAR)]
+    months = [p for p in s["periods"] if p.startswith(year)]
     countries = s["countries"]
     R = np.mean([np.array(s["R_by_period"][m]) for m in months], axis=0).clip(min=0)
     C = np.mean([np.array(s["C_by_period"][m]) for m in months], axis=0).clip(min=0)
     F = np.mean([np.array(s["F_by_period"][m]) for m in months], axis=0)
-    return countries, R, C, F, "era-anchored TV-MFM, 2024 monthly means"
+    return countries, R, C, F, f"era-anchored TV-MFM, {year} monthly means"
 
 
 def hubs_from_json(baskets, k=4):
@@ -262,16 +262,18 @@ def hubs_from_json(baskets, k=4):
         "constant-loading annual MFM 2020-24 (no monthly panel upstream)"
 
 
-def draw_hub_chart(fname, title, code_or_baskets, kind):
+def draw_hub_chart(fname, title, code_or_baskets, kind, year=YEAR):
     """Four-column chart: exporters -> export hubs -> import hubs -> importers.
     Hub-pair dollars are the model-implied decomposition renormalized to the
     year's actual total -- an interpretation layer, not raw data."""
     if kind == "panel":
-        countries, R, C, F, src = hubs_from_panel(code_or_baskets)
-        total_actual = sum(flows_panel(code_or_baskets).values())
+        countries, R, C, F, src = hubs_from_panel(code_or_baskets, year)
+        total_actual = sum(flows_panel(code_or_baskets, year).values())
+        data_src = "Comtrade+TDM monthly panel"
     else:
         countries, R, C, F, src = hubs_from_json(code_or_baskets)
         total_actual = sum(flows_json(code_or_baskets).values())
+        data_src = "Atlas HS2012 annual bilateral"
     K = R.shape[1]
     hubR = [f"{countries[int(R[:, a].argmax())]}-led" for a in range(K)]
     hubC = [f"{countries[int(C[:, b].argmax())]}-led" for b in range(K)]
@@ -369,13 +371,14 @@ def draw_hub_chart(fname, title, code_or_baskets, kind):
     for x, lab in ((xs[0], "exporters ($B)"), (xs[1] + nw / 2, "export hubs"),
                    (xs[2] + nw / 2, "import hubs"), (xs[3] + nw, "importers ($B)")):
         ax.text(x, 1.045, lab, ha="center", fontsize=9, color=MUTED)
-    ax.set_title(f"{title} — through the factor model's hubs ({YEAR})\n"
+    ax.set_title(f"{title} — through the factor model's hubs ({year})\n"
                  f"country -> hub attribution from loadings; hub-to-hub = F; "
                  f"total ${total_actual:.0f}B", fontsize=11, color=INK, pad=16)
     ax.text(0.5, -0.055, f"Model-implied decomposition ({src}; negative loadings "
-            "clipped; renormalized to actual total). China+Hong Kong merged (CHK). Hub named by its dominant member.",
+            "clipped; renormalized to actual total). China+Hong Kong merged (CHK). "
+            f"Hub named by its dominant member. Data: {data_src}.",
             ha="center", fontsize=7.5, color=MUTED)
-    out = OUT_DIR / f"supply_chain_{fname}_hubs_{YEAR}.png"
+    out = OUT_DIR / f"supply_chain_{fname}_hubs_{year}.png"
     fig.savefig(out, dpi=150, bbox_inches="tight", facecolor=SURFACE)
     plt.close(fig)
     print(f"-> {out}")
@@ -593,8 +596,10 @@ def draw_chain_overview(input_stages, seq_stages, MODE="dollar"):
     ax.text(0.5, -0.155, "Ribbon colour = exporting country (legend above); columns are "
             f"checkpoints (buy left, sell right). China+Hong Kong merged (CHK). Countries under {FOLD_MIN:.0f}B on a "
             "side fold into Other, so small stages may show few named countries. No "
-            "cross-stage absorption implied. Sources: docs/tech-ai-taxonomy.md; Atlas "
-            "HS2012 bilateral / monthly panel.", ha="center", fontsize=8, color=MUTED)
+            "cross-stage absorption implied. 2024 = latest year covered by every stage. "
+            "Sources: stages 1-5 Atlas HS2012 ANNUAL bilateral (ends 2024); stages 6-8 "
+            "Comtrade+TDM monthly panel (2025 versions of those charts exist).",
+            ha="center", fontsize=8, color=MUTED)
     out = OUT_DIR / f"supply_chain_overview_{MODE}_{YEAR}.png"
     fig.savefig(out, dpi=150, bbox_inches="tight", facecolor=SURFACE)
     plt.close(fig)
@@ -731,11 +736,13 @@ def main():
         flows = flows_json(arg) if kind == "json" else flows_panel(arg)
         all_flows.append(flows)
         draw_hub_chart(fname, title, arg, kind)
+        if kind == "panel":
+            draw_hub_chart(fname, title, arg, kind, year="2025")
     input_stages = [("raw materials", all_flows[0]), ("wafers", all_flows[1]),
                     ("litho & optics", all_flows[2]), ("fab equipment", all_flows[3])]
     seq_stages = [("chips", all_flows[4]), ("parts & modules", all_flows[5]),
                   ("baseboards", all_flows[6]), ("AI servers", all_flows[7])]
-    for mode in ("dollar", "log", "normalized"):
+    for mode in ("dollar", "normalized"):   # log retired: inflates small (Other-heavy) stages
         draw_chain_overview(input_stages, seq_stages, mode)
 
 
