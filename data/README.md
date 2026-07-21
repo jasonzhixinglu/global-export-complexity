@@ -35,8 +35,8 @@ HS4 (4-digit) `country × product × year` level.
 
 - **PCI is standardized within each year's cross-section.** Absolute PCI levels are not strictly
   comparable across years; a value-weighted *shift* toward higher PCI is interpretable, an absolute
-  level change is not. See `docs/analysis.md` §3.
+  level change is not. See `docs/pci-analysis.md` §3.
 - This vintage re-estimates PCI and rescales `cog` relative to older Atlas releases, so values
   differ slightly from the legacy notebook in `legacy/`.
 - The data is already harmonized so that, per product-year, country export values sum to world
-  exports of that product (Bustos–Yildirim cleaning). See `docs/analysis.md` §2.
+  exports of that product (Bustos–Yildirim cleaning). See `docs/pci-analysis.md` §2.

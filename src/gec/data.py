@@ -1,7 +1,7 @@
 """Loading, cleaning, and reshaping the HS4 country-product-year trade data.
 
 The Atlas data is already harmonized so that, for each (product, year), the sum of country
-export (import) values equals world exports (imports) of that product (see docs/analysis.md §2).
+export (import) values equals world exports (imports) of that product (see docs/pci-analysis.md §2).
 Both flows are kept (export_value, import_value); the only cleaning here is type coercion and
 dropping rows with missing PCI.
 """

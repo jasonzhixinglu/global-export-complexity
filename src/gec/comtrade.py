@@ -1,6 +1,6 @@
 """Pull HS4 export data from UN Comtrade and map it onto the Atlas schema.
 
-Why this exists (see docs/analysis.md and docs/data.md):
+Why this exists (see docs/pci-analysis.md and docs/data.md):
   * The Atlas (reconciled, with PCI) lags ~1.5 years. Comtrade is more current but
     (a) RAW / unreconciled, (b) has NO complexity index, and (c) serves recent years
     only in the as-reported HS revision (HS2022-ish), not HS92.
