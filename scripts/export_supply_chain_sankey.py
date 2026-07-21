@@ -226,7 +226,7 @@ def hubs_from_panel(code, year=YEAR):
     return countries, R, C, F, f"era-anchored TV-MFM, {year} monthly means"
 
 
-def hubs_from_json(baskets, k=4):
+def hubs_from_json(baskets, k=4, rotate=True):
     """Hub inputs for upstream stages: constant-loading MFM (k=r=4, $B levels,
     varimax) on the ANNUAL bilateral matrices 2020-2024 from the dashboard data --
     same estimator as results/mfm/annual, no monthly panel exists upstream."""
@@ -252,14 +252,53 @@ def hubs_from_json(baskets, k=4):
     _, vc = np.linalg.eigh(M_C)
     R = vr[:, -k:][:, ::-1] * np.sqrt(p)
     C = vc[:, -k:][:, ::-1] * np.sqrt(q)
-    R, C = R @ varimax(R), C @ varimax(C)
+    if rotate:
+        R, C = R @ varimax(R), C @ varimax(C)
     for L in (R, C):                              # dominant member positive
         for j in range(k):
             if L[np.abs(L[:, j]).argmax(), j] < 0:
                 L[:, j] *= -1
     F = R.T @ Y[-1] @ C / (p * q)                 # 2024 factor matrix
-    return countries, R.clip(min=0), C.clip(min=0), F, \
-        "constant-loading annual MFM 2020-24 (no monthly panel upstream)"
+    note = "constant-loading annual MFM 2020-24 (no monthly panel upstream)"
+    if not rotate:
+        note = "UNROTATED spectral basis, hubs in descending eigenvalue order; " + note
+    return countries, R.clip(min=0), C.clip(min=0), F, note
+
+
+def hubs_from_panel_pooled(code, year=YEAR, rotate=True, k=4):
+    """Constant-loading MFM pooled over the year's monthly matrices (panel codes),
+    optionally without varimax -- the unrotated spectral basis."""
+    pdf = pd.read_parquet(cfg.DATA_DIR / "derived" / "panel_ai_compute_monthly.parquet")
+    pdf = pdf[(pdf.code == code) & (pdf.period.str[:4] == year)]
+    flows = {}
+    for (per, o, t), v in pdf.groupby(["period", "exporter", "importer"]).value.sum().items():
+        o2, t2 = BLOC.get(o, o), BLOC.get(t, t)
+        if o2 != t2:
+            flows[(per, o2, t2)] = flows.get((per, o2, t2), 0.0) + float(v) / 1e9
+    countries = sorted({o for (_, o, _) in flows} | {t for (_, _, t) in flows})
+    idx = {c: i for i, c in enumerate(countries)}
+    periods = sorted({per for (per, _, _) in flows})
+    Y = np.zeros((len(periods), len(countries), len(countries)))
+    for (per, o, t), v in flows.items():
+        Y[periods.index(per), idx[o], idx[t]] = v
+    p_ = q_ = len(countries)
+    M_R = np.einsum("sij,skj->ik", Y, Y)
+    M_C = np.einsum("sji,sjk->ik", Y, Y)
+    _, vr = np.linalg.eigh(M_R)
+    _, vc = np.linalg.eigh(M_C)
+    R = vr[:, -k:][:, ::-1] * np.sqrt(p_)
+    C = vc[:, -k:][:, ::-1] * np.sqrt(q_)
+    if rotate:
+        R, C = R @ varimax(R), C @ varimax(C)
+    for L in (R, C):
+        for j in range(k):
+            if L[np.abs(L[:, j]).argmax(), j] < 0:
+                L[:, j] *= -1
+    F = np.mean([R.T @ Y[t] @ C / (p_ * q_) for t in range(len(periods))], axis=0)
+    note = f"pooled {year} monthly MFM"
+    if not rotate:
+        note = "UNROTATED spectral basis, hubs in descending eigenvalue order; " + note
+    return countries, R.clip(min=0), C.clip(min=0), F, note
 
 
 def draw_hub_chart(fname, title, codes_txt, code_or_baskets, kind, year=YEAR):
@@ -270,6 +309,14 @@ def draw_hub_chart(fname, title, codes_txt, code_or_baskets, kind, year=YEAR):
         countries, R, C, F, src = hubs_from_panel(code_or_baskets, year)
         total_actual = sum(flows_panel(code_or_baskets, year).values())
         data_src = "Comtrade+TDM monthly panel"
+    elif kind == "panel_norot":
+        countries, R, C, F, src = hubs_from_panel_pooled(code_or_baskets, year, rotate=False)
+        total_actual = sum(flows_panel(code_or_baskets, year).values())
+        data_src = "Comtrade+TDM monthly panel"
+    elif kind == "json_norot":
+        countries, R, C, F, src = hubs_from_json(code_or_baskets, rotate=False)
+        total_actual = sum(flows_json(code_or_baskets).values())
+        data_src = "Atlas HS2012 annual bilateral"
     else:
         countries, R, C, F, src = hubs_from_json(code_or_baskets)
         total_actual = sum(flows_json(code_or_baskets).values())
@@ -288,7 +335,7 @@ def draw_hub_chart(fname, title, codes_txt, code_or_baskets, kind, year=YEAR):
     I = (C / np.where(Csum > 0, Csum, 1)) [:, :] * V.sum(0)   # imp hub -> importer
     # rescale outer columns to ACTUAL country totals (model attribution can misstate
     # e.g. Mexico by 2x); hub columns keep model proportions, nodes absorb the gap
-    fl = flows_panel(code_or_baskets, year) if kind == "panel" else flows_json(code_or_baskets)
+    fl = flows_panel(code_or_baskets, year) if kind.startswith("panel") else flows_json(code_or_baskets)
     act_ex, act_im = {}, {}
     for (o, t), v in fl.items():
         act_ex[o] = act_ex.get(o, 0.0) + v
@@ -837,6 +884,8 @@ def main():
         flows = flows_json(arg) if kind == "json" else flows_panel(arg)
         all_flows.append(flows)
         draw_hub_chart(fname, title, codes_txt, arg, kind)
+        draw_hub_chart(fname + "_norot", title + " [unrotated]", codes_txt, arg,
+                       "panel_norot" if kind == "panel" else "json_norot")
     input_stages = [("raw materials", all_flows[0]), ("wafers", all_flows[1]),
                     ("litho & optics", all_flows[2]), ("fab equipment", all_flows[3])]
     inter = {}
