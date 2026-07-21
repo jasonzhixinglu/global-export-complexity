@@ -6,7 +6,7 @@ export direction; the import view of a corridor is the same number read the othe
 
 Each corridor's distribution over PCI is a Gaussian mixture (adaptive K by fidelity to the raw
 data, fixed across years, warm-started year-to-year) -- same method as the country distributions
-(docs/analysis.md s3.3).  Concentrated single-product corridors smear (fine in W1, large in KS;
+(docs/pci-analysis.md s3.3).  Concentrated single-product corridors smear (fine in W1, large in KS;
 see the error discussion); we accept that uniform treatment.
 
 Writes dashboard/public/data/gmm_bilateral.json.

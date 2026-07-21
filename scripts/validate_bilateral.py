@@ -8,7 +8,7 @@ Checks (all from the small JSON outputs, no big-file reads):
      mixture; the outbound sum for A should reproduce A's country-level EXPORT distribution
      (gmm.json), and the inbound sum for B its country-level IMPORT distribution.  Compared
      with KS (sup-norm) and W1 (transport) -- the bilateral fits are anchored to the country
-     curves, which are themselves validated against raw data (docs/analysis.md s3.3).
+     curves, which are themselves validated against raw data (docs/pci-analysis.md s3.3).
 
 Run:  python scripts/validate_bilateral.py
 """

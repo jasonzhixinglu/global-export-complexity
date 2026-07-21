@@ -1,6 +1,6 @@
 """Conservation & adding-up diagnostics: figures + a summary table.
 
-Verifies the two accounting properties from docs/analysis.md §3:
+Verifies the two accounting properties from docs/pci-analysis.md §3:
   1. Shares add up to exactly 1 across all countries (self-calibration).
   2. Dollar mass is conserved exactly in total; sub-range error is mean-zero
      redistribution, quantified against the exact weighted histogram.

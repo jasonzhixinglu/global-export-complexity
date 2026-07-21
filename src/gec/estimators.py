@@ -1,6 +1,6 @@
 """Non-parametric estimators with explicit accounting properties.
 
-Two estimands, two different conservation guarantees (see docs/analysis.md §3):
+Two estimands, two different conservation guarantees (see docs/pci-analysis.md §3):
 
 * `local_linear_shares` — a country's share of world exports as a function of PCI.
   It is a *linear smoother that reproduces constants*, applied to a response
@@ -148,6 +148,6 @@ def weighted_histogram(x, w, edges):
 def calibrate_total(values, target_total):
     """Raking / ratio benchmarking: scale `values` so they sum to a known accounting
     total. This is the standard official-statistics fix for aligning a smooth estimate
-    with an aggregate (see docs/analysis.md §3)."""
+    with an aggregate (see docs/pci-analysis.md §3)."""
     s = np.nansum(values)
     return values * (target_total / s) if s > 0 else values

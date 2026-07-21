@@ -1,8 +1,13 @@
 # Global Trade Complexity
 
-Non-parametric analysis of global trade — **exports and imports** — by **product complexity (PCI)**,
-across country, time, and technology/AI, built on the Harvard Growth Lab *Atlas of Economic
-Complexity*, with an interactive dashboard.
+Two related workstreams share this repo and its data infrastructure:
+
+1. **PCI / complexity** (the original project, and the dashboard): non-parametric analysis of global
+   trade — exports and imports — by **product complexity (PCI)**, built on the Harvard Growth Lab
+   *Atlas of Economic Complexity*. Documented in [`docs/pci-analysis.md`](docs/pci-analysis.md).
+2. **The AI semiconductor supply chain** (active research): a monthly bilateral panel, time-varying
+   matrix factor models, and network measures for the AI-era trade network. Start at
+   [`docs/research-proposal.md`](docs/research-proposal.md) and [`docs/data.md`](docs/data.md).
 
 ### → Live dashboard: **https://jasonzhixinglu.github.io/global-export-complexity/**
 
@@ -51,13 +56,13 @@ Two estimands, each with an exact accounting property:
    by fidelity to the raw data, K≈2–8) and reconstructed in the browser — smoothness becomes a
    render-time blur (`σ → √(σ²+b²)`), shrinking that payload ~36× while staying smooth. The mixture
    is faithful in *location* (median KS 6.1%, beating the KDE it replaced; transport error W1 ≈ 0.03
-   PCI); it only smooths over sharp single-product spikes — see [`docs/analysis.md`](docs/analysis.md) §3.3.
+   PCI); it only smooths over sharp single-product spikes — see [`docs/pci-analysis.md`](docs/pci-analysis.md) §3.3.
 
 Both estimands run on either flow (the same estimators applied to `import_value`), exposed via the
 Exports / Imports toggle.
 
 Full write-up — including how to reconcile non-parametric smoothing with trade-accounting
-identities — in [`docs/analysis.md`](docs/analysis.md).
+identities — in [`docs/pci-analysis.md`](docs/pci-analysis.md).
 
 ## Data
 
