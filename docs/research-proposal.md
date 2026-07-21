@@ -41,15 +41,73 @@ rerouting), while the April 2025 tariffs are the one policy event that reorganiz
 the bloc-level structure, coinciding with the appearance of a new Singapore
 rerouting factor.
 
-**3. A semi-structural model (not started; aspirational).** The factor model is a
-description, not a mechanism. A model flexible enough to fit the system and explain
-some of its dynamics — capacity constraints at bottleneck stages, demand shocks
-propagating upstream, substitution across suppliers under policy — would let the
-measurements below speak to counterfactuals. Candidate ingredients: a production-
-network structure using our stage taxonomy, capacity/adjustment frictions at the
-concentrated stages, and the observed price (unit-value) responses as the
-identifying signal for elasticities. This is future work and the proposal's main
-open ambition.
+**3. A semi-structural model (sketched below; not yet estimated).** The factor
+model is a description, not a mechanism. The simplest model that could *explain*
+the dynamics needs only three canonical ingredients — Armington aggregation across
+supplier countries, a stage-by-stage production chain, and stage-specific supply
+curves — with the key economics carried by two elasticities per stage.
+
+*Setup.* Stages s = 1..S follow the taxonomy (materials → wafers/equipment →
+chips → parts → baseboards → servers); countries are indexed o (origin) and d
+(destination); time is monthly.
+
+*Demand across varieties (who buys from whom).* Users of stage-s goods in country
+d combine country varieties with a CES aggregator,
+
+```
+X_s,d = [ Σ_o  a_s,od^(1/σ_s) · x_s,od^((σ_s−1)/σ_s) ]^(σ_s/(σ_s−1))
+```
+
+which yields gravity-form bilateral demands
+
+```
+x_s,od = a_s,od · ( p_s,o · τ_s,od / P_s,d )^(−σ_s) · X_s,d ,
+P_s,d = [ Σ_o a_s,od · (p_s,o · τ_s,od)^(1−σ_s) ]^(1/(1−σ_s))
+```
+
+σ_s is the substitutability of suppliers at stage s — how easily buyers reroute.
+τ_s,od carries trade costs and policy: tariffs are a τ increase, export controls a
+τ → ∞ (or a quantity cap) on specific (o,d) pairs. The taste/technology weights
+a_s,od are exactly what the factor model estimates a low-rank representation of:
+hubs are blocks of similar a-rows, so the MFM is the model's reduced form.
+
+*Production (how stages connect).* Stage-(s+1) output in country c uses the
+stage-s composite plus local factors; the simplest adequate form is Leontief
+across distinct input types (a fab needs wafers AND equipment AND materials in
+fixed proportions) with the CES aggregation above operating within each type:
+
+```
+y_{s+1,c} = A_{s+1,c} · min( X_s,c / λ_s ,  V_c / μ )
+```
+
+*Supply (where the bottlenecks live).* Each stage-country pair has capacity k_s,c
+and an upward-sloping supply curve whose steepness is the stage's short-run supply
+elasticity ε_s:
+
+```
+p_s,c = mc_s,c · ( y_s,c / k_s,c )^(1/ε_s) ,        k_s,c(t+1) = k_s,c(t) + investment with time-to-build
+```
+
+ε_s is the choke-point parameter: leading-edge fabrication and advanced packaging
+have ε ≈ 0 in the short run (output is hard-capped; demand surges go straight into
+price), assembly has large ε (Mexico can add shifts), wafers and materials sit in
+between. A demand shock at the final stage (AI investment) propagates upstream
+through the Leontief links and prices each stage according to its ε_s — which is
+precisely the observed 2023–25 pattern: baseboard/packaging prices 20x (ε small),
+generic parts prices flat (ε large).
+
+*Identification comes from events we have already dated.* σ_s from observed
+rerouting after the April 2025 tariff shock and the export-control episodes
+(quasi-experiments with known dates from the factor model's break chronology);
+ε_s from the joint price/quantity response by stage to the 2023 demand surge
+(price up 20x with quantities capped reveals ε ≈ 0; quantities up with flat
+prices reveals ε large). The unit-value data provides p, the panel provides x,
+and the era-anchored hubs discipline the a_s,od.
+
+*What it buys.* Counterfactuals the measurement layer cannot produce: the price
+and reallocation consequences of removing a node (Taiwan capacity at each stage),
+of a tariff schedule, or of capacity build-out (US/Arizona fabs entering k over
+time). Estimation is future work; the sketch fixes the target.
 
 ## The measurement program
 
