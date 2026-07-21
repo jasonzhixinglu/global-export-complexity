@@ -263,3 +263,39 @@ whenever a hub owns a variety: 847180's exporter HHI of 0.38 already flags
 Taiwan, but the AI-baseboard *variety* within it is closer to a Taiwan
 near-monopoly. Hub-level (variety-level) concentration is the right metric, and
 the factor model provides the partition to compute it on.
+
+
+## 2026-07: What the MFM identifies, structurally (the precise mapping)
+
+Factor the structural gravity demand over time: x_od,t = A_od * phi_o,t * psi_d,t,
+where A = [a_od * tau_od^(-sigma)] is the time-fixed taste/friction matrix,
+phi_o,t the exporter-side shifters (prices/supply), psi_d,t the importer-side
+shifters (expenditure, price indices). If A has low rank, A = sum_a r_a c_a',
+then X_t = sum_a (r_a o phi_t)(c_a o psi_t)' -- which IS the time-varying MFM.
+The mapping is therefore exact:
+
+1. **k, r <-> effective rank of A**: hubs exist because demand only distinguishes
+   a few supplier/buyer types. Complements consumed together have proportional
+   a-columns and collapse into one type -- the MFM's types are co-demand
+   equivalence classes (varieties AND bundles).
+2. **col(R), col(C) <-> spans of the type profiles, tilted by relative prices**
+   (col(R_t) = span{r_a o phi_t}). Breaks = changes in A (new varieties;
+   controls zeroing tau-cells) or large relative-price divergence; 2023-07 was
+   both. Eras = joint stability of A and relative prices.
+3. **F_t <-> type-pair equilibrium aggregates** (p*q of each demand segment):
+   where shocks and supply constraints surface after propagating.
+4. **Rotational ambiguity <-> structural non-identification**: only span(A) is
+   pinned down; the type decomposition is not. Varimax = the sparsity
+   identifying assumption on preferences (Rohe-Zeng); eigen-order = size
+   ordering. Both conventions, honestly labeled.
+5. **Not identified by flows**: sigma (needs prices/events), tau vs a
+   (frictions vs tastes -- classic gravity problem), epsilon (needs p/q split),
+   level normalizations. These live in the other layers by design.
+
+One-line synthesis: the MFM estimates the equilibrium's low-rank factorization
+-- rank, spans, and segment aggregates over time -- and the structural model
+explains those identified objects with primitives the MFM provably cannot reach.
+Relative to vector PCA: identical logic plus ONE restriction -- loadings are
+separable, Lambda = C (x) R, i.e. a corridor loads only through its endpoints'
+types (the bilinear/gravity-shaped restriction on comovement); this is also
+exactly the low-rank structure the structural sketch places on a_od.
