@@ -211,11 +211,18 @@ heterogeneity (unit values 10-100x apart, necessary condition); coarse
 hub/price-tier alignment (CHN's cheap-parts hub vs TWN elsewhere; solo-TWN
 847180 hub = the price outlier); and the temporal coincidence — flows (hub
 purification) and prices (unit-value divergence) independently date the AI
-variety's birth to mid-2023. Known counterexample: KOR ($5,071/kg) and TWN
-($280/kg) shared an 847330 hub — within-hub heterogeneity remains large, so
-hubs are coarse variety clusters at best. Untested: the direct tariff-line
-decomposition (Taiwan 11-digit) and a formal within/across-hub unit-value
-variance decomposition (needs more reporters' quantities).
+variety's birth to mid-2023. The apparent counterexample — KOR
+($5,071/kg) and TWN ($280/kg) sharing an 847330 hub — largely dissolves on
+inspection: Korea ships nearly-bare memory (HBM stacks — grams of silicon,
+maximal value density) while Taiwan ships assembled modules (the same class of
+silicon plus PCB, power stages, and a kilogram of heatsink), so the $/kg gap
+reflects physical form, not market segment; the hub grouping (both AI-component
+suppliers to the same customers) is plausibly the model being RIGHT. Lesson:
+weight-based unit values confound value density with form factor — variety
+comparisons need per-unit values (QTY1: sets/pieces) or within-form $/kg.
+Untested: the direct tariff-line decomposition (Taiwan 11-digit) and a formal
+within/across-hub unit-value variance decomposition (needs more reporters'
+quantities, per-unit where possible).
 
 **Consequence for measurement.** The effective market is the variety segment,
 not the HS6 code. Concentration and power computed at code level understate

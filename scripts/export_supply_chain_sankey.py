@@ -262,7 +262,7 @@ def hubs_from_json(baskets, k=4):
         "constant-loading annual MFM 2020-24 (no monthly panel upstream)"
 
 
-def draw_hub_chart(fname, title, code_or_baskets, kind, year=YEAR):
+def draw_hub_chart(fname, title, codes_txt, code_or_baskets, kind, year=YEAR):
     """Four-column chart: exporters -> export hubs -> import hubs -> importers.
     Hub-pair dollars are the model-implied decomposition renormalized to the
     year's actual total -- an interpretation layer, not raw data."""
@@ -385,9 +385,10 @@ def draw_hub_chart(fname, title, code_or_baskets, kind, year=YEAR):
     for x, lab in ((xs[0], "exporters ($B)"), (xs[1] + nw / 2, "export hubs"),
                    (xs[2] + nw / 2, "import hubs"), (xs[3] + nw, "importers ($B)")):
         ax.text(x, 1.045, lab, ha="center", fontsize=9, color=MUTED)
-    ax.set_title(f"{title} — through the factor model's hubs ({year})\n"
-                 f"country -> hub attribution from loadings; hub-to-hub = F; "
-                 f"total ${total_actual:.0f}B", fontsize=11, color=INK, pad=16)
+    ax.set_title(f"{title}  ({codes_txt})  — {year}\n"
+                 f"through the factor model's hubs: country -> hub from loadings; "
+                 f"hub-to-hub = F; total ${total_actual:.0f}B",
+                 fontsize=11, color=INK, pad=16)
     ax.text(0.5, -0.055, f"Hub decomposition from the factor model ({src}); "
             f"outer columns rescaled to actual totals. CHK = China+HK. Data: {data_src}.",
             ha="center", fontsize=7.5, color=MUTED)
@@ -835,7 +836,7 @@ def main():
     for fname, title, codes_txt, (kind, arg) in STAGES:
         flows = flows_json(arg) if kind == "json" else flows_panel(arg)
         all_flows.append(flows)
-        draw_hub_chart(fname, title, arg, kind)
+        draw_hub_chart(fname, title, codes_txt, arg, kind)
     input_stages = [("raw materials", all_flows[0]), ("wafers", all_flows[1]),
                     ("litho & optics", all_flows[2]), ("fab equipment", all_flows[3])]
     inter = {}
