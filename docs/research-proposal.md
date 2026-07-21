@@ -258,11 +258,41 @@ wants to know.
 
 ## Limitations we state up front
 
-Customs data measures gross border crossings: the same value is counted at every
-hop, entrepots inflate, in-country transformation is invisible, and design/IP —
-the largest value component — never appears. Our two-layer design confines these
-problems: the measurement layer (panel + factor models) is assumption-light and
-stands on its own; the interpretation layers (value-added weights, replaceability
-judgments) import assumptions and industry knowledge that are stated explicitly.
-Where a claim depends on a judgment — for instance that Mexican assembly is
-replaceable and Taiwanese fabrication is not — it is labeled a judgment.
+Everything here rests on one observation window: we see goods when they enter and
+leave customs, and nothing else. Three distinct blindnesses follow.
+
+**1. We do not observe what products are used for.** A chip crossing into Mexico
+might go into a server for the US or a television for Brazil; customs records the
+crossing, not the purpose. Value added is therefore never observed — only inferable
+by comparing what enters a country with what later leaves it, under stated
+absorption assumptions (the Layer-2 program). Gross flows double-count every hop,
+entrepôts inflate, and design/IP — the largest value component in this industry —
+never crosses a border as goods at all.
+
+**2. We do not observe within-HS6 differences between products.** An H100 module
+and a commodity mobile-SoC part can sit in the same six-digit code. Consequences:
+level shifts in a code can be composition rather than growth; unit-value changes
+mix same-good price change with mix shift (the 20x figures carry both); and the
+"AI share" of any code is an estimate, not an observation. Mitigations: quantity
+data separates price from volume; the *timing* of composition shifts is itself
+informative (a code's $/kg jumping 5x in one year identifies when AI content
+arrived); and stage-level contrasts (baseboards vs generic parts) survive because
+composition moved in only one of them.
+
+**3. We do not observe transactions that never cross a border.** Multi-stage
+production absorbed domestically is invisible: chips fabricated, packaged, and
+deployed within China appear nowhere in this data, and the same holds for US
+domestic production feeding US data centers. This truncation is not neutral — it
+is largest exactly for the two poles, whose domestic loops are growing fastest
+(China's fab build-out, US onshoring). Trade data measures the *internationalized
+share* of the chain, and that share is itself shrinking at the frontier as both
+poles internalize stages. Findings must be read as statements about cross-border
+activity, with the domestic loops tracked qualitatively (capacity announcements,
+company disclosures) as context.
+
+Our two-layer design confines these problems rather than solving them: the
+measurement layer (panel + factor models) is assumption-light about everything it
+does claim; the interpretation layers (value-added weights, replaceability
+judgments) import stated assumptions and industry knowledge. Where a claim
+depends on a judgment — for instance that Mexican assembly is replaceable and
+Taiwanese fabrication is not — it is labeled a judgment.
