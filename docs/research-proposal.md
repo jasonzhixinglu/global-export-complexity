@@ -172,6 +172,73 @@ of the choke-point map and the export-control battlefield); (iv) the value-added
 layer (mini-TiVA absorption accounting) that corrects gross-flow importance into
 value importance — the Mexico-vs-Taiwan correction; (v) the semi-structural model.
 
+## Related literature, and an honest account of what would be new
+
+**The strands this work sits between.** (i) *Quantitative trade models*: Armington
+and Eaton–Kortum foundations; Caliendo–Parro (2015) adds input–output links and is
+the standard tool for tariff counterfactuals, computed as comparative statics
+between equilibria ("hat algebra", Costinot–Rodríguez-Clare 2014). (ii) *Global
+value chains*: Yi (2003) on vertical specialization, Johnson–Noguera and the OECD
+TiVA program on value-added accounting, Antràs–de Gortari (2020) on where each
+stage of a chain locates. (iii) *Production networks*: Acemoglu et al. (2012) and
+Baqaee–Farhi on how shocks propagate through input networks, quantified for the
+pandemic by Bonadio et al. (2021). (iv) *Trade-policy event studies*: Fajgelbaum
+et al. (2020), Amiti–Redding–Weinstein (2019) on the 2018–19 trade war — the
+template for estimating elasticities off dated policy shocks; a growing
+descriptive literature on the 2022+ export controls and "great reallocation"
+(Alfaro–Chor 2023) and on fragmentation measurement (IMF). (v) *Supply-chain
+resilience theory*: Grossman–Helpman–Lhuillier (2023) on diversification vs
+reshoring; Elliott–Golub–Leduc on network fragility. (vi) *Matrix factor
+econometrics*: the Chen et al. lineage our estimation builds on, which uses trade
+data as an illustration rather than a subject.
+
+**What is securely new but not conceptual: the instrument.** A balanced,
+reconciled, monthly bilateral panel of the AI-compute chain, current to ~3 months,
+with a stable-labeled dynamic factor structure on top. Nothing comparable is
+public. Most of the descriptive results (the pole swap, the price story, the break
+chronology) follow from the instrument, not from any conceptual innovation — and
+we say so.
+
+**Where there is genuine conceptual scope — two things the literature has not
+tried.**
+
+*First: supply-chain adjustment at business-cycle frequency, including rationing.*
+The quantitative trade literature is built for comparative statics between annual
+equilibria; it has essentially no treatment of how a value chain *transitions* —
+at the speed transitions actually happen — when demand outruns capacity: order
+backlogs, queues, and above all allocation. In 2023–25 the market for compute did
+not clear by price alone: the scarce input was explicitly rationed by its
+producers, and which buyers' quantities held up versus which paid higher prices is
+visible in our data. Price-clearing CES models have no vocabulary for this.
+Modeling — even simply — a chain where one node rations and the rest of the
+network adjusts around it, at monthly frequency, against data that actually
+resolves the episode, has not been done. The 2023–25 surge is arguably the first
+well-measured instance of a major value chain hitting a hard capacity wall, which
+makes it the natural laboratory for exactly this.
+
+*Second: policy that changes structure versus policy that changes flows.* Our
+empirical finding — export controls moved levels and routes within blocs but never
+broke the factor structure, while tariffs produced the one genuine structural
+break — points at a distinction the literature does not currently express. In
+existing models every policy works the same way (a trade-cost change reallocates
+flows smoothly); there is no concept of network *structure* that policy could
+break or fail to break, because structure (who co-moves with whom; how many
+factors; their composition) is not an object in those models. Formalizing when a
+shock reorganizes the factor structure versus merely sliding along it — and which
+policy instruments do which — is a conceptual question our two-layer design is
+unusually placed to pose, since the factor layer defines "structure" precisely and
+the events are already dated.
+
+**What is not new, stated plainly.** Choke-point mapping as an idea (ubiquitous in
+the policy literature — ours is *measured*, not conceived); fragmentation indices
+(IMF and others — ours are higher-frequency); value-added correction of gross
+flows (TiVA invented it — ours would be a monthly miniature); descriptive
+reallocation facts (Alfaro–Chor — ours are sharper because the instrument is);
+and the ε_s supply block, whose ingredients are classical even if their
+stage-level estimated profile is not. The honest summary: one new instrument, two
+conceptual openings, and otherwise better measurement of things the field already
+wants to know.
+
 ## Limitations we state up front
 
 Customs data measures gross border crossings: the same value is counted at every
