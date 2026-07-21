@@ -130,6 +130,23 @@ is Leibovici–Dunn treating chips as a quasi-fixed input in the 2021 auto
 shortage — one node, calibrated; here the object is the estimated *profile* of
 ε across stages, which is the choke-point map in structural form.
 
+Stated sharply: in a constant-returns, mobile-factor, competitive model, price
+responds to demand only through factor and input costs — a few percent in this
+episode, against observed unit-value increases of 500–2000% — and quantities
+should *rise* with demand, not flatline. No parameterization of that model class
+reproduces 2023–25. The one alternative channel, variable markups
+(Atkeson–Burstein), is empirically real here — much of the price explosion was
+collected as the design layer's margin (Nvidia at ~75% gross margin) while the
+physically constrained producer priced modestly — but markups with elastic supply
+predict *more* quantity, not rationing and queues. The coherent reading: the
+capacity constraint is the root cause, and the markup is how its rent was
+collected one layer downstream. Our customs unit values embed the rent wherever
+it accrues, so the model fits total chain pricing without claiming who captures
+it. A further measurement caveat handled in the terms-of-trade work: part of the
+observed unit-value rise is composition within customs categories (PC boards →
+H100 boards in the same HS code), to be separated from same-good price change
+where quantity units allow.
+
 ## The measurement program
 
 The organizing idea: the network's *structure* (who trades with whom, how
