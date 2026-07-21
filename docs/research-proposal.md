@@ -267,6 +267,18 @@ substituting imported chips with domestically fabricated ones. **[measured]**
 Supplier diversification trends (is each pole concentrating or diversifying its
 sources?) remain to compute. **[open]**
 
+A first computed pass of the naive measures — per-stage concentration and
+centrality, fragmentation by bloc and by chain position — is documented in
+[notes/network-measures-first-pass.md](notes/network-measures-first-pass.md);
+headline findings: the authority handoff (every stage upstream of parts drains
+into China, every stage downstream drains into the US), the baseboards
+concentration spike (exporter HHI 0.38, Taiwan hub score 0.77 — the naive
+outlier coincides with the price-confirmed bottleneck), fragmentation as
+exclusion from growth (direct pole trade flat in dollars while the network
+tripled), and the top-down fragmentation gradient (finished goods aligned with
+geopolitics; chips remain the great cross-bloc integrator; upstream tools trade
+shows no fragmentation at all).
+
 **The contrasts that carry the story.** Presented as paired differences, the
 findings organize themselves:
 
