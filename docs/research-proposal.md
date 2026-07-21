@@ -189,6 +189,92 @@ of the choke-point map and the export-control battlefield); (iv) the value-added
 layer (mini-TiVA absorption accounting) that corrects gross-flow importance into
 value importance — the Mexico-vs-Taiwan correction; (v) the semi-structural model.
 
+## Rough answers, stated as hypotheses
+
+The questions above are not open-ended: the data already supports first-pass
+answers, which the full analysis will confirm, refine, or overturn. Each is
+tagged **[measured]** (computed from our data), **[provisional]** (partly
+computed), or **[conjecture]** (prior to be tested).
+
+**Where are the bottlenecks?** At and immediately around the fabs. Trade value
+exploded for chips and everything downstream while upstream stages grew modestly —
+the signature of a constraint at fabrication/advanced packaging: downstream prices
+carry the scarcity rent, upstream cannot expand fast enough to matter. Baseboard
+unit values 20x'd while generic parts stayed flat, locating the binding constraint
+in the Taiwan packaging/systems layer. **[measured]** Markup gains concentrate in
+Taiwan and to a lesser degree Korea (memory/HBM), smaller elsewhere.
+**[provisional — Korea unit values pulled, not yet indexed]**
+
+**Terms of trade.** Strongly positive for Taiwan (the 20x is the largest
+terms-of-trade gain in the sample, plausibly in modern trade data) and Korea;
+modestly positive Japan (equipment, wafers). **[provisional]** Ambiguous for
+China — its export basket (parts, compliant chips) shows flat unit values while
+its import basket (chips, equipment) got pricier, so its ToT may well be
+*negative* despite its producer role. **[conjecture — computable from data in
+hand]** Negative for pure importers (the US pays the scarcity rents; its ToT loss
+is the mirror of Taiwan's gain). **[conjecture]**
+
+**Concentration and near-monopolies.** A nuance the data forces: at the
+country-by-HS-basket level, measured concentration is only moderate (2024
+exporter HHIs: wafers 0.17 the highest, chips 0.12, fab equipment just 0.085 —
+because Japan/US/Netherlands/Germany split the heading). The near-monopolies
+everyone knows about — ASML in EUV, Ga/Ge refining, HBM — live at sub-HS6 and
+firm level, exactly where limitation 2 blinds us. **[measured, with stated
+blindness]** So the honest claim is layered: chips imports (0.165, the China
+vortex) and wafer exports are concentrated at country level; equipment is
+concentrated at *segment* level, to be shown on the narrower codes (litho-specific
+lines) where the data allows.
+
+**Fragmentation.** Real but selective, and one prior gets corrected. Weakening
+links: China-bloc→US final goods (collapsed in the 2018–19 trade war from $17B to
+$7B and never recovered; $6.9B by 2024) and Taiwan→China chips (peak $109B in
+2022 → $90B in 2024, the export-control wedge). **[measured]** But the
+redirection went to the assembly belt, not to other advanced economies: China-bloc
+chips exports to Vietnam quadrupled ($6.7B → $24.5B), while flows to Japan and
+Taiwan are flat-to-declining — so the pattern is not "China trades more with
+everyone else" but "China's chain re-routes through Southeast Asia."
+**[measured — corrects the prior that CHN→JPN/TWN strengthened]** Compliant-chip
+carve-outs cut the other way: Taiwan→China *compute-module* flows doubled in
+2024–25 even as the chips corridor shrank. Fragmentation is corridor-specific,
+not general decoupling.
+
+**US vs China investment.** The cleanest contrast in the dataset: the US buys the
+chain's *outputs* (import share of final compute 27% → 40%+), China buys the
+*means of production* (fab equipment import share 22% → 26% in 2024, wafer inputs
+18% → 24%, with control-deadline stockpiling spikes) while its final-compute share
+fell by a third (21% → 16%, still falling through 2026). China remains the
+world's assembly floor (~44% of chips imports, flat) — the visible strategy is
+substituting imported chips with domestically fabricated ones. **[measured]**
+Supplier diversification trends (is each pole concentrating or diversifying its
+sources?) remain to compute. **[open]**
+
+**The contrasts that carry the story.** Presented as paired differences, the
+findings organize themselves:
+
+- *Seller-concentrated upstream, buyer-concentrated downstream.* Upstream stages
+  are concentrated on the export side (wafers: exporter HHI 0.17 vs importer
+  0.11) — few makers, many buyers; downstream stages flip (chips: importer 0.165
+  vs exporter 0.12; final compute: importer-side dominated by one country) — many
+  makers, few buyers. The chain runs from near-monopoly at the top to
+  near-monopsony at the bottom, and the two poles of concentration are different
+  *countries*: sellers' power sits in Japan/Netherlands/Taiwan, buyers' power in
+  the US and China. **[measured]**
+- *Poles versus connectors versus conduits.* The two poles appear in the data
+  mainly as concentrated *buyers* (US downstream, China upstream). The connector
+  economies — Taiwan, Korea, Japan — are the concentrated *sellers*, and they are
+  exactly where the terms-of-trade gains and markup increases land. The conduit
+  economies — Vietnam, Malaysia, Mexico — gained enormous *volume* (the
+  redirection and assembly flows) with little visible price gain: quantity share
+  without rent. Who you are in the chain determines what you got from the boom:
+  buyers paid, sellers earned, conduits grew. **[provisional — conduit unit
+  values to be indexed]**
+- *Rent follows inelasticity, not volume.* The largest markup and ToT gains sit
+  precisely at the stages that are both seller-concentrated and
+  capacity-inelastic (Taiwan packaging/systems, Korean HBM), not at the highest-
+  volume stages or fastest-growing corridors. This is the choke-point triad
+  visible in prices, and the structural model's ε-profile should reproduce it.
+  **[provisional]**
+
 ## Related literature, and an honest account of what would be new
 
 **The strands this work sits between.** (i) *Quantitative trade models*: Armington
