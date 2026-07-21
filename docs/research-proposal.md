@@ -225,6 +225,25 @@ vortex) and wafer exports are concentrated at country level; equipment is
 concentrated at *segment* level, to be shown on the narrower codes (litho-specific
 lines) where the data allows.
 
+The deeper point: **concentration is not market power, and the data can tell
+them apart.** Mexico has a near-monopoly on server assembly for the US market
+(bilateral concentration close to 1), yet almost certainly no pricing power:
+assembly is elastic and relocatable, and the two tests agree — Mexico's export
+unit values stayed ordinary through the boom (no rent extracted), and its
+"monopoly" corridor was contested within a single year (Taiwan's direct server
+shipments to the US surged in 2025, something a protected position would not
+permit). Japan's wafer dominance is likely the same species: a large share held
+by long-term contract producers whose prices moved modestly — positional
+concentration in a contestable stage. Taiwan's packaging/systems layer is the
+true positive: concentrated AND inelastic AND repriced 20x. The general rule for
+the whole analysis: measured concentration (a share) is only the *candidate*
+list; market power is concentration times inelasticity, and the price response
+under the demand surge is the test that separates them. Bilateral concentration
+(who serves whom today) overstates power wherever the stage itself is globally
+diversified — assembly runs in Mexico, Taiwan, Vietnam, Malaysia, and Czechia,
+so the Mexico–US corridor is a routing choice, not a scarcity. **[measured in
+part; unit-value indexing completes it]**
+
 **Fragmentation.** Real but selective, and one prior gets corrected. Weakening
 links: China-bloc→US final goods (collapsed in the 2018–19 trade war from $17B to
 $7B and never recovered; $6.9B by 2024) and Taiwan→China chips (peak $109B in
