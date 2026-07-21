@@ -67,7 +67,7 @@ identities — in [`docs/analysis.md`](docs/analysis.md).
 - **Atlas bilateral** (HS92 HS6 `origin × destination × product × year`) — reconciled flows for the
   **Corridors** tab; aggregated to HS4, top 50 + ROW. Imports are the same matrix read by destination.
 - **Tech & AI baskets** — AI compute from the Fed FEDS Note (2026); semiconductor value chain from
-  OECD (2025). See [`docs/tech-ai-taxonomy.md`](docs/tech-ai-taxonomy.md) (basket tiers, national
+  OECD (2025). See [`docs/data.md`](docs/data.md) (basket tiers, national
   monthly sources, and the Haver cross-check).
 - **UN Comtrade** — optional puller for more recent years (raw, mirror-reconstructable for late
   filers); see [`docs/data.md`](docs/data.md).
@@ -99,7 +99,7 @@ scripts/
   fetch_comtrade.py         pull recent-year HS4 exports from UN Comtrade
   explore_bilateral_pci.py  prototype: origin x destination complexity (sizing)
 dashboard/             React/Vite/Recharts app (deployed to GitHub Pages)
-docs/                  data.md (master data reference) · analysis.md · tech-ai-taxonomy.md
+docs/                  data.md (master data reference) · analysis.md
 results/               committed figures & tables
 data/                  git-ignored raw + derived (download / regenerate)
 legacy/                original exploratory notebook (superseded)
