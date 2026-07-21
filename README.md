@@ -6,8 +6,15 @@ Two related workstreams share this repo and its data infrastructure:
    trade — exports and imports — by **product complexity (PCI)**, built on the Harvard Growth Lab
    *Atlas of Economic Complexity*. Documented in [`docs/pci-analysis.md`](docs/pci-analysis.md).
 2. **The AI semiconductor supply chain** (active research): a monthly bilateral panel, time-varying
-   matrix factor models, and network measures for the AI-era trade network. Start at
-   [`docs/research-proposal.md`](docs/research-proposal.md) and [`docs/data.md`](docs/data.md).
+   matrix factor models, and network measures for the AI-era trade network. Reading order:
+   [`docs/research-proposal.md`](docs/research-proposal.md) (the program: claims, model sketch,
+   measures, rough answers) → [`docs/supply-chain-narrative.md`](docs/supply-chain-narrative.md)
+   (the empirical story 2021–26, with the flow charts) → [`docs/data.md`](docs/data.md) (sources,
+   taxonomy, panel construction) → [`docs/modeling-brainstorm.md`](docs/modeling-brainstorm.md)
+   (methodology decisions and interpretation, incl. hubs-as-varieties) →
+   [`docs/notes/`](docs/notes/) (working notes: computed measure results, proposal sketch).
+   Estimation outputs live in [`results/mfm/`](results/mfm/); reference papers in
+   [`docs/references/`](docs/references/).
 
 ### → Live dashboard: **https://jasonzhixinglu.github.io/global-export-complexity/**
 
