@@ -299,3 +299,36 @@ Relative to vector PCA: identical logic plus ONE restriction -- loadings are
 separable, Lambda = C (x) R, i.e. a corridor loads only through its endpoints'
 types (the bilinear/gravity-shaped restriction on comovement); this is also
 exactly the low-rank structure the structural sketch places on a_od.
+
+
+## 2026-07: The bundle microfoundation — factors as latent composite goods
+
+Refinement of the identification mapping (user's conjecture, confirmed): suppose
+demand is two-level — destinations demand k latent COMPOSITE GOODS (bundles),
+each bundle an aggregate of origin varieties with recipe weights w_ob, and
+destination spending on bundles factors through buyer types. Then
+x_od,t = sum_b w_ob * E_bd,t, which IS the MFM with units attached:
+**R = recipes** (which origins constitute each composite), **F_t = expenditure
+on each bundle by each buyer type**, **C = buyer-type memberships**. This
+supplies what the low-rank-A story lacked: WHY A is low rank (demand is over k
+composites, not pq varieties) and what F means economically (bundle
+expenditures).
+
+Consequences:
+- **Loading stability/drift <-> within-bundle elasticity.** Cobb-Douglas
+  recipes (sigma=1) give exactly constant loadings (the calm eras); sigma<1
+  (complements) makes the expensive component's expenditure share RISE with its
+  price — observed: TWN's loading climbing while its prices 20x'd. The
+  within-bundle sigma is thus identifiable from co-movement of loadings with
+  component prices — a new identification route.
+- **2023-07 restated:** a new composite good (the AI-compute bundle) entered
+  the economy — a new recipe column.
+- **Nest vs kit unified:** a bundle with substitutable components is an
+  Armington nest; with complementary components, a kit. Both are one composite
+  to buyers — the co-demand equivalence class, now demand-theoretically named.
+- **Literature anchor:** latent-factor/mixed-CES demand (Lancaster;
+  Adao-Costinot-Donaldson) — the MFM is the reduced form of such a system.
+- **Caveats:** rotation ambiguity = recipes identified only up to span; varimax
+  = "recipes are sparse" (a technology assumption). Origin weights confound
+  recipe with sourcing shares where components are multi-sourced (whence
+  multi-location hubs like MEX/TWN servers).
