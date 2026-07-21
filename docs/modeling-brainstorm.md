@@ -387,3 +387,34 @@ multi-starts. Findings:
 Bottom line: the rotation question is empirically closed for this data — the
 bundle basis is unique under admissibility, and it is the basis we have been
 using all along.
+
+
+## 2026-07: Final interpretation — bundles are DEMAND PROGRAMS; what the conditions require
+
+Stress test (user): Taiwan exports high- AND low-end chips (not pure), and no one
+else exports Taiwan-grade chips (no shared membership) — do the identification
+conditions fail? No, on both counts, and resolving this fixes the interpretation:
+
+1. **What the conditions require.** Anchors/purity: each BUNDLE needs one
+   near-pure participating country — not multiple suppliers of a product. A
+   sole-supplier bundle is the trivially identified case (its expenditure path
+   is observed directly). A mixed Taiwan just loads on two bundles, each
+   anchored elsewhere (the low-end program by CHK). Scattering, refined: every
+   bundle direction must be realized by some near-extreme row; membership
+   breadth is irrelevant, membership purity is everything.
+2. **Economic meaning (final form): bundles are demand programs** — recurring
+   expenditure streams over destination x month (the AI build-out program; the
+   China-assembly program). A country's loading = how much of its exports are
+   financed by each program. Substitute varieties, complement kits, and
+   sole-source products are different SUPPLY structures behind a program; the
+   factorization identifies programs and participation, and is agnostic about
+   within-program supply structure (why varieties-vs-complements needed extra
+   evidence).
+3. **Theoretical certainty is conditional, and the certificate is external.**
+   IF each true program has a near-pure participant and program paths are
+   linearly independent (patently true), THEN identification holds. Estimated
+   purity alone is partly criterion-induced (circular); the non-circular
+   certificates are the tariff-line decomposition and the CES loading-price
+   test. Paper order: multi-start uniqueness (demonstrated) -> identifying
+   condition (stated) -> external tests (the certificate). Same epistemic
+   status as Rohe-Zeng sparsity.
