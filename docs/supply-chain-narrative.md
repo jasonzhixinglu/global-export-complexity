@@ -10,7 +10,7 @@ from the panel unless noted; industry events from the public record. Written 202
 Before the story, the map. The stage definitions and HS6 code lists come from the
 OECD's *Mapping the semiconductor value chain* (2025, doi:10.1787/4154cdbf-en) and
 the Fed's AI-compute basket (FEDS Note, 2026-02-13), as pinned down in
-[tech-ai-taxonomy.md](tech-ai-taxonomy.md); the dollar sizes and corridors are from
+[data.md §1](data.md); the dollar sizes and corridors are from
 our own bilateral data (2024, HS2012 files; the three panel codes also from the
 monthly panel). The whole traded chain was ~$1.66T in 2024, more than half of it
 the chips stage.

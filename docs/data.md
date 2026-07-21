@@ -3,8 +3,9 @@
 Everything the project's numbers rest on, in one place: what products we track
 (taxonomy), where the data comes from (sources, with their properties and
 trade-offs), what we build from it (panels), how fresh each piece is, and the
-operational detail to regenerate any of it. Vendor/API operational detail is folded in here (formerly separate files, now in git history); `tech-ai-taxonomy.md`
-remains the extended taxonomy discussion (tier B/C proposals, validation).
+operational detail to regenerate any of it. Vendor/API notes, the taxonomy, and
+the national-source intelligence formerly spread across `comtrade.md`, `tdm.md`,
+and `tech-ai-taxonomy.md` are all folded in here (originals in git history).
 
 ---
 
@@ -12,8 +13,9 @@ remains the extended taxonomy discussion (tier B/C proposals, validation).
 
 Organizing principle: **proximity to the GPU**, arranged as supply-chain stages.
 Codes are HS6; stage definitions follow the OECD semiconductor value-chain
-mapping (2025) and the Fed's AI-compute basket (FEDS Note 2026); full discussion
-and the proposed Tier B/C extensions in [tech-ai-taxonomy.md](tech-ai-taxonomy.md).
+mapping (2025) and the Fed's AI-compute basket (FEDS Note 2026). The closer a
+code is to the compute silicon, the more cleanly it is "AI/semiconductor"; the
+further out, the more dual-use dilution — the reason for tiering (below).
 
 | stage | codes | 2024 world trade | monthly? |
 |---|---|---|---|
@@ -36,6 +38,20 @@ HS92) — this forces the HS2012 vintage for anything semiconductor-specific.
 Within-HS6 heterogeneity is severe (an H100 module and a commodity part share
 847330; exporter unit values within one code span two orders of magnitude) —
 see the varieties discussion in [modeling-brainstorm.md](modeling-brainstorm.md).
+
+**Planned basket extensions (Tiers B and C).** Tier B, "AI / data-center
+infrastructure" (~$0.45T world 2024) — the rack around the GPU, genuinely
+AI-driven but dual-use, to be kept as a separately-labeled basket, never merged
+into the silicon tiers: networking/interconnect 851762/851769/851770/854470/
+900110, power 850440 (+850423/850434), storage 847170, boards/substrates
+853400/853890. Tier C (documented, excluded): lithium batteries 850760, generic
+connectors/passives/HVAC — either a different boom (EV/storage) or too generic.
+The tiering trade-off: moving outward, the dollar base grows (851762 alone,
+$177B, dwarfs the Fed basket) but so does the non-AI share; folding B into A
+would turn a clean semiconductor signal into a noisy ICT one. Dual-use is
+irreducible at HS6 (data-center vs telecom switches share 851762); the fix is
+national HS8-10 lines or firm data. Tier A baskets are implemented in
+`src/gec/classifications.py`; B remains a proposal.
 
 ## 2. Sources: properties, advantages, disadvantages
 
@@ -87,9 +103,25 @@ COMMODITY/YEAR/MONTH/VALUE/QTY1/UNIT1/QTY2/UNIT2. Standing pulls: TWN full
 history, CHN 2024-01+, VN2 full, KR/SG/TH/TR top-ups; portal fallback documented
 in [tdm/tdm-report-by-email-help.pdf](tdm/tdm-report-by-email-help.pdf).
 
-**Alternatives considered:** CEPII BACI (reconciled + quantities, but ~2y stale
-— superseded by Atlas+TDM combination); ITC TradeMap (no advantage over the
-above); Haver (used once to sanity-check basket definitions).
+**National customs portals** (probed 2026-06, as TDM alternatives/checks):
+Taiwan MOF (portal.sw.nat.gov.tw) — free, English, HS2/4/6/8/11, ~10-day lag,
+no anti-bot: the clean programmatic option and an independent check on TDM's
+Taiwan feed, plus the tariff-line source for the varieties validation. China
+GACC (stats.customs.gov.cn) — HS8 exists but behind an aggressive WAF (HTTP 412
+on every scripted request); manual-browser only. Vietnam GDVC — reachable but
+free data stops at a broad "electronics" group; HS6 is a manual dig.
+
+**Haver** (`emergepr`, tracked in the separate haver-data pipeline; monitoring
+only, not basket-grade): curated national aggregates for TW/CN/KR/SG/VN, ~1-2
+months fresher than Comtrade, mixed units and concepts. A mapping check found
+Vietnam's "Computers, Electronic Products & Parts" ≈ the 8471/8473/8541/8542
+HS6 set excluding phones (Haver ≈ 88% of that basket on exports). Taiwan is the
+exception worth knowing: emergepr splits IC / DRAM / semi-equipment bilaterally
+by partner — finer than HS6.
+
+**Alternatives considered and passed over:** CEPII BACI (reconciled +
+quantities, but ~2y stale — superseded by the Atlas+TDM combination); ITC
+TradeMap (no advantage over Comtrade for us).
 
 ## 3. What we build: the derived datasets
 

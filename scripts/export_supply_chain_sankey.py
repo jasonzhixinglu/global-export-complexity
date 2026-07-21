@@ -7,7 +7,7 @@ proportional to dollars, country colours consistent across all charts. Within a
 chart widths share one scale; ACROSS charts scales differ (totals differ 10x) --
 each title carries the stage total.
 
-Stage/code definitions per docs/tech-ai-taxonomy.md (OECD value chain + Fed
+Stage/code definitions per docs/data.md (OECD value chain + Fed
 basket). Data: dashboard techai_bilateral.json (equipment, chips; HS2012
 bilateral) and the monthly panel (compute codes). Output: exports/supply_chain_*.png
 """
@@ -192,7 +192,7 @@ def draw_stage(fname, title, codes_txt, flows):  # unused: plain versions retire
     ax.set_title(f"{title}\n{codes_txt} — world trade ${total:.0f}B ({YEAR})",
                  fontsize=12, color=INK, pad=14)
     ax.text(0.5, -0.045, "Ribbon colour = exporter. Within-chart widths share one scale; "
-            "scales differ between stage charts. Sources: docs/tech-ai-taxonomy.md codes; "
+            "scales differ between stage charts. Sources: docs/data.md codes; "
             "Atlas HS2012 bilateral / monthly panel.", ha="center", fontsize=7.5, color=MUTED)
     out = OUT_DIR / f"supply_chain_{fname}_{YEAR}.png"
     fig.savefig(out, dpi=150, bbox_inches="tight", facecolor=SURFACE)
@@ -819,7 +819,7 @@ def draw_overview(stage_flows, MODE="dollar"):  # unused: replaced by draw_chain
     ax.text(0.5, -0.08, "Ribbon colour = exporting country; each column is a checkpoint "
             "(country sells the right-hand stage, buys the left-hand stage). Smallest "
             "corridors not drawn (see per-stage charts for detail). No cross-stage "
-            "absorption implied. Sources: docs/tech-ai-taxonomy.md codes; Atlas HS2012 "
+            "absorption implied. Sources: docs/data.md codes; Atlas HS2012 "
             "bilateral / monthly panel.", ha="center", fontsize=8, color=MUTED)
     out = OUT_DIR / f"supply_chain_overview_{MODE}{suffix}_{YEAR}.png"
     fig.savefig(out, dpi=150, bbox_inches="tight", facecolor=SURFACE)

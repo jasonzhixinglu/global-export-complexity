@@ -73,7 +73,7 @@ the first question but only informed judgment answers the second.
 Three ingredients, in increasing order of difficulty:
 
 1. **The chain order.** Chips → boards/parts → subassemblies → finished systems.
-   We already have this: it is the taxonomy (docs/tech-ai-taxonomy.md), and it is
+   We already have this: it is the taxonomy (docs/data.md §1), and it is
    knowledge about the products, not something estimated.
 2. **Tracking flows through countries.** How much of Mexico's server exports is
    Taiwanese board content? Not directly observed — customs data records shipments,
