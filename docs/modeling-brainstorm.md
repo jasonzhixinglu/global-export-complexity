@@ -418,3 +418,34 @@ conditions fail? No, on both counts, and resolving this fixes the interpretation
    test. Paper order: multi-start uniqueness (demonstrated) -> identifying
    condition (stated) -> external tests (the certificate). Same epistemic
    status as Rohe-Zeng sparsity.
+
+
+## 2026-07: Which uniqueness condition holds for our data, and its trade translation
+
+Measured (purity of criterion-basis loadings, pooled-2024): every program on
+BOTH sides has a top participant with own-purity 0.93-1.00, mostly exactly 1.00
+(TWN, MEX, CHK, VNM anchors on the supplier side; USA, CHK, MYS, MEX on the
+buyer side; top participants hold 46-100% of their program's mass). So the
+applicable theorem is **near-separability (the anchor condition)** -- the
+strongest of the family, held on both sides where one side + full rank
+suffices (Donoho-Stodden exact; Arora et al. / Gillis-Vavasis robust versions
+with graceful degradation in anchor impurity).
+
+Trade translations:
+- **Supplier anchor**: each spending stream has a country supplying essentially
+  nothing else (TWN/AI, MEX/NAFTA-server, CHK/assembly, VNM/belt). Plausible
+  because GVC participation is specialized: dedicated capacity, qualification,
+  relationships.
+- **Buyer anchor (dual; most self-evident for us)**: each stream has a buyer
+  whose purchases in these codes are only that stream (USA/AI, CHK/assembly).
+- **Sufficiently scattered (fallback, implied)**: no purity needed; the pattern
+  of NON-participation must be rich and crisscrossing. Key reconciliation with
+  gravity: "everyone trades with everyone" concerns bilateral TOTALS (the
+  programs' combined footprint); each country's PROGRAM vector can still be
+  near-one-hot -- and is.
+
+Status: purity is measured on criterion-chosen loadings (not sole proof), but
+the criterion does not force 1.00 purity or single-country program mass -- that
+extremity is the data. Chain for the paper: condition stated -> trade meaning ->
+empirical signature measured -> uniqueness demonstrated (60/60 multi-start) ->
+external certificates (tariff lines, CES price test) specified.
