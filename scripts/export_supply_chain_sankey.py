@@ -414,8 +414,12 @@ def draw_chain_overview(input_stages, seq_stages, MODE="dollar", fold_min=10.0, 
         for (o, t), v in flows.items():
             ex[o] = ex.get(o, 0.0) + v
             im[t] = im.get(t, 0.0) + v
-        ko = set(ex[ex >= FOLD_MIN].index)
-        kt = set(im[im >= FOLD_MIN].index)
+        # keep a country if it clears the absolute bar OR ~10% of its stage total,
+        # so relatively-large players in small stages (TWN in wafers/equipment)
+        # stay visible instead of folding into Other
+        rel = 0.10 * sum(flows.values())
+        ko = set(ex[(ex >= FOLD_MIN) | (ex >= rel)].index)
+        kt = set(im[(im >= FOLD_MIN) | (im >= rel)].index)
         f = {}
         for (o, t), v in flows.items():
             key = (o if o in ko else "Other", t if t in kt else "Other")
@@ -534,7 +538,7 @@ def draw_chain_overview(input_stages, seq_stages, MODE="dollar", fold_min=10.0, 
                 if v <= 0:
                     continue
                 h = v * sc
-                if v < draw_min:
+                if v < draw_min * 0.4:
                     out_off[o] += h
                     fab_in_off[t] += h
                     continue
