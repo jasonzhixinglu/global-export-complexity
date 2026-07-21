@@ -1,451 +1,180 @@
-# Why we need more than product-level factor models
+# Modeling notes: what we estimate, what it means, what we decided
 
-The argument of this note, in one paragraph: our product-level factor models measure
-who ships what to whom, and they do that well. But shipping is not the same as
-mattering. In electronics, the country that ships the most valuable boxes (Mexico,
-finished servers) often created little of the value inside them, while the country
-that created most of the value (Taiwan) can look mid-sized in any single product's
-data. So conclusions drawn from one product's model alone can be misleading. To say
-who actually matters in this supply chain — and how that is changing — we have to
-connect the product layers to each other and weight flows by where value is created.
-Some of that can be estimated from our data; some of it requires knowledge the data
-does not contain, and we should be explicit about which is which.
-
-## 1. What the product-level models measure
-
-For one product code — say finished servers — the model takes the monthly matrix of
-who ships to whom and finds groups of countries that behave similarly as shippers
-and receivers (hubs), plus the flows between those groups over time. This is a good
-description of one layer of the system. What it cannot be, even in principle, is a
-description of the chain that runs *through* that layer: a server shipped from
-Mexico contains chips and boards that entered Mexico the month before as imports of
-different product codes. Each product model sees one cross-section of that journey.
-
-## 2. How the cross-sections mislead if read alone
-
-Our own results supply the example that matters. In the finished-server data
-(847150), Mexico is the largest exporter — $110B over 2020–24 — and in the factor
-model it earns its own hub. Taken at face value: Mexico is a pillar of the global
-AI-compute trade. In reality, Mexico's role is final assembly — attaching imported
-boards to imported chassis. Most of the value in a server leaving Mexico was created
-elsewhere: chips fabricated in Taiwan, boards built in Taiwan or Malaysia, design
-from the US. The data is not wrong — Mexico genuinely shipped those servers — but
-the *importance reading* is wrong.
-
-Three mechanisms cause this, and all are visible in our data:
-
-- **Double counting along the chain.** The same chip is counted once leaving Taiwan
-  (as a chip), again inside a board leaving Malaysia, again inside a server leaving
-  Mexico. Countries late in the chain ship the biggest dollar totals because their
-  boxes contain everyone else's work.
-- **Pass-through.** Hong Kong's $59B of "exports" is almost entirely re-export of
-  goods it neither made nor changed. The models place it in the core hubs alongside
-  actual producers.
-- **The bilateral single-hop view.** Taiwan's exports to the US look modest partly
-  because Taiwan's output reaches the US *via* Mexico and via assembly in Southeast
-  Asia. Its true US-bound share is spread across other countries' export rows.
-
-A practical note: every time the model output was checked against prior knowledge of
-this industry (why is Taiwan only 4th in that hub? why does the log transform bury
-it?), the discrepancy traced back to one of these three mechanisms. That checking
-habit is the right validation method for everything below.
-
-## 3. The question we actually want to answer
-
-"Who matters in the AI-compute supply chain, and how is that changing?" splits into
-two different questions:
-
-- **Where is value created?** This is measurable in principle: the value a country
-  adds at its hop is (roughly) what it exports minus the inputs it imported for
-  those exports. Mexico's markup per server is small; Taiwan's markup per chip is
-  enormous.
-- **Who is hard to replace?** This is not in trade data at all. Mexico's assembly
-  role could relocate in a year; TSMC's fabrication cannot relocate this decade.
-  Two countries with the same measured value added can have completely different
-  strategic importance. Answering this requires outside knowledge — technology,
-  capital intensity, lead times — imported explicitly as context, not inferred.
-
-Keeping these separate matters, because the data can correct the Mexico illusion for
-the first question but only informed judgment answers the second.
-
-## 4. What connecting the layers requires
-
-Three ingredients, in increasing order of difficulty:
-
-1. **The chain order.** Chips → boards/parts → subassemblies → finished systems.
-   We already have this: it is the taxonomy (docs/data.md §1), and it is
-   knowledge about the products, not something estimated.
-2. **Tracking flows through countries.** How much of Mexico's server exports is
-   Taiwanese board content? Not directly observed — customs data records shipments,
-   not what happens inside the country between arrival and departure. It has to be
-   estimated by comparing what goes in (imports of upstream codes) with what comes
-   out (exports of downstream codes), country by country, with a lag. This is where
-   assumptions live: how imports map to exports when a country has several output
-   products, how long goods sit in inventory. Existing frameworks (the OECD's
-   value-added accounting) solve this with a proportionality assumption at annual
-   frequency; at monthly frequency it is harder and this is the genuinely new work.
-3. **Value-added weights at each hop.** The difference between the value of what a
-   country ships and what it imported to make it. Our data has raw material for
-   this: values and quantities (so unit values), and for pass-through hubs, actual
-   re-export statistics (Hong Kong publishes them).
-
-With those three, the correcting objects become computable: e.g. "Taiwan-origin
-content of US server imports, monthly" — which would show Taiwan's true weight
-regardless of which country's flag is on the final box, and would show whether the
-2025 tariff shock actually rerouted chains or just relabeled them.
-
-## 5. The plan: two layers, and honesty about what each can claim
-
-- **Layer 1 (built): the per-product factor models.** Good measurement of each
-  cross-section: hubs, memberships, flows, and the dates when structure broke
-  (mid-2023, spring 2025). These results stand on their own and involve no
-  assumptions about how products relate.
-- **Layer 2 (open): the chain accounting.** Connect the layers using the three
-  ingredients above. Its outputs re-weight Layer 1's story: gross-flow importance
-  becomes value-added importance. Every Layer 2 claim depends on the absorption
-  assumptions, so they must be stated and stress-tested — and claims about
-  *replaceability* (question two above) additionally depend on imported industry
-  knowledge and should be labeled as judgments, not estimates.
-
-Shelved along the way: a tensor factor model over exporter × importer × product.
-Rejected because it assumes countries in the same hub export the same product mix,
-when the defining feature of real supply-chain blocs is the opposite — members
-divide the labor (Taiwan boards, Korea memory, Malaysia assembly). Our per-code
-results confirm the mixes differ: the server network is Mexico-led, the board
-network Taiwan-led, the parts network China-led.
-
-## 6. Test cases the finished system must get right
-
-The calibration standard: the system is judged against what we know about this
-industry. If it fails these, the model is wrong, not the priors.
-
-| country | gross-flow picture (Layer 1) | true role the system must recover |
-|---|---|---|
-| Mexico | top server exporter, own hub | low-value final assembly; large flows, small value added, replaceable |
-| Taiwan | mid-ranked in several codes | dominant value creator; its content reaches the US mostly via others' exports; hard to replace |
-| Hong Kong | core-hub member, big flows | pass-through; near-zero value added |
-| Vietnam / Malaysia | rising exporters | assembly tier: genuine but thin value added, growing |
-| China | biggest parts exporter | mixed: assembly AND growing value creation AND a major final destination — the one case that needs care rather than a label |
+The project's consolidated interpretation and decision record. Superseded
+intermediate discussions (this document developed through many revisions) live
+in git history; what follows is the settled state as of 2026-07, organized as:
+the measurement problem (I), the architecture and decisions (II), what the
+factor model identifies (III — the main synthesis), calibration test cases
+(IV), and open items (V).
 
 ---
-*Working decisions (details in results/mfm/ and the git log): dollar levels rather
-than logs; 12-month trailing estimation window; no seasonal adjustment; era-anchored
-hub labels with breaks at 2023-07 and 2025-04.*
 
+## I. The measurement problem: shipping is not mattering
 
-## 2026-07: Visualization — country-node network graphs (OPEN)
+Product-level trade data measures who ships what to whom, and our models
+describe that well. But gross flows mislead about *importance* through three
+mechanisms, all visible in our data:
 
-The staged flow-of-funds charts have a structural limit: columns imply goods hop
-countries between stages, but integrated assemblers (Mexico: chips in, servers
-out) do the intermediate stages domestically, which customs data cannot show. A
-complementary chart type would put COUNTRIES as nodes (one node per country, laid
-out geographically or by role) and draw product flows as directed edges between
-them, coloured/styled by product stage — so a country's full input/output mix sits
-at one node instead of being scattered across checkpoints. Candidate first cut:
-top ~12 countries + Other, edges from the same stage flow data, edge width = $.
+- **Double counting along the chain**: the same chip is counted leaving Taiwan,
+  again inside a board leaving Malaysia, again inside a server leaving Mexico.
+  Late-chain countries ship the biggest totals because their boxes contain
+  everyone else's work.
+- **Pass-through**: Hong Kong's ~$59B of "exports" is mostly re-export of goods
+  it neither made nor changed.
+- **The single-hop view**: Taiwan's exports to the US look modest because its
+  content reaches the US via Mexico and Southeast Asia, spread across other
+  countries' export rows.
 
+The canonical example: Mexico is the largest server exporter ($110B 2020–24)
+and earns its own factor — yet its role is final assembly of imported content.
+The data is right; the naive importance reading is wrong. "Who matters" splits
+into two questions: *where is value created* (estimable, under stated
+absorption assumptions) and *who is hard to replace* (not in trade data;
+requires labeled judgment — though the price-response evidence now answers it
+partially: see the market-power results in the research proposal).
 
-## 2026-07: What the hubs actually identify — co-demand clusters: varieties OR complement bundles
+## II. Architecture and standing decisions
 
-**The puzzle.** If goods within an HS6 code were homogeneous, gravity logic says
-every exporter should have roughly the same destination profile (proportional to
-demand and distance) and roughly one world price. Neither holds. Destination
-profiles separate into sharp hubs, and — the decisive evidence — exporters of the
-"same" code sell at unit values spanning two orders of magnitude *in the same
-year*:
+**Two layers, assumptions quarantined.** Layer 1 (built): per-product factor
+models — assumption-light measurement of each cross-section; hubs, flows,
+break dates. Layer 2 (open): chain accounting connecting the layers (absorption,
+value added) — all cross-product assumptions live here and are stated
+explicitly. A reader who rejects Layer 2's assumptions still gets Layer 1.
 
-| $/kg, 2025 exports | 847330 (parts) | 847180 (units) | 847150 (servers) |
+**Decisions log** (rationales in git history and results/mfm/):
+
+| decision | choice | reason |
+|---|---|---|
+| transform | dollar levels, not logs | logs bury scale (demoted Taiwan); the paper's own application uses levels |
+| estimation window | 12m trailing, uniform | seasonally balanced, one-sided (defined to the last month); OOS-validated vs 6/18/24m |
+| seasonality | none removed | 12m window absorbs it; LNY handled by presentation (3m MA) |
+| hub labels | era-anchored (constant anchors within calm eras; Procrustes to anchor; crosswalks at breaks) | chained matching accumulates ambiguity exactly at the breaks |
+| blocs | CHN+HKG merged (CHK) as the preferred basis; USA+MEX variant as diagnostic | entrepôt churn nets out; **Taiwan is never merged into a China bloc** (its substitution vs China is a finding, not noise) |
+| tensor factor model (exporter×importer×product) | **shelved** | Tucker separability forces same-hub countries to share product mix; real blocs divide labor (memory vs boards vs assembly) |
+| rank | k=r=4 working rank (ratio estimator picks 1 = gravity factor) | the hub structure lives at the 2nd spectral tier |
+
+## III. What the factor model identifies (the synthesis)
+
+### 1. Relative to vector PCA: one added restriction
+
+The MFM is vector factor analysis on the 900 corridor cells plus one
+constraint: loadings are separable, Λ = C ⊗ R — corridor (i,j) loads only
+through i's exporter type and j's importer type. Corridors have no identity of
+their own. This is a bilinear, gravity-shaped restriction on comovement; it is
+also exactly a low-rank structure on the Armington weight matrix, which makes
+the MFM the reduced form of the structural sketch (research-proposal §3):
+writing gravity demand as x_od,t = A_od·φ_o,t·ψ_d,t with A low-rank *is* the
+time-varying MFM. Hence: hub counts = rank of A; loading subspaces = type
+spans (tilted by relative prices — so breaks = changes in A or large price
+divergence; 2023-07 was both); F_t = type-pair expenditure aggregates.
+
+### 2. The interpretation: factors are demand programs
+
+The settled reading, reached after several refinements (varieties → co-demand
+clusters → composite bundles → programs): **each factor is a spending stream**
+— a recurring pattern of expenditure over destination×month. Concretely: the
+*AI build-out program* (US-concentrated expenditure, flat until mid-2023 then
+growing ~8x) and the *China assembly program* (stable component-buying spread
+over KOR/VNM/MYS). With natural normalizations:
+
+- **exporter weights = supplier market shares within a program** (cents of
+  each program dollar going to each country);
+- **importer weights = where the program's spending sits**;
+- **F_t = the programs' budgets month by month**;
+- **a country's loadings = how much of its exports each program finances.**
+
+The 2023-07 structural break, restated: *a new spending program entered the
+economy*, and the factor model watched its column appear.
+
+### 3. Below the factorization's resolution: supply structure within programs
+
+Programs are demand objects; the factorization is agnostic about the *supply*
+structure behind each. Three types occur, with discriminators and evidence:
+
+| program's suppliers are… | example | discriminating evidence |
+|---|---|---|
+| a **sole source** | 847180: solo-Taiwan (AI baseboards) | trivially identified; no substitution at any price; the 20x unit-value spike |
+| **substitutes** (same product, multiple locations) | 847150: MEX and TWN assembling AI servers | ~zero monthly timing correlation but monotone share reallocation (TWN share of the pair to the US: 25%→47% in 3 years) |
+| **complements** (a kit consumed together) | 847330: KOR memory + TWN modules | cross-destination proportionality corr(log,log)=0.83; growing intra-pair trade (KOR→TWN 4x); joint repricing under the common bottleneck; monthly changes anti-correlate at big destinations (consistent with lead–lag shipping; lagged test pending) |
+
+Working rules: substitution is fast within a product regardless of factor
+assignment, slow across products, near-zero within kits; a bottleneck in one
+kit member caps the whole kit (demand complementarity operating *inside* a
+program, on top of the capacity story). Unit-value caveat: $/kg confounds value
+density with physical form (bare HBM at $5,071/kg vs assembled modules at
+$280/kg can be the *same* program) — cross-form comparisons need per-unit
+quantities. Within-code heterogeneity is severe regardless (same-code exporter
+unit values span 10–100x): HS6 codes bundle different products, and the
+factorization sees through the codes to the programs.
+
+### 4. Identification: why the basis is not a convention here
+
+Pure algebra leaves total rotational indeterminacy (only the subspace is
+identified). Economics adds **nonnegativity** — market shares and budgets
+can't be negative — which converts the problem from PCA to NMF, where
+uniqueness theorems exist. Geometrically: the data points must lie inside the
+cone of the program profiles, and the profiles inside the positive orthant;
+the edges are pinned when data points press against them — i.e. when near-pure
+rows/columns exist.
+
+Status, demonstrated then stated:
+
+- **Numerically unique**: choosing the basis by minimizing negative mass over
+  rotations (60 multi-starts, per code, both sides) converges to a single
+  solution (dispersion 0.000) — and that solution **is the varimax basis**
+  (column match |cos| 0.99–1.00), so every hub result in the project is the
+  admissible basis. Residual ~1% negativity is the orthogonality tax; tri-NMF
+  (Route B) would remove it without moving the basis.
+- **The applicable theorem is near-separability (anchors)** — the strongest
+  condition — and it holds on *both* sides where one suffices: measured
+  own-purity of each program's top participant is 0.93–1.00 (TWN, MEX, CHK,
+  VNM on the supplier side; USA, CHK on the buyer side). Trade translation:
+  each spending stream has a country supplying essentially nothing else
+  (GVC specialization), and a buyer whose purchases are essentially only that
+  stream (the US *is* the AI program's buyer). The weaker
+  sufficiently-scattered condition (sparse program membership despite dense
+  bilateral totals — which reconciles identification with gravity) is implied.
+- **Epistemic chain for the paper**: condition stated → trade meaning →
+  empirical signature measured → uniqueness demonstrated → external
+  certificates (Taiwan tariff-line decomposition; CES loading–price test)
+  specified but not yet run. Same status as topic-model anchor identification;
+  apparently the first application of that machinery to trade factorization.
+
+### 5. Consequences for measurement
+
+The effective market is the program/variety, not the HS6 code: concentration
+and market power computed at code level understate wherever a program has a
+sole source (847180's HHI 0.38 already flags Taiwan; the AI-baseboard program
+within it is closer to a monopoly). The factor partition supplies the market
+definition the power metrics should run on. And the within-kit elasticity is
+identifiable from loading–price comovement (shares rising in a component's
+price ⇒ complements), a route neither flows nor prices alone provide.
+
+## IV. Test cases the finished system must get right
+
+Judged against industry knowledge; if the system fails these, the model is
+wrong, not the priors. Status added as of 2026-07:
+
+| country | gross-flow picture | true role | status |
 |---|---|---|---|
-| China | 58 | — | — |
-| Turkey | 89 | 92 | 285 |
-| Thailand | 132 | — | — |
-| Korea | 5,071 | 356 | 274 |
-| Taiwan | 280 | 3,646 | 1,678 |
-| Singapore | 668 | 5,828 | — |
+| Mexico | top server exporter, own factor | replaceable low-value assembly | **confirmed by data**: no price premium; corridor contested by TWN within a quarter |
+| Taiwan | mid-ranked in several codes | dominant value creator, hard to replace | **confirmed**: 20x repricing; sole-source program; no substitution |
+| Hong Kong | core-hub member | pass-through | **confirmed**: netted out by CHK bloc; conduit-index signature |
+| Vietnam/Malaysia | rising exporters | thin-margin assembly tier, growing | consistent (volume without price gains); ToT indexing pending |
+| China | biggest parts exporter | assembler AND value creator AND main non-US buyer | the one case needing care; upstream-import surge = capacity build-out (leading indicator) |
 
-And the dynamics split the same way: Taiwan's 847180 went from ~$285/kg (2022)
-to ~$3,646 (2025) while Turkey's stayed near $92 — the AI variety appreciated
-13x, the generic variety did not move.
+## V. Open items, in rough priority order
 
-**The interpretation — sharpened.** The factor model, fed only flow patterns,
-recovers *co-demand clusters*: exporters whose sales co-move because the same
-downstream demand pulls them. Crucially, TWO opposite micro-structures generate
-identical flow signatures: (a) **substitute varieties** — exporters of the same
-sub-product competing for the same buyers (one's share gain is the other's
-loss); (b) **complement bundles** — exporters of *different* sub-products that
-are consumed together downstream in near-fixed proportions (HBM + GPU modules),
-whose demands co-move perfectly for the opposite reason. Co-destination
-covariance — all the MFM sees — cannot tell them apart; the same hub can even
-contain both. So "hubs = varieties" was half right: hubs are demand-side
-clusters whose internal structure (substitute vs complement) must be determined
-by evidence beyond flows.
-
-**Discriminators, with first evidence.** (i) *Intra-hub trade*: complements ship
-to each other, substitutes do not — and KOR->TWN 847330 flows quadrupled
-2020-2025 ($0.3B -> $1.15B, doubling in the 2023-24 ramp): the Korea+Taiwan
-847330 hub contains a vertical complement pipeline, alongside shared US/China
-customers. (ii) *Response to asymmetric shocks*: substitutes reallocate shares
-(Taiwan took Mexico's US server share in a quarter); complements co-cap — a
-binding constraint in one propagates to the other, which fits the joint
-Korean-memory/Taiwan-packaging price surge under the HBM/CoWoS bottleneck.
-(iii) *Physical content* (tariff lines / form factors): the KOR/TWN unit-value
-gap is bare memory vs assembled modules — different sub-products consumed
-together, i.e. complements, not rival varieties. (iv) *Bundle co-shipment*
-(user's sharpest prediction: complements travel as a kit, so different
-countries' exports of the pair should be proportional across destinations):
-tested — corr(log KOR, log TWN) = 0.83 across 1,954 destination-months of
-847330, within-destination log-ratio sd ~0.68 (a +/-2x band). Monthly
-log-changes anti-correlate at USA (-0.27) and CHN (-0.12) — consistent with
-lead-lag shipment (memory precedes the modules it is consumed with) rather
-than contradicting bundling; the lagged cross-correlation is the follow-up
-test. The substitute contrast behaves as predicted: MEX vs TWN servers to the
-USA show ~zero monthly comovement (+0.08) but monotone share reallocation
-(TWN share of the pair 25% 2023 -> 40% 2025 -> 47% 2026). Working rule:
-complements = cross-destination proportionality + lagged volume comovement;
-substitutes = uncorrelated timing + trend share reallocation.
-
-**Structural mapping: hubs as discovered Armington nests — with a three-type
-refinement.** Standard Armington assumes each country is its own variety. The
-evidence suggests varieties exist at a coarser level that hubs approximately
-recover — but hubs come in two types, and the substitution evidence separates
-them. Some hubs partition *varieties* (847180: the solo-Taiwan hub owns the AI
-baseboard; nobody substituted away from it at any price — low cross-nest
-sigma). Other hubs partition *locations of the same variety* (847150: the
-MEX-led and TWN-led hubs both ship AI servers, and Taiwan took Mexico's US
-share within a quarter — the fast substitution ran ACROSS those hubs, because
-they are one variety in two places). A third type completes the taxonomy: hubs
-that bundle *complements* (847330's KOR+TWN: memory + modules consumed
-together). So a hub is one of: a variety monopoly (847180 solo-TWN), a
-multi-location single variety (847150 MEX/TWN — high substitutability), or a
-complement bundle (847330 KOR+TWN — near-zero substitutability, Leontief-like).
-The correct general statement: substitution is fast within a variety regardless
-of hub, slow across varieties, andnear zero within complement bundles — and the
-within-bundle structure is where a bottleneck in one member caps the whole
-bundle (the Baqaee-Farhi complementarity channel operating INSIDE a hub, on top
-of our capacity story). The supply elasticity ε still applies at the variety level:
-capacity bound for the AI variety of 847180 while the generic variety in the
-same code stayed slack.
-
-**Testable implications.**
-1. National tariff-line data (Taiwan and US publish 8-11 digit lines) should
-   decompose these codes into sub-lines that align with hub membership — the
-   direct confirmation, and a natural appendix exercise.
-2. Unit values should cluster within hubs and diverge across them (the table
-   above is the first pass; more reporters via TDM would fill it out).
-3. Substitution speed should be fast within a VARIETY and absent across
-   varieties — both observed (MEX->TWN server assembly contested in a quarter;
-   TWN baseboards never substituted). Note the server case is cross-hub
-   substitution within one variety: hub != variety there (see refinement above).
-4. Price dynamics should track the variety, not the code — observed (TWN vs TR
-   in 847180).
-
-**Evidence status (honest audit, 2026-07).** Established: within-code exporter
-heterogeneity (unit values 10-100x apart, necessary condition); coarse
-hub/price-tier alignment (CHN's cheap-parts hub vs TWN elsewhere; solo-TWN
-847180 hub = the price outlier); and the temporal coincidence — flows (hub
-purification) and prices (unit-value divergence) independently date the AI
-variety's birth to mid-2023. The apparent counterexample — KOR
-($5,071/kg) and TWN ($280/kg) sharing an 847330 hub — largely dissolves on
-inspection: Korea ships nearly-bare memory (HBM stacks — grams of silicon,
-maximal value density) while Taiwan ships assembled modules (the same class of
-silicon plus PCB, power stages, and a kilogram of heatsink), so the $/kg gap
-reflects physical form, not market segment; the hub grouping (both AI-component
-suppliers to the same customers) is plausibly the model being RIGHT. Lesson:
-weight-based unit values confound value density with form factor — variety
-comparisons need per-unit values (QTY1: sets/pieces) or within-form $/kg.
-Untested: the direct tariff-line decomposition (Taiwan 11-digit) and a formal
-within/across-hub unit-value variance decomposition (needs more reporters'
-quantities, per-unit where possible).
-
-**Consequence for measurement.** The effective market is the variety segment,
-not the HS6 code. Concentration and power computed at code level understate
-whenever a hub owns a variety: 847180's exporter HHI of 0.38 already flags
-Taiwan, but the AI-baseboard *variety* within it is closer to a Taiwan
-near-monopoly. Hub-level (variety-level) concentration is the right metric, and
-the factor model provides the partition to compute it on.
-
-
-## 2026-07: What the MFM identifies, structurally (the precise mapping)
-
-Factor the structural gravity demand over time: x_od,t = A_od * phi_o,t * psi_d,t,
-where A = [a_od * tau_od^(-sigma)] is the time-fixed taste/friction matrix,
-phi_o,t the exporter-side shifters (prices/supply), psi_d,t the importer-side
-shifters (expenditure, price indices). If A has low rank, A = sum_a r_a c_a',
-then X_t = sum_a (r_a o phi_t)(c_a o psi_t)' -- which IS the time-varying MFM.
-The mapping is therefore exact:
-
-1. **k, r <-> effective rank of A**: hubs exist because demand only distinguishes
-   a few supplier/buyer types. Complements consumed together have proportional
-   a-columns and collapse into one type -- the MFM's types are co-demand
-   equivalence classes (varieties AND bundles).
-2. **col(R), col(C) <-> spans of the type profiles, tilted by relative prices**
-   (col(R_t) = span{r_a o phi_t}). Breaks = changes in A (new varieties;
-   controls zeroing tau-cells) or large relative-price divergence; 2023-07 was
-   both. Eras = joint stability of A and relative prices.
-3. **F_t <-> type-pair equilibrium aggregates** (p*q of each demand segment):
-   where shocks and supply constraints surface after propagating.
-4. **Rotational ambiguity <-> structural non-identification**: only span(A) is
-   pinned down; the type decomposition is not. Varimax = the sparsity
-   identifying assumption on preferences (Rohe-Zeng); eigen-order = size
-   ordering. Both conventions, honestly labeled.
-5. **Not identified by flows**: sigma (needs prices/events), tau vs a
-   (frictions vs tastes -- classic gravity problem), epsilon (needs p/q split),
-   level normalizations. These live in the other layers by design.
-
-One-line synthesis: the MFM estimates the equilibrium's low-rank factorization
--- rank, spans, and segment aggregates over time -- and the structural model
-explains those identified objects with primitives the MFM provably cannot reach.
-Relative to vector PCA: identical logic plus ONE restriction -- loadings are
-separable, Lambda = C (x) R, i.e. a corridor loads only through its endpoints'
-types (the bilinear/gravity-shaped restriction on comovement); this is also
-exactly the low-rank structure the structural sketch places on a_od.
-
-
-## 2026-07: The bundle microfoundation — factors as latent composite goods
-
-Refinement of the identification mapping (user's conjecture, confirmed): suppose
-demand is two-level — destinations demand k latent COMPOSITE GOODS (bundles),
-each bundle an aggregate of origin varieties with recipe weights w_ob, and
-destination spending on bundles factors through buyer types. Then
-x_od,t = sum_b w_ob * E_bd,t, which IS the MFM with units attached:
-**R = recipes** (which origins constitute each composite), **F_t = expenditure
-on each bundle by each buyer type**, **C = buyer-type memberships**. This
-supplies what the low-rank-A story lacked: WHY A is low rank (demand is over k
-composites, not pq varieties) and what F means economically (bundle
-expenditures).
-
-Consequences:
-- **Loading stability/drift <-> within-bundle elasticity.** Cobb-Douglas
-  recipes (sigma=1) give exactly constant loadings (the calm eras); sigma<1
-  (complements) makes the expensive component's expenditure share RISE with its
-  price — observed: TWN's loading climbing while its prices 20x'd. The
-  within-bundle sigma is thus identifiable from co-movement of loadings with
-  component prices — a new identification route.
-- **2023-07 restated:** a new composite good (the AI-compute bundle) entered
-  the economy — a new recipe column.
-- **Nest vs kit unified:** a bundle with substitutable components is an
-  Armington nest; with complementary components, a kit. Both are one composite
-  to buyers — the co-demand equivalence class, now demand-theoretically named.
-- **Literature anchor:** latent-factor/mixed-CES demand (Lancaster;
-  Adao-Costinot-Donaldson) — the MFM is the reduced form of such a system.
-- **Caveats:** rotation ambiguity = recipes identified only up to span; varimax
-  = "recipes are sparse" (a technology assumption). Origin weights confound
-  recipe with sourcing shares where components are multi-sourced (whence
-  multi-location hubs like MEX/TWN servers).
-
-
-## 2026-07: Why bundles survive rotation — admissibility, anchors, and NMF
-
-The puzzle: if factors = bundles (real objects), rotation should destroy the
-bundle comovement; yet fit is rotation-invariant. Resolution: **rotation
-preserves fit but destroys admissibility.** X = W E = (W M^-1)(M E) for any
-invertible M — every rotation defines a recombined bundle system with identical
-flows. But recipes and expenditures must be NONNEGATIVE, and generic rotations
-of a nonnegative solution produce negative recipe entries ("minus 30% Korea") —
-not bundles. Imposing nonnegativity turns the problem from PCA into NMF, whose
-identifiability theory is real: under anchor/separability conditions (each
-bundle has an anchor origin supplying only that bundle), the nonnegative
-decomposition is unique up to permutation and scale — no rotation freedom.
-
-Our data plausibly satisfies anchors: the levels-basis hubs are near-singletons
-(CHK, TWN, MEX dominating their columns) — a near-singleton hub IS an anchor
-origin. This explains (a) why varimax solutions are so stable across
-subsamples/eras (sparse orthogonal basis ~ the unique sparse nonnegative
-solution) and (b) why loadings carry only small negative entries (the cost of
-forcing orthogonality onto a system whose true identification is nonnegativity).
-Second tie-breaker: prices — under the true bundle basis, CES restricts how each
-loading comoves with its component's price; rotated bases scramble this. So the
-bundle basis survives flows + nonnegativity + prices, though not flows alone.
-
-**Actionable upgrade:** estimate the bundle system by anchored NMF (or
-archetypal analysis) as the robustness companion to varimax; coincidence of the
-two demonstrates identification rather than assuming it, and closes the
-rotation question for the paper.
-
-
-## 2026-07: Route A executed — nonnegativity picks the varimax basis, uniquely
-
-Experiment (scripts/prototype_nonneg_rotation.py; results in
-notes/nonneg-rotation-experiment.md): pooled-2024 MFM per code, basis chosen by
-minimizing negative-mass over orthogonal rotations + column signs, 60
-multi-starts. Findings:
-
-1. **Practical uniqueness**: 59-60/60 starts converge to the same basis (max
-   dispersion 0.000) for every code, both sides. The admissibility criterion
-   pins a single solution — the sufficient-scattering condition evidently holds
-   in the way that matters.
-2. **Varimax IS the admissible basis**: nonneg-optimal vs varimax column match
-   |cos| = 0.99-1.00 everywhere; varimax already achieved neg-shares of
-   0.1-1.9% (vs 11-18% unrotated), nonneg-opt shaves only marginally more. The
-   sparsity and nonnegativity criteria coincide on this data — all existing
-   hub results are validated as the (essentially unique) bundle basis.
-3. **Residual negativity ~1%** is the orthogonality tax (exact nonnegativity is
-   unattainable within an orthogonal basis when recipes overlap) — full
-   tri-NMF (Route B) would drop orthogonality and remove it, but the basis
-   itself would move at most cosmetically given (2).
-
-Bottom line: the rotation question is empirically closed for this data — the
-bundle basis is unique under admissibility, and it is the basis we have been
-using all along.
-
-
-## 2026-07: Final interpretation — bundles are DEMAND PROGRAMS; what the conditions require
-
-Stress test (user): Taiwan exports high- AND low-end chips (not pure), and no one
-else exports Taiwan-grade chips (no shared membership) — do the identification
-conditions fail? No, on both counts, and resolving this fixes the interpretation:
-
-1. **What the conditions require.** Anchors/purity: each BUNDLE needs one
-   near-pure participating country — not multiple suppliers of a product. A
-   sole-supplier bundle is the trivially identified case (its expenditure path
-   is observed directly). A mixed Taiwan just loads on two bundles, each
-   anchored elsewhere (the low-end program by CHK). Scattering, refined: every
-   bundle direction must be realized by some near-extreme row; membership
-   breadth is irrelevant, membership purity is everything.
-2. **Economic meaning (final form): bundles are demand programs** — recurring
-   expenditure streams over destination x month (the AI build-out program; the
-   China-assembly program). A country's loading = how much of its exports are
-   financed by each program. Substitute varieties, complement kits, and
-   sole-source products are different SUPPLY structures behind a program; the
-   factorization identifies programs and participation, and is agnostic about
-   within-program supply structure (why varieties-vs-complements needed extra
-   evidence).
-3. **Theoretical certainty is conditional, and the certificate is external.**
-   IF each true program has a near-pure participant and program paths are
-   linearly independent (patently true), THEN identification holds. Estimated
-   purity alone is partly criterion-induced (circular); the non-circular
-   certificates are the tariff-line decomposition and the CES loading-price
-   test. Paper order: multi-start uniqueness (demonstrated) -> identifying
-   condition (stated) -> external tests (the certificate). Same epistemic
-   status as Rohe-Zeng sparsity.
-
-
-## 2026-07: Which uniqueness condition holds for our data, and its trade translation
-
-Measured (purity of criterion-basis loadings, pooled-2024): every program on
-BOTH sides has a top participant with own-purity 0.93-1.00, mostly exactly 1.00
-(TWN, MEX, CHK, VNM anchors on the supplier side; USA, CHK, MYS, MEX on the
-buyer side; top participants hold 46-100% of their program's mass). So the
-applicable theorem is **near-separability (the anchor condition)** -- the
-strongest of the family, held on both sides where one side + full rank
-suffices (Donoho-Stodden exact; Arora et al. / Gillis-Vavasis robust versions
-with graceful degradation in anchor impurity).
-
-Trade translations:
-- **Supplier anchor**: each spending stream has a country supplying essentially
-  nothing else (TWN/AI, MEX/NAFTA-server, CHK/assembly, VNM/belt). Plausible
-  because GVC participation is specialized: dedicated capacity, qualification,
-  relationships.
-- **Buyer anchor (dual; most self-evident for us)**: each stream has a buyer
-  whose purchases in these codes are only that stream (USA/AI, CHK/assembly).
-- **Sufficiently scattered (fallback, implied)**: no purity needed; the pattern
-  of NON-participation must be rich and crisscrossing. Key reconciliation with
-  gravity: "everyone trades with everyone" concerns bilateral TOTALS (the
-  programs' combined footprint); each country's PROGRAM vector can still be
-  near-one-hot -- and is.
-
-Status: purity is measured on criterion-chosen loadings (not sole proof), but
-the criterion does not force 1.00 purity or single-country program mass -- that
-extremity is the data. Chain for the paper: condition stated -> trade meaning ->
-empirical signature measured -> uniqueness demonstrated (60/60 multi-start) ->
-external certificates (tariff lines, CES price test) specified.
+1. **Taiwan tariff-line decomposition** (free 11-digit customs portal): the
+   direct external certificate for program identification; highest
+   evidence-per-effort available.
+2. **CES loading–price test**: second certificate; also identifies within-kit σ.
+3. **Lagged cross-correlation** of kit co-shipment (memory leads modules?).
+4. **Per-unit unit values** (QTY1) for cross-form price comparisons; more
+   reporters for the within/across-program variance decomposition.
+5. **Tri-NMF (Route B)**: drop orthogonality, remove the ~1% negativity;
+   expected to confirm the basis.
+6. **Layer 2 chain accounting** (mini-TiVA absorption): the Mexico-vs-Taiwan
+   correction as estimates; monthly proportionality assumptions are the new
+   work.
+7. Network-statistics module and ToT indices per the research-proposal roadmap.

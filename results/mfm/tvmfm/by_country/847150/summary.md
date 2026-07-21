@@ -1,6 +1,6 @@
 # Era-anchored time-varying MFM — HS 847150 (AI servers), monthly panel
 
-12m trailing loadings, k=r=4, $B levels; months aligned to per-era constant anchors (Procrustes), no chained matching. In-sample R^2 0.986; mean within-era loading step 0.074 (superseded chained version: ../../archive/ai_compute_chained).
+12m trailing loadings, k=r=4, $B levels; months aligned to per-era constant anchors (Procrustes), no chained matching. In-sample R^2 0.986; mean within-era loading step 0.074 (superseded chained version: ../archive/ai_compute_chained).
 
 ## Era 0: 2020-12 .. 2021-05
 

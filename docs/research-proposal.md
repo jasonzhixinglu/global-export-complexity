@@ -39,7 +39,12 @@ Taiwan factor — and is a demand event, not a policy event; export controls nev
 appear as structural breaks (their signature is denied growth and within-China-bloc
 rerouting), while the April 2025 tariffs are the one policy event that reorganized
 the bloc-level structure, coinciding with the appearance of a new Singapore
-rerouting factor.
+rerouting factor. The hub basis itself is identified, not a rotation
+convention: imposing nonnegativity (market shares and budgets cannot be
+negative) pins a unique basis — demonstrated by multi-start convergence and
+matching the varimax solution at |cos| 0.99–1.00 — under a measured anchor
+structure (each factor has a 0.93–1.00-pure top participant); see
+modeling-brainstorm.md §III.4.
 
 **3. A semi-structural model (sketched below; not yet estimated).** The factor
 model is a description, not a mechanism. The simplest model that could *explain*

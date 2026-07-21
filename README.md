@@ -94,25 +94,18 @@ src/gec/               importable package
   classifications.py   AI / semiconductor HS code sets (Fed, OECD)
   comtrade.py          UN Comtrade pulls (direct + mirror) + availability checks
   plotting.py          headless matplotlib helpers
-scripts/
-  download_data.py        fetch raw CSVs from Harvard Dataverse (HS4, bilateral)
-  compute_surfaces.py     kernel surfaces (share / density / coverage) -> data/derived/
-  make_figures.py         static analysis figures -> results/figures/
-  run_diagnostics.py      conservation & adding-up checks -> results/tables/
-  run_all.py              download -> compute -> figures -> diagnostics
-  export_dashboard_data.py  surfaces -> dashboard/public/data (meta, share series, coverage, anchors)
-  export_gmm_data.py        per-country PCI distribution as a Gaussian mixture (gmm.json)
-  export_gmm_bilateral.py   origin->destination corridor distributions as mixtures (gmm_bilateral.json)
-  validate_bilateral.py     corridor checks: marginal adding-up + recomposition vs country GMMs
-  export_tech_data.py       HS12 -> AI/semiconductor basket JSON (techai.json)
-  export_tech_bilateral.py  HS6 tech baskets x origin x destination from the HS2012 bilateral (techai_bilateral.json)
-  export_pci_products.py    per-PCI product drill-down JSON (pci_products.json)
-  export_country_products.py per-country top-50 HS4 categories/year (country_products.json)
-  fetch_comtrade.py         pull recent-year HS4 exports from UN Comtrade
-  explore_bilateral_pci.py  prototype: origin x destination complexity (sizing)
+scripts/               two workstreams -- see scripts/README.md for the full index
+  PCI pipeline:        download_data -> compute_surfaces -> make_figures -> run_diagnostics
+  dashboard exports:   export_dashboard_data, export_gmm_*, export_tech_*, ...
+  supply-chain data:   fetch_comtrade_monthly, fetch_tdm, build_monthly_panel
+  estimation:          prototype_mfm (annual), tvmfm_monthly_anchored (time-varying)
+  charts:              export_supply_chain_sankey
 dashboard/             React/Vite/Recharts app (deployed to GitHub Pages)
-docs/                  data.md (master data reference) · analysis.md
-results/               committed figures & tables
+docs/                  data.md (master data reference) · research-proposal.md ·
+                       supply-chain-narrative.md · modeling-brainstorm.md ·
+                       pci-analysis.md · notes/ · references/ · tdm/
+results/               figures & tables (PCI) · mfm/ (factor models) · panel_monthly/
+exports/               committed charts (supply-chain set + PCI-era)
 data/                  git-ignored raw + derived (download / regenerate)
 legacy/                original exploratory notebook (superseded)
 ```

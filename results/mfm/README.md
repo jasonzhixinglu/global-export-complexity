@@ -14,12 +14,14 @@ tvmfm/                 time-varying MFM on the monthly panel (results/panel_mont
   by_country/          12m trailing loadings, era-anchored hub labels
     847150/  847180/  847330/  ai_compute/
   chn_hkg_bloc/        same, with China+Hong Kong merged into one bloc (CHK);
-    ai_compute/        intra-bloc entrepot churn cancels. Taiwan deliberately separate.
+    847150/ 847180/ 847330/ ai_compute/   entrepot churn cancels; TWN separate.
+  chnhkg_usamex_blocs/  CHK and USA+MEX both merged (the only-tariff-break run)
+    ai_compute/
   bandwidth_experiment/  OOS window-length comparison that chose the 12m window
   archive/
     ai_compute_chained/  superseded pre-anchoring run (chained label matching)
   (regenerate: python scripts/tvmfm_monthly_anchored.py [label ...];
-   labels: 847150 847180 847330 ai_compute ai_compute_chnhkg)
+   labels: 847150 847180 847330 ai_compute ai_compute_chnhkg 847150_chnhkg 847180_chnhkg 847330_chnhkg ai_compute_2blocs)
 ```
 
 Headline findings so far: the parts network (847330) shows no structural breaks over

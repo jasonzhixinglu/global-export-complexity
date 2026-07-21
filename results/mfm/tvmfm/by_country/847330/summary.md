@@ -1,6 +1,6 @@
 # Era-anchored time-varying MFM — HS 847330 (parts / GPU cards), monthly panel
 
-12m trailing loadings, k=r=4, $B levels; months aligned to per-era constant anchors (Procrustes), no chained matching. In-sample R^2 0.951; mean within-era loading step 0.025 (superseded chained version: ../../archive/ai_compute_chained).
+12m trailing loadings, k=r=4, $B levels; months aligned to per-era constant anchors (Procrustes), no chained matching. In-sample R^2 0.951; mean within-era loading step 0.025 (superseded chained version: ../archive/ai_compute_chained).
 
 ## Era 0: 2020-12 .. 2026-04
 
