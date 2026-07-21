@@ -6,7 +6,7 @@ git-ignored repo-root .env (TDM_USERNAME / TDM_PASSWORD) -- never commit them,
 and never commit the raw extracts either (data/raw/tdm/ is git-ignored):
 TDM is subscription-licensed data.
 
-Standing pull set (see docs/tdm.md): Taiwan full history, China/Vietnam from
+Standing pull set (see docs/data.md): Taiwan full history, China/Vietnam from
 2024-01, exports + imports each, HS 847150/847180/847330.
 
 Usage:

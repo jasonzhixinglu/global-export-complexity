@@ -70,7 +70,7 @@ identities — in [`docs/analysis.md`](docs/analysis.md).
   OECD (2025). See [`docs/tech-ai-taxonomy.md`](docs/tech-ai-taxonomy.md) (basket tiers, national
   monthly sources, and the Haver cross-check).
 - **UN Comtrade** — optional puller for more recent years (raw, mirror-reconstructable for late
-  filers); see [`docs/comtrade.md`](docs/comtrade.md).
+  filers); see [`docs/data.md`](docs/data.md).
 
 ## Repository layout
 
@@ -99,7 +99,7 @@ scripts/
   fetch_comtrade.py         pull recent-year HS4 exports from UN Comtrade
   explore_bilateral_pci.py  prototype: origin x destination complexity (sizing)
 dashboard/             React/Vite/Recharts app (deployed to GitHub Pages)
-docs/                  analysis.md · tech-ai-taxonomy.md · comtrade.md
+docs/                  data.md (master data reference) · analysis.md · tech-ai-taxonomy.md
 results/               committed figures & tables
 data/                  git-ignored raw + derived (download / regenerate)
 legacy/                original exploratory notebook (superseded)

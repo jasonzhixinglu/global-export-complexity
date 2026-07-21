@@ -1,6 +1,6 @@
 """Fetch monthly bilateral flows for the AI-compute HS6 codes from UN Comtrade.
 
-Backbone of the monthly panel (see docs/tdm.md for the TDM supplement): all reporters,
+Backbone of the monthly panel (see docs/data.md for the TDM supplement): all reporters,
 all partners, HS 847150/847180/847330, monthly 2020-01 onward, both flows. One API call
 covers 12 periods x all reporters x 3 codes (well under the 100k row cap), so the whole
 pull is ~14 batches - minutes of quota. Requires COMTRADE_API_KEY in .env; uses the

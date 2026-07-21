@@ -12,7 +12,7 @@ Usage:
 Output: data/raw/comtrade_hs4_<year>.csv  (git-ignored, Atlas-like schema + provenance)
 Without a key it uses the free preview endpoint (capped at 500 rows/call -> truncated;
 smoke-test only). 2025 world totals are incomplete (late filers), so shares computed
-from a partial year are provisional -- see docs/comtrade.md.
+from a partial year are provisional -- see docs/data.md.
 """
 from __future__ import annotations
 

@@ -1,6 +1,6 @@
 """Assemble the balanced monthly bilateral panel for the AI-compute HS6 codes.
 
-Sources and hierarchy (per user direction + Atlas methodology, docs/tdm.md):
+Sources and hierarchy (per user direction + Atlas methodology, docs/data.md):
   1. UN Comtrade monthly (validated national submissions) is the backbone.
   2. TDM fills where Comtrade is silent: Taiwan (always), China 2025+, Vietnam 2024+
      (edition VN2, preliminary), and recent-month top-ups (KR/SG/FR/TR/TH).

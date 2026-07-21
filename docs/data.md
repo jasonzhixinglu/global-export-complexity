@@ -3,8 +3,7 @@
 Everything the project's numbers rest on, in one place: what products we track
 (taxonomy), where the data comes from (sources, with their properties and
 trade-offs), what we build from it (panels), how fresh each piece is, and the
-operational detail to regenerate any of it. Detailed vendor/API notes that used
-to live in `comtrade.md` and `tdm.md` are folded in here; `tech-ai-taxonomy.md`
+operational detail to regenerate any of it. Vendor/API operational detail is folded in here (formerly separate files, now in git history); `tech-ai-taxonomy.md`
 remains the extended taxonomy discussion (tier B/C proposals, validation).
 
 ---
