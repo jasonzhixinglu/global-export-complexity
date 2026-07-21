@@ -361,3 +361,29 @@ bundle basis survives flows + nonnegativity + prices, though not flows alone.
 archetypal analysis) as the robustness companion to varimax; coincidence of the
 two demonstrates identification rather than assuming it, and closes the
 rotation question for the paper.
+
+
+## 2026-07: Route A executed — nonnegativity picks the varimax basis, uniquely
+
+Experiment (scripts/prototype_nonneg_rotation.py; results in
+notes/nonneg-rotation-experiment.md): pooled-2024 MFM per code, basis chosen by
+minimizing negative-mass over orthogonal rotations + column signs, 60
+multi-starts. Findings:
+
+1. **Practical uniqueness**: 59-60/60 starts converge to the same basis (max
+   dispersion 0.000) for every code, both sides. The admissibility criterion
+   pins a single solution — the sufficient-scattering condition evidently holds
+   in the way that matters.
+2. **Varimax IS the admissible basis**: nonneg-optimal vs varimax column match
+   |cos| = 0.99-1.00 everywhere; varimax already achieved neg-shares of
+   0.1-1.9% (vs 11-18% unrotated), nonneg-opt shaves only marginally more. The
+   sparsity and nonnegativity criteria coincide on this data — all existing
+   hub results are validated as the (essentially unique) bundle basis.
+3. **Residual negativity ~1%** is the orthogonality tax (exact nonnegativity is
+   unattainable within an orthogonal basis when recipes overlap) — full
+   tri-NMF (Route B) would drop orthogonality and remove it, but the basis
+   itself would move at most cosmetically given (2).
+
+Bottom line: the rotation question is empirically closed for this data — the
+bundle basis is unique under admissibility, and it is the basis we have been
+using all along.
