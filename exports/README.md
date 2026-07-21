@@ -2,8 +2,10 @@
 
 Committed chart/figure outputs.
 
-- `supply_chain_*_hubs_2024.png` — per-stage four-column hub charts (varimax basis);
-  `*_norot_*` = unrotated spectral-basis variants (hub 1 = HITS pair)
+- `supply_chain_*_nnf_hubs_2024.png` — per-stage four-column hub charts on the
+  NONNEGATIVITY-IDENTIFIED basis (the canonical set; referenced by the narrative)
+- `supply_chain_*_hubs_2024.png` — varimax-basis variants (≈ identical, |cos|≥0.99)
+- `supply_chain_*_norot_*` — unrotated spectral-basis variants (hub 1 = HITS pair)
 - `supply_chain_overview_{dollar,normalized}[_coarse]_2024.png` — 8-stage chain
   overviews (two scales × two granularities)
 - `supply_chain_network_2024.png` — country-node network graph

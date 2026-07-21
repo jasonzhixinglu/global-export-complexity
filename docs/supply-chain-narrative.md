@@ -34,23 +34,25 @@ country-network graph (nodes = countries, edges = flows by stage — the view
 that shows an integrated assembler like Mexico correctly: chips and parts in,
 servers out at one node), plus one four-column chart per stage
 routing the flows through factor-model hubs (exporters -> export hubs -> import
-hubs -> importers; TV-MFM hubs for the three compute codes, annual
-constant-loading MFM upstream; hub decompositions fit at R^2 0.95-0.99, so
-these carry the flows faithfully).
+hubs -> importers). The default figures below use the NONNEGATIVITY-IDENTIFIED
+basis — the unique admissible bundle basis (see modeling-brainstorm.md §III.4),
+so the hub decomposition is an identified object, not a rotation convention;
+varimax and unrotated spectral variants live in exports/ for comparison. Hub
+decompositions fit at R^2 0.95-0.99, so these carry the flows faithfully.
 
 ![network](../exports/supply_chain_network_2024.png)
 ![overview dollar coarse](../exports/supply_chain_overview_dollar_coarse_2024.png)
 ![overview dollar](../exports/supply_chain_overview_dollar_2024.png)
 ![overview normalized](../exports/supply_chain_overview_normalized_2024.png)
 ![overview normalized coarse](../exports/supply_chain_overview_normalized_coarse_2024.png)
-![raw materials](../exports/supply_chain_1_raw_materials_hubs_2024.png)
-![wafers](../exports/supply_chain_2_wafers_hubs_2024.png)
-![litho optics](../exports/supply_chain_3_litho_optics_hubs_2024.png)
-![equipment](../exports/supply_chain_4_equipment_hubs_2024.png)
-![chips](../exports/supply_chain_5_chips_hubs_2024.png)
-![parts](../exports/supply_chain_6_parts_hubs_2024.png)
-![baseboards](../exports/supply_chain_7_baseboards_hubs_2024.png)
-![servers](../exports/supply_chain_8_servers_hubs_2024.png)
+![raw materials](../exports/supply_chain_1_raw_materials_nnf_hubs_2024.png)
+![wafers](../exports/supply_chain_2_wafers_nnf_hubs_2024.png)
+![litho optics](../exports/supply_chain_3_litho_optics_nnf_hubs_2024.png)
+![equipment](../exports/supply_chain_4_equipment_nnf_hubs_2024.png)
+![chips](../exports/supply_chain_5_chips_nnf_hubs_2024.png)
+![parts](../exports/supply_chain_6_parts_nnf_hubs_2024.png)
+![baseboards](../exports/supply_chain_7_baseboards_nnf_hubs_2024.png)
+![servers](../exports/supply_chain_8_servers_nnf_hubs_2024.png)
 
 All charts merge China+Hong Kong (CHK; intra-bloc flows excluded) and show 2024,
 the latest year covered by every stage. Stages 1-5 are Atlas HS2012 annual

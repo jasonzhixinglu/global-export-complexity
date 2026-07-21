@@ -151,6 +151,41 @@ def hubs_from_panel(code, year=YEAR):
     return countries, R, C, F, f"era-anchored TV-MFM, {year} monthly means"
 
 
+def nnf_rotate(L, restarts=6, rng=np.random.default_rng(11)):
+    """Rotate to the nonnegativity-identified basis: minimize negative-mass share
+    over orthogonal rotations + column signs, warm-started from varimax (shown to
+    be ~the optimum; see docs/notes/nonneg-rotation-experiment.md)."""
+    from scipy.linalg import expm
+    from scipy.optimize import minimize
+    k = L.shape[1]
+    iu = np.triu_indices(k, 1)
+
+    def sign_fix(B):
+        B = B.copy()
+        for j in range(B.shape[1]):
+            if (np.minimum(B[:, j], 0)**2).sum() > (np.minimum(-B[:, j], 0)**2).sum():
+                B[:, j] *= -1
+        return B
+
+    def negshare(B):
+        B = sign_fix(B)
+        return float((np.minimum(B, 0)**2).sum() / (B**2).sum())
+
+    def M(th):
+        S = np.zeros((k, k)); S[iu] = th
+        return expm(S - S.T)
+
+    L1 = L @ varimax(L)
+    best = (negshare(L1), np.eye(k))
+    n_par = len(iu[0])
+    for th0 in [np.zeros(n_par)] + [rng.uniform(-.6, .6, n_par) for _ in range(restarts - 1)]:
+        r = minimize(lambda th: negshare(L1 @ M(th)), th0, method="Nelder-Mead",
+                     options={"maxiter": 2500, "fatol": 1e-10})
+        if r.fun < best[0]:
+            best = (r.fun, M(r.x))
+    return sign_fix(L1 @ best[1])
+
+
 def hubs_from_json(baskets, k=4, rotate=True):
     """Hub inputs for upstream stages: constant-loading MFM (k=r=4, $B levels,
     varimax) on the ANNUAL bilateral matrices 2020-2024 from the dashboard data --
@@ -177,16 +212,19 @@ def hubs_from_json(baskets, k=4, rotate=True):
     _, vc = np.linalg.eigh(M_C)
     R = vr[:, -k:][:, ::-1] * np.sqrt(p)
     C = vc[:, -k:][:, ::-1] * np.sqrt(q)
-    if rotate:
+    note = "constant-loading annual MFM 2020-24 (no monthly panel upstream)"
+    if rotate == "nnf":
+        R, C = nnf_rotate(R), nnf_rotate(C)
+        note = "NONNEGATIVITY-IDENTIFIED basis (unique admissible bundle basis); " + note
+    elif rotate:
         R, C = R @ varimax(R), C @ varimax(C)
+    else:
+        note = "UNROTATED spectral basis, hubs in descending eigenvalue order; " + note
     for L in (R, C):                              # dominant member positive
         for j in range(k):
             if L[np.abs(L[:, j]).argmax(), j] < 0:
                 L[:, j] *= -1
     F = R.T @ Y[-1] @ C / (p * q)                 # 2024 factor matrix
-    note = "constant-loading annual MFM 2020-24 (no monthly panel upstream)"
-    if not rotate:
-        note = "UNROTATED spectral basis, hubs in descending eigenvalue order; " + note
     return countries, R.clip(min=0), C.clip(min=0), F, note
 
 
@@ -213,16 +251,19 @@ def hubs_from_panel_pooled(code, year=YEAR, rotate=True, k=4):
     _, vc = np.linalg.eigh(M_C)
     R = vr[:, -k:][:, ::-1] * np.sqrt(p_)
     C = vc[:, -k:][:, ::-1] * np.sqrt(q_)
-    if rotate:
+    note = f"pooled {year} monthly MFM"
+    if rotate == "nnf":
+        R, C = nnf_rotate(R), nnf_rotate(C)
+        note = "NONNEGATIVITY-IDENTIFIED basis (unique admissible bundle basis); " + note
+    elif rotate:
         R, C = R @ varimax(R), C @ varimax(C)
+    else:
+        note = "UNROTATED spectral basis, hubs in descending eigenvalue order; " + note
     for L in (R, C):
         for j in range(k):
             if L[np.abs(L[:, j]).argmax(), j] < 0:
                 L[:, j] *= -1
     F = np.mean([R.T @ Y[t] @ C / (p_ * q_) for t in range(len(periods))], axis=0)
-    note = f"pooled {year} monthly MFM"
-    if not rotate:
-        note = "UNROTATED spectral basis, hubs in descending eigenvalue order; " + note
     return countries, R.clip(min=0), C.clip(min=0), F, note
 
 
@@ -238,6 +279,14 @@ def draw_hub_chart(fname, title, codes_txt, code_or_baskets, kind, year=YEAR):
         countries, R, C, F, src = hubs_from_panel_pooled(code_or_baskets, year, rotate=False)
         total_actual = sum(flows_panel(code_or_baskets, year).values())
         data_src = "Comtrade+TDM monthly panel"
+    elif kind == "panel_nnf":
+        countries, R, C, F, src = hubs_from_panel_pooled(code_or_baskets, year, rotate="nnf")
+        total_actual = sum(flows_panel(code_or_baskets, year).values())
+        data_src = "Comtrade+TDM monthly panel"
+    elif kind == "json_nnf":
+        countries, R, C, F, src = hubs_from_json(code_or_baskets, rotate="nnf")
+        total_actual = sum(flows_json(code_or_baskets).values())
+        data_src = "Atlas HS2012 annual bilateral"
     elif kind == "json_norot":
         countries, R, C, F, src = hubs_from_json(code_or_baskets, rotate=False)
         total_actual = sum(flows_json(code_or_baskets).values())
@@ -690,6 +739,8 @@ def main():
         draw_hub_chart(fname, title, codes_txt, arg, kind)
         draw_hub_chart(fname + "_norot", title + " [unrotated]", codes_txt, arg,
                        "panel_norot" if kind == "panel" else "json_norot")
+        draw_hub_chart(fname + "_nnf", title, codes_txt, arg,
+                       "panel_nnf" if kind == "panel" else "json_nnf")
     input_stages = [("raw materials", all_flows[0]), ("wafers", all_flows[1]),
                     ("litho & optics", all_flows[2]), ("fab equipment", all_flows[3])]
     inter = {}
