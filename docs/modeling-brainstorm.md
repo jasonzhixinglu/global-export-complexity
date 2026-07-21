@@ -332,3 +332,32 @@ Consequences:
   = "recipes are sparse" (a technology assumption). Origin weights confound
   recipe with sourcing shares where components are multi-sourced (whence
   multi-location hubs like MEX/TWN servers).
+
+
+## 2026-07: Why bundles survive rotation — admissibility, anchors, and NMF
+
+The puzzle: if factors = bundles (real objects), rotation should destroy the
+bundle comovement; yet fit is rotation-invariant. Resolution: **rotation
+preserves fit but destroys admissibility.** X = W E = (W M^-1)(M E) for any
+invertible M — every rotation defines a recombined bundle system with identical
+flows. But recipes and expenditures must be NONNEGATIVE, and generic rotations
+of a nonnegative solution produce negative recipe entries ("minus 30% Korea") —
+not bundles. Imposing nonnegativity turns the problem from PCA into NMF, whose
+identifiability theory is real: under anchor/separability conditions (each
+bundle has an anchor origin supplying only that bundle), the nonnegative
+decomposition is unique up to permutation and scale — no rotation freedom.
+
+Our data plausibly satisfies anchors: the levels-basis hubs are near-singletons
+(CHK, TWN, MEX dominating their columns) — a near-singleton hub IS an anchor
+origin. This explains (a) why varimax solutions are so stable across
+subsamples/eras (sparse orthogonal basis ~ the unique sparse nonnegative
+solution) and (b) why loadings carry only small negative entries (the cost of
+forcing orthogonality onto a system whose true identification is nonnegativity).
+Second tie-breaker: prices — under the true bundle basis, CES restricts how each
+loading comoves with its component's price; rotated bases scramble this. So the
+bundle basis survives flows + nonnegativity + prices, though not flows alone.
+
+**Actionable upgrade:** estimate the bundle system by anchored NMF (or
+archetypal analysis) as the robustness companion to varimax; coincidence of the
+two demonstrates identification rather than assuming it, and closes the
+rotation question for the paper.
