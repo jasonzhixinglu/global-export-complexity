@@ -397,7 +397,7 @@ def draw_hub_chart(fname, title, code_or_baskets, kind, year=YEAR):
     print(f"-> {out}")
 
 
-def draw_chain_overview(input_stages, seq_stages, MODE="dollar"):
+def draw_chain_overview(input_stages, seq_stages, MODE="dollar", fold_min=10.0, draw_min=0.0, suffix=""):
     """Chain overview with correct topology: the four upstream input streams (raw
     materials, wafers, litho/optics, equipment) are PARALLEL, converging on the fab
     checkpoint; chips -> parts -> baseboards -> servers then run sequentially.
@@ -406,7 +406,7 @@ def draw_chain_overview(input_stages, seq_stages, MODE="dollar"):
     Countries below FOLD_MIN ($B, side total) fold into 'Other' -- an absolute
     threshold, so a small stage (raw materials) may legitimately show no
     individual countries at chain scale."""
-    FOLD_MIN = 10.0     # coarser fold: fewer named countries, fewer ribbons
+    FOLD_MIN = fold_min
 
     def fold(flows):
         ex = pd.Series(dtype=float)
@@ -534,6 +534,10 @@ def draw_chain_overview(input_stages, seq_stages, MODE="dollar"):
                 if v <= 0:
                     continue
                 h = v * sc
+                if v < draw_min:
+                    out_off[o] += h
+                    fab_in_off[t] += h
+                    continue
                 y0 = gpos[o][0] - out_off[o]
                 y1 = fab_pos[t][0] - fab_in_off[t]
                 out_off[o] += h
@@ -552,6 +556,10 @@ def draw_chain_overview(input_stages, seq_stages, MODE="dollar"):
                 if v <= 0:
                     continue
                 h = v * seq_scales[g]
+                if v < draw_min:
+                    out_off[o] += h
+                    in_off[t] += h
+                    continue
                 y0 = src[o][0] - out_off[o]
                 y1 = dst[t][0] - in_off[t]
                 out_off[o] += h
@@ -612,7 +620,7 @@ def draw_chain_overview(input_stages, seq_stages, MODE="dollar"):
             f"countries under {FOLD_MIN:.0f}B/side fold into Other. Sources: Atlas annual "
             "(stages 1-5), Comtrade+TDM monthly panel (compute stages).",
             ha="center", fontsize=8, color=MUTED)
-    out = OUT_DIR / f"supply_chain_overview_{MODE}_{YEAR}.png"
+    out = OUT_DIR / f"supply_chain_overview_{MODE}{suffix}_{YEAR}.png"
     fig.savefig(out, dpi=150, bbox_inches="tight", facecolor=SURFACE)
     plt.close(fig)
     print(f"-> {out}")
@@ -809,7 +817,7 @@ def draw_overview(stage_flows, MODE="dollar"):  # unused: replaced by draw_chain
             "corridors not drawn (see per-stage charts for detail). No cross-stage "
             "absorption implied. Sources: docs/tech-ai-taxonomy.md codes; Atlas HS2012 "
             "bilateral / monthly panel.", ha="center", fontsize=8, color=MUTED)
-    out = OUT_DIR / f"supply_chain_overview_{MODE}_{YEAR}.png"
+    out = OUT_DIR / f"supply_chain_overview_{MODE}{suffix}_{YEAR}.png"
     fig.savefig(out, dpi=150, bbox_inches="tight", facecolor=SURFACE)
     plt.close(fig)
     print(f"-> {out}")
@@ -835,6 +843,8 @@ def main():
                   ("AI servers", all_flows[7])]
     for mode in ("dollar", "normalized"):   # log retired: inflates small (Other-heavy) stages
         draw_chain_overview(input_stages, seq_stages, mode)
+        draw_chain_overview(input_stages, seq_stages, mode,
+                            fold_min=30.0, draw_min=8.0, suffix="_coarse")
     fab_inputs = {}
     for f in all_flows[:4]:
         for k, v in f.items():

@@ -39,8 +39,10 @@ constant-loading MFM upstream; hub decompositions fit at R^2 0.95-0.99, so
 these carry the flows faithfully).
 
 ![network](../exports/supply_chain_network_2024.png)
+![overview dollar coarse](../exports/supply_chain_overview_dollar_coarse_2024.png)
 ![overview dollar](../exports/supply_chain_overview_dollar_2024.png)
 ![overview normalized](../exports/supply_chain_overview_normalized_2024.png)
+![overview normalized coarse](../exports/supply_chain_overview_normalized_coarse_2024.png)
 ![raw materials](../exports/supply_chain_1_raw_materials_hubs_2024.png)
 ![wafers](../exports/supply_chain_2_wafers_hubs_2024.png)
 ![litho optics](../exports/supply_chain_3_litho_optics_hubs_2024.png)
