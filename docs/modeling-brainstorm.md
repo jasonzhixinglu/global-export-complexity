@@ -143,3 +143,65 @@ out geographically or by role) and draw product flows as directed edges between
 them, coloured/styled by product stage — so a country's full input/output mix sits
 at one node instead of being scattered across checkpoints. Candidate first cut:
 top ~12 countries + Other, edges from the same stage flow data, edge width = $.
+
+
+## 2026-07: What the hubs actually identify — latent varieties within codes
+
+**The puzzle.** If goods within an HS6 code were homogeneous, gravity logic says
+every exporter should have roughly the same destination profile (proportional to
+demand and distance) and roughly one world price. Neither holds. Destination
+profiles separate into sharp hubs, and — the decisive evidence — exporters of the
+"same" code sell at unit values spanning two orders of magnitude *in the same
+year*:
+
+| $/kg, 2025 exports | 847330 (parts) | 847180 (units) | 847150 (servers) |
+|---|---|---|---|
+| China | 58 | — | — |
+| Turkey | 89 | 92 | 285 |
+| Thailand | 132 | — | — |
+| Korea | 5,071 | 356 | 274 |
+| Taiwan | 280 | 3,646 | 1,678 |
+| Singapore | 668 | 5,828 | — |
+
+And the dynamics split the same way: Taiwan's 847180 went from ~$285/kg (2022)
+to ~$3,646 (2025) while Turkey's stayed near $92 — the AI variety appreciated
+13x, the generic variety did not move.
+
+**The interpretation.** The factor model, fed only flow patterns, is recovering
+*variety-market segments*: clusters of exporters that make similar sub-products
+and therefore sell to similar customer sets. Hub loadings are variety-mix
+memberships; the hub-to-hub matrix F is demand flowing between variety segments.
+This explains at once why hubs are so clean (varieties differ physically, not
+just statistically), why hub membership predicts price tier (China's parts hub at
+$58/kg vs the Taiwan module complex at 10-60x that), and why the 2023-07 break
+was Taiwan's hub "purifying" — a new variety (AI hardware) coming into existence
+inside old codes.
+
+**Structural mapping: hubs as discovered Armington nests.** Standard Armington
+assumes each country is its own variety. The evidence suggests the right
+structure is nested: varieties exist at the *hub* level; countries within a hub
+are close substitutes (high within-nest sigma — e.g. server assembly, where
+Taiwan replaced Mexico's US share within a quarter), countries across hubs are
+poor substitutes (low across-nest sigma — nobody replaced Taiwan baseboards at
+any price). The MFM thus *estimates the nesting structure* that nested-CES
+models normally assume a priori — and the supply elasticity ε applies at the
+variety-segment level, not the code level: capacity bound for the AI variety of
+847180 while the generic variety stayed slack in the same code.
+
+**Testable implications.**
+1. National tariff-line data (Taiwan and US publish 8-11 digit lines) should
+   decompose these codes into sub-lines that align with hub membership — the
+   direct confirmation, and a natural appendix exercise.
+2. Unit values should cluster within hubs and diverge across them (the table
+   above is the first pass; more reporters via TDM would fill it out).
+3. Substitution speed should be fast within hub and absent across hubs — both
+   halves already observed (MEX->TWN servers vs TWN baseboards).
+4. Price dynamics should track the variety, not the code — observed (TWN vs TR
+   in 847180).
+
+**Consequence for measurement.** The effective market is the variety segment,
+not the HS6 code. Concentration and power computed at code level understate
+whenever a hub owns a variety: 847180's exporter HHI of 0.38 already flags
+Taiwan, but the AI-baseboard *variety* within it is closer to a Taiwan
+near-monopoly. Hub-level (variety-level) concentration is the right metric, and
+the factor model provides the partition to compute it on.
