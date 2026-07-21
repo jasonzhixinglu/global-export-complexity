@@ -109,6 +109,27 @@ and reallocation consequences of removing a node (Taiwan capacity at each stage)
 of a tariff schedule, or of capacity build-out (US/Arizona fabs entering k over
 time). Estimation is future work; the sketch fixes the target.
 
+*Relation to existing models — and where this one has to differ.* The demand and
+network blocks are off the shelf: Caliendo–Parro (2015) is the workhorse for
+CES/Armington trade with input–output links and tariff counterfactuals;
+Antràs–de Gortari (2020) formalizes multi-stage location choice; Baqaee–Farhi
+supply the general nested-CES propagation machinery; Fajgelbaum et al. (2020) and
+Amiti–Redding–Weinstein (2019) are the templates for estimating σ off dated tariff
+events. But these models carry only *substitution* elasticities (who buys from
+whom). Their supply side is flexible — constant returns with mobile factors or
+country-level endowments — so no node can cap. Complementarities in the
+Baqaee–Farhi tradition mimic bottleneck amplification, but observationally differ
+from capacity: under complementarity quantities co-move; under a capacity
+constraint the constrained stage's quantity flatlines while its price explodes —
+the pattern the data actually shows (baseboards: capped volumes, 20x prices). The
+supply block is therefore the contribution: stage-specific capacity with
+short-run elasticity ε_s, classically microfounded (a specific-factors production
+function y = A·k^α·l^(1−α) gives ε = (1−α)/α — stages differ in how
+capital-specific they are) with time-to-build investment. The closest precedent
+is Leibovici–Dunn treating chips as a quasi-fixed input in the 2021 auto
+shortage — one node, calibrated; here the object is the estimated *profile* of
+ε across stages, which is the choke-point map in structural form.
+
 ## The measurement program
 
 The organizing idea: the network's *structure* (who trades with whom, how
