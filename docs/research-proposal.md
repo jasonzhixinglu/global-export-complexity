@@ -395,6 +395,22 @@ poles internalize stages. Findings must be read as statements about cross-border
 activity, with the domestic loops tracked qualitatively (capacity announcements,
 company disclosures) as context.
 
+The asymmetry between the poles deserves its own statement. The US-centered
+chain is *internationalized by construction* — fabrication in Taiwan, memory in
+Korea, assembly in Mexico and Southeast Asia — so nearly every stage of it
+crosses a border and the trade network captures it well. China's frontier effort
+runs the other way: SMIC fabrication, domestic packaging, Huawei systems — all
+inside one customs territory, invisible here *except at the point of entry*: the
+imports of equipment, wafers, and materials that feed it. Two consequences. For
+comparisons: like-for-like pole comparisons are biased toward the US chain's
+completeness and must say so. For measurement: China's upstream imports are the
+observable *leading indicator* of the invisible domestic chain — equipment
+bought today is capacity in two to three years — and the framework's testable
+implication is that successful domestic substitution must eventually appear in
+this data as a *decline in China's chip-import share* (~44% and flat so far)
+without a matching decline in its electronics output. Watching that margin is
+how a trade dataset monitors a domestication it cannot see.
+
 Our two-layer design confines these problems rather than solving them: the
 measurement layer (panel + factor models) is assumption-light about everything it
 does claim; the interpretation layers (value-added weights, replaceability
