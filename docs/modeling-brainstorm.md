@@ -145,7 +145,7 @@ at one node instead of being scattered across checkpoints. Candidate first cut:
 top ~12 countries + Other, edges from the same stage flow data, edge width = $.
 
 
-## 2026-07: What the hubs actually identify — latent varieties within codes
+## 2026-07: What the hubs actually identify — co-demand clusters: varieties OR complement bundles
 
 **The puzzle.** If goods within an HS6 code were homogeneous, gravity logic says
 every exporter should have roughly the same destination profile (proportional to
@@ -167,17 +167,32 @@ And the dynamics split the same way: Taiwan's 847180 went from ~$285/kg (2022)
 to ~$3,646 (2025) while Turkey's stayed near $92 — the AI variety appreciated
 13x, the generic variety did not move.
 
-**The interpretation.** The factor model, fed only flow patterns, is recovering
-*variety-market segments*: clusters of exporters that make similar sub-products
-and therefore sell to similar customer sets. Hub loadings are variety-mix
-memberships; the hub-to-hub matrix F is demand flowing between variety segments.
-This explains at once why hubs are so clean (varieties differ physically, not
-just statistically), why hub membership predicts price tier (China's parts hub at
-$58/kg vs the Taiwan module complex at 10-60x that), and why the 2023-07 break
-was Taiwan's hub "purifying" — a new variety (AI hardware) coming into existence
-inside old codes.
+**The interpretation — sharpened.** The factor model, fed only flow patterns,
+recovers *co-demand clusters*: exporters whose sales co-move because the same
+downstream demand pulls them. Crucially, TWO opposite micro-structures generate
+identical flow signatures: (a) **substitute varieties** — exporters of the same
+sub-product competing for the same buyers (one's share gain is the other's
+loss); (b) **complement bundles** — exporters of *different* sub-products that
+are consumed together downstream in near-fixed proportions (HBM + GPU modules),
+whose demands co-move perfectly for the opposite reason. Co-destination
+covariance — all the MFM sees — cannot tell them apart; the same hub can even
+contain both. So "hubs = varieties" was half right: hubs are demand-side
+clusters whose internal structure (substitute vs complement) must be determined
+by evidence beyond flows.
 
-**Structural mapping: hubs as discovered Armington nests — with a two-type
+**Discriminators, with first evidence.** (i) *Intra-hub trade*: complements ship
+to each other, substitutes do not — and KOR->TWN 847330 flows quadrupled
+2020-2025 ($0.3B -> $1.15B, doubling in the 2023-24 ramp): the Korea+Taiwan
+847330 hub contains a vertical complement pipeline, alongside shared US/China
+customers. (ii) *Response to asymmetric shocks*: substitutes reallocate shares
+(Taiwan took Mexico's US server share in a quarter); complements co-cap — a
+binding constraint in one propagates to the other, which fits the joint
+Korean-memory/Taiwan-packaging price surge under the HBM/CoWoS bottleneck.
+(iii) *Physical content* (tariff lines / form factors): the KOR/TWN unit-value
+gap is bare memory vs assembled modules — different sub-products consumed
+together, i.e. complements, not rival varieties.
+
+**Structural mapping: hubs as discovered Armington nests — with a three-type
 refinement.** Standard Armington assumes each country is its own variety. The
 evidence suggests varieties exist at a coarser level that hubs approximately
 recover — but hubs come in two types, and the substitution evidence separates
@@ -186,10 +201,16 @@ baseboard; nobody substituted away from it at any price — low cross-nest
 sigma). Other hubs partition *locations of the same variety* (847150: the
 MEX-led and TWN-led hubs both ship AI servers, and Taiwan took Mexico's US
 share within a quarter — the fast substitution ran ACROSS those hubs, because
-they are one variety in two places). So the correct statement is: substitution
-is fast within a variety regardless of hub, and slow across varieties; hubs
-recover the variety partition only where production is geographically
-concentrated. The supply elasticity ε still applies at the variety level:
+they are one variety in two places). A third type completes the taxonomy: hubs
+that bundle *complements* (847330's KOR+TWN: memory + modules consumed
+together). So a hub is one of: a variety monopoly (847180 solo-TWN), a
+multi-location single variety (847150 MEX/TWN — high substitutability), or a
+complement bundle (847330 KOR+TWN — near-zero substitutability, Leontief-like).
+The correct general statement: substitution is fast within a variety regardless
+of hub, slow across varieties, andnear zero within complement bundles — and the
+within-bundle structure is where a bottleneck in one member caps the whole
+bundle (the Baqaee-Farhi complementarity channel operating INSIDE a hub, on top
+of our capacity story). The supply elasticity ε still applies at the variety level:
 capacity bound for the AI variety of 847180 while the generic variety in the
 same code stayed slack.
 
