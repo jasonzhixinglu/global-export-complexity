@@ -190,7 +190,19 @@ binding constraint in one propagates to the other, which fits the joint
 Korean-memory/Taiwan-packaging price surge under the HBM/CoWoS bottleneck.
 (iii) *Physical content* (tariff lines / form factors): the KOR/TWN unit-value
 gap is bare memory vs assembled modules — different sub-products consumed
-together, i.e. complements, not rival varieties.
+together, i.e. complements, not rival varieties. (iv) *Bundle co-shipment*
+(user's sharpest prediction: complements travel as a kit, so different
+countries' exports of the pair should be proportional across destinations):
+tested — corr(log KOR, log TWN) = 0.83 across 1,954 destination-months of
+847330, within-destination log-ratio sd ~0.68 (a +/-2x band). Monthly
+log-changes anti-correlate at USA (-0.27) and CHN (-0.12) — consistent with
+lead-lag shipment (memory precedes the modules it is consumed with) rather
+than contradicting bundling; the lagged cross-correlation is the follow-up
+test. The substitute contrast behaves as predicted: MEX vs TWN servers to the
+USA show ~zero monthly comovement (+0.08) but monotone share reallocation
+(TWN share of the pair 25% 2023 -> 40% 2025 -> 47% 2026). Working rule:
+complements = cross-destination proportionality + lagged volume comovement;
+substitutes = uncorrelated timing + trend share reallocation.
 
 **Structural mapping: hubs as discovered Armington nests — with a three-type
 refinement.** Standard Armington assumes each country is its own variety. The
