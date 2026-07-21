@@ -177,16 +177,21 @@ $58/kg vs the Taiwan module complex at 10-60x that), and why the 2023-07 break
 was Taiwan's hub "purifying" — a new variety (AI hardware) coming into existence
 inside old codes.
 
-**Structural mapping: hubs as discovered Armington nests.** Standard Armington
-assumes each country is its own variety. The evidence suggests the right
-structure is nested: varieties exist at the *hub* level; countries within a hub
-are close substitutes (high within-nest sigma — e.g. server assembly, where
-Taiwan replaced Mexico's US share within a quarter), countries across hubs are
-poor substitutes (low across-nest sigma — nobody replaced Taiwan baseboards at
-any price). The MFM thus *estimates the nesting structure* that nested-CES
-models normally assume a priori — and the supply elasticity ε applies at the
-variety-segment level, not the code level: capacity bound for the AI variety of
-847180 while the generic variety stayed slack in the same code.
+**Structural mapping: hubs as discovered Armington nests — with a two-type
+refinement.** Standard Armington assumes each country is its own variety. The
+evidence suggests varieties exist at a coarser level that hubs approximately
+recover — but hubs come in two types, and the substitution evidence separates
+them. Some hubs partition *varieties* (847180: the solo-Taiwan hub owns the AI
+baseboard; nobody substituted away from it at any price — low cross-nest
+sigma). Other hubs partition *locations of the same variety* (847150: the
+MEX-led and TWN-led hubs both ship AI servers, and Taiwan took Mexico's US
+share within a quarter — the fast substitution ran ACROSS those hubs, because
+they are one variety in two places). So the correct statement is: substitution
+is fast within a variety regardless of hub, and slow across varieties; hubs
+recover the variety partition only where production is geographically
+concentrated. The supply elasticity ε still applies at the variety level:
+capacity bound for the AI variety of 847180 while the generic variety in the
+same code stayed slack.
 
 **Testable implications.**
 1. National tariff-line data (Taiwan and US publish 8-11 digit lines) should
@@ -194,10 +199,23 @@ variety-segment level, not the code level: capacity bound for the AI variety of
    direct confirmation, and a natural appendix exercise.
 2. Unit values should cluster within hubs and diverge across them (the table
    above is the first pass; more reporters via TDM would fill it out).
-3. Substitution speed should be fast within hub and absent across hubs — both
-   halves already observed (MEX->TWN servers vs TWN baseboards).
+3. Substitution speed should be fast within a VARIETY and absent across
+   varieties — both observed (MEX->TWN server assembly contested in a quarter;
+   TWN baseboards never substituted). Note the server case is cross-hub
+   substitution within one variety: hub != variety there (see refinement above).
 4. Price dynamics should track the variety, not the code — observed (TWN vs TR
    in 847180).
+
+**Evidence status (honest audit, 2026-07).** Established: within-code exporter
+heterogeneity (unit values 10-100x apart, necessary condition); coarse
+hub/price-tier alignment (CHN's cheap-parts hub vs TWN elsewhere; solo-TWN
+847180 hub = the price outlier); and the temporal coincidence — flows (hub
+purification) and prices (unit-value divergence) independently date the AI
+variety's birth to mid-2023. Known counterexample: KOR ($5,071/kg) and TWN
+($280/kg) shared an 847330 hub — within-hub heterogeneity remains large, so
+hubs are coarse variety clusters at best. Untested: the direct tariff-line
+decomposition (Taiwan 11-digit) and a formal within/across-hub unit-value
+variance decomposition (needs more reporters' quantities).
 
 **Consequence for measurement.** The effective market is the variety segment,
 not the HS6 code. Concentration and power computed at code level understate
