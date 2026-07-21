@@ -294,6 +294,70 @@ findings organize themselves:
   visible in prices, and the structural model's ε-profile should reproduce it.
   **[provisional]**
 
+## Network measures: what exists, why naive use fails, what we build instead
+
+**The existing toolkit (measures lit review).** *Centrality, for weighted directed
+trade networks:* node strength and share-based concentration (HHI); HITS
+hub/authority scores (Kleinberg) — the top singular vectors of the flow matrix,
+which means our factor loadings, pre-rotation, literally *are* HITS scores, and
+the MFM is a multi-factor, time-varying, identity-stable generalization of HITS
+(rotated loadings = centrality within named sub-networks; loading row-norms =
+rotation-invariant total centrality); PageRank and Katz–Bonacich (with
+input–output weights, Katz becomes the Acemoglu et al. influence vector);
+betweenness and flow-betweenness (how much trade passes *through* a node);
+upstreamness/downstreamness (Antràs–Chor–Fally–Hillberry) locating each country's
+average chain position. *Fragmentation:* within-bloc vs cross-bloc trade shares
+(IMF, Gopinath et al., blocs from UN-vote alignment); gravity-residual bloc
+frictions (the wedge after controlling for size and distance); connector-share
+measures (bloc-to-bloc trade routed through third countries — Gopinath et al.
+2024); network modularity against the geopolitical partition; and the EU/IMF
+"strategic dependency" indicators (import HHI + extra-bloc share +
+non-substitutability screens).
+
+**Three failure modes when applied naively — each documented in our data.**
+
+1. *Concentration is not power.* HHI and its relatives rank shares, not the
+   ability to move prices. Applied naively they crown Mexico (bilateral
+   concentration ≈ 1 on US-bound servers) — a position contested by Taiwan within
+   a single quarter and carrying no price premium — and acquit fab equipment
+   (country HHI 0.085) where the true near-monopoly (ASML in EUV) hides below
+   the HS6 code level. The share is the candidate list, never the verdict.
+2. *Even concentration plus inelasticity is not enough — utilization decides.*
+   Wafers are concentrated (exporter HHI 0.17, the highest), highly technical,
+   and presumably capacity-inelastic; they never became a bottleneck because the
+   AI surge is physically narrow (millions of large dies against billions of
+   phone chips) and hit during a broader volume downturn, so the stage had
+   slack. Rent = concentration × inelasticity × *binding utilization*; any
+   metric missing the third coordinate misfires exactly where it looks safest.
+3. *Gross-flow centrality rewards pass-through.* Computed on customs values,
+   strength, PageRank, and especially betweenness award their highest scores to
+   entrepôts and assemblers — Hong Kong and Mexico, the two nodes we can show
+   have the least pricing power — because gross flows double-count and
+   pass-through *is* betweenness. Naive centrality is close to a paraphrase of
+   the Mexico illusion.
+
+**Tailored metrics, each defined by the failure it repairs.** We keep the
+standard measures as baselines — the divergence between them and ours is itself
+a result — and build:
+
+- a **bottleneck index**: concentration × inverse supply elasticity × utilization,
+  with ε from the price/quantity split under the demand surge and utilization
+  proxied by volume relative to trend (repairs 1 and 2);
+- **rent-weighted centrality**: centrality computed on unit-value *premia*
+  (price above the stage's competitive baseline) rather than gross dollars, so
+  scores follow where rent is earned, not where boxes cross (repairs 3);
+- a **contestability metric**: the observed speed of share reallocation in a
+  corridor after shocks — Mexico's server corridor repriced its shares within a
+  quarter; a protected position would not — giving an empirical, per-corridor
+  substitutability that the EC-style screens assert by assumption (repairs 1);
+- **substitutability-adjusted dependence**: import dependence discounted by the
+  number of alternative suppliers *with slack*, not just alternative suppliers
+  (repairs 2 applied to the buyer side);
+- **structural systemicness**: whether a node's removal or a policy shock moves
+  the factor *structure* (era break, crosswalk rotation) rather than just
+  levels — the measure implied by our structure-vs-flows distinction, with the
+  2025 tariff episode as the existence proof.
+
 ## Related literature, and an honest account of what would be new
 
 **The strands this work sits between.** (i) *Quantitative trade models*: Armington
