@@ -6,7 +6,8 @@ Levels (not logs) follow the paper's Section 7, which factors raw dollar volumes
 transform buries scale (e.g. Taiwan's corridor-concentrated dollar dominance).
 Estimation: R = sqrt(p) * top-k eigenvectors of M_R = sum_t Y_t Y_t';  C likewise from
 sum_t Y_t' Y_t;  F_t = R' Y_t C / (p*q).  Ranks by eigenvalue ratio (Ahn-Horenstein).
-Rotation fixed by varimax on each side (one global rotation; loadings are constant here),
+Basis fixed by the nonnegativity-identified rotation (warm-started varimax; see
+docs/notes/nonneg-rotation-experiment.md),
 signs set so each hub's dominant loading is positive, hubs ordered by loading mass.
 
 Runs one analysis per Fed AI-compute HS6 code (847150 AI servers, 847180 other ADP
@@ -94,6 +95,39 @@ def eig_ratio(M, kmax=KMAX):
     return vals, vecs, ratios, int(np.argmax(ratios)) + 1
 
 
+def nnf_rotation(L, restarts=6, rng_seed=11):
+    """Return the ROTATION matrix taking L to the nonnegativity-identified basis
+    (minimize negative-mass share over orthogonal rotations + column signs),
+    warm-started from varimax which is ~the optimum for this data (see
+    docs/notes/nonneg-rotation-experiment.md)."""
+    from scipy.linalg import expm
+    from scipy.optimize import minimize
+    rng = np.random.default_rng(rng_seed)
+    k = L.shape[1]
+    iu = np.triu_indices(k, 1)
+
+    def negshare(B):
+        B = B.copy()
+        for j in range(B.shape[1]):
+            if (np.minimum(B[:, j], 0)**2).sum() > (np.minimum(-B[:, j], 0)**2).sum():
+                B[:, j] *= -1
+        return float((np.minimum(B, 0)**2).sum() / (B**2).sum())
+
+    def M(th):
+        S = np.zeros((k, k)); S[iu] = th
+        return expm(S - S.T)
+
+    V = varimax(L)
+    best = (negshare(L @ V), np.eye(k))
+    for th0 in [np.zeros(len(iu[0]))] + [rng.uniform(-.6, .6, len(iu[0]))
+                                         for _ in range(restarts - 1)]:
+        r = minimize(lambda th: negshare(L @ V @ M(th)), th0, method="Nelder-Mead",
+                     options={"maxiter": 2500, "fatol": 1e-10})
+        if r.fun < best[0]:
+            best = (r.fun, M(r.x))
+    return V @ best[1]
+
+
 def varimax(L, iters=200, tol=1e-8):
     p, k = L.shape
     O = np.eye(k)
@@ -145,8 +179,8 @@ def run(label):
     R = np.sqrt(p) * vecs_R[:, :k]
     C = np.sqrt(q) * vecs_C[:, :r]
 
-    # varimax + sign/order conventions on each side; transform F accordingly
-    R, C = R @ varimax(R), C @ varimax(C)
+    # NNF basis (nonnegativity-identified) + sign/order conventions; transform F accordingly
+    R, C = R @ nnf_rotation(R), C @ nnf_rotation(C)
     R, _, _ = fix_signs_order(R)
     C, _, _ = fix_signs_order(C)
     F = np.array([R.T @ Y[t] @ C / (p * q) for t in range(T)])
@@ -233,8 +267,8 @@ def write_summary_md(s, title, out_dir):
         "Constant-loading matrix factor model `Y_t = R F_t C' + E_t` on annual bilateral",
         f"export matrices in {SPACE} (Atlas HS2012 bilateral data), top {len(s['countries'])} countries",
         f"covering {s['coverage']:.1%} of ${s['world_total_usd']/1e9:.0f}B world trade.",
-        "Estimation per Chen, Chen, Bolivar & Chen (2024), `docs/references/`; varimax",
-        "rotation on each side; hub size = share of fitted signal (exact under the",
+        "Estimation per Chen, Chen, Bolivar & Chen (2024), `docs/references/`; the",
+        "nonnegativity-identified basis on each side; hub size = share of fitted signal (exact under the",
         f"orthonormal-loading decomposition, {SPACE}).",
         "",
         f"- **Rank:** eigenvalue-ratio estimator picks {s['k_selected']} (the dominant",
@@ -264,10 +298,10 @@ def write_summary_md(s, title, out_dir):
     ]
     for i in range(k):
         lines.append(f"| exp {i+1} | " + " | ".join(f"{pair[i, j]:.0%}" for j in range(r)) + " |")
-    lines += ["", "### Export hubs (varimax loadings, top 8)", ""]
+    lines += ["", "### Export hubs (NNF-basis loadings, top 8)", ""]
     lines += [f"- **hub {j+1}** ({exp_share[j]:.0%}): {row}"
               for j, row in enumerate(hub_rows(R, k))]
-    lines += ["", "### Import hubs (varimax loadings, top 8)", ""]
+    lines += ["", "### Import hubs (NNF-basis loadings, top 8)", ""]
     lines += [f"- **hub {j+1}** ({imp_share[j]:.0%}): {row}"
               for j, row in enumerate(hub_rows(C, r))]
     lines += [
@@ -356,7 +390,7 @@ def fig_loadings(L, countries, k, side, mat, title, out_dir):
         ax.axvline(0, color="#c3c2b7", lw=1)
         ax.set_title(f"{side} hub {j+1}", fontsize=10, color=INK)
         ax.tick_params(labelsize=8)
-    fig.suptitle(f"{title} — {side}-side loadings ({mat}, varimax, top {show})", color=INK)
+    fig.suptitle(f"{title} — {side}-side loadings ({mat}, NNF basis, top {show})", color=INK)
     fig.tight_layout()
     fig.savefig(out_dir / f"loadings_{side}.png", dpi=150, bbox_inches="tight")
     plt.close(fig)

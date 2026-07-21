@@ -4,17 +4,17 @@
 
 ## Era 0: 2020-12 .. 2022-05
 
-- export hub 1 (CHN-led, serves HKG-hub): CHN +5.54, NLD +0.32, MYS +0.28, USA +0.18, VNM -0.16, CZE +0.11
-- export hub 2 (HKG-led, serves CHN-hub): HKG +5.55, MYS +0.28, NLD +0.25, MEX -0.12, HUN +0.12, VNM +0.10
-- export hub 3 (TWN-led, serves USA-hub): TWN +5.17, NLD -1.28, MYS +1.06, VNM +0.89, USA +0.56, MEX +0.42
-- export hub 4 (MEX-led, serves USA-hub): MEX +4.46, NLD +2.43, VNM +1.64, USA -1.10, CZE +0.63, CAN +0.55
+- export hub 1 (CHN-led, serves HKG-hub): CHN +5.54, NLD +0.34, MYS +0.27, USA +0.17, VNM -0.16, CZE +0.12
+- export hub 2 (HKG-led, serves CHN-hub): HKG +5.55, MYS +0.27, NLD +0.27, HUN +0.12, MEX -0.11, VNM +0.10
+- export hub 3 (TWN-led, serves USA-hub): TWN +5.16, VNM +1.05, MYS +1.02, NLD -1.01, MEX +0.89, USA +0.44
+- export hub 4 (MEX-led, serves USA-hub): MEX +4.39, NLD +2.55, VNM +1.53, USA -1.16, CZE +0.66, CAN +0.54
 
 ## Era 1: 2022-06 .. 2023-08
 
-- export hub 1 (CHN-led, serves HKG-hub): CHN +5.46, MYS +0.79, USA +0.69, SGP +0.25, NLD +0.11, CZE +0.07
-- export hub 2 (HKG-led, serves CHN-hub): HKG +5.56, MYS +0.26, THA +0.11, HUN +0.07, MEX -0.07, SGP +0.04
-- export hub 3 (TWN-led, serves USA-hub): TWN +5.56, USA +0.19, MYS +0.07, DEU +0.04, HUN +0.04, GBR +0.02
-- export hub 4 (MEX-led, serves USA-hub): MEX +4.35, VNM +2.92, USA -1.24, MYS +0.89, CAN +0.64, THA +0.51
+- export hub 1 (CHN-led, serves HKG-hub): CHN +5.46, MYS +0.76, USA +0.73, SGP +0.24, MEX -0.15, NLD +0.09
+- export hub 2 (HKG-led, serves CHN-hub): HKG +5.56, MYS +0.27, THA +0.12, HUN +0.07, MEX -0.05, SGP +0.04
+- export hub 3 (TWN-led, serves USA-hub): TWN +5.56, USA +0.20, MYS +0.06, DEU +0.04, HUN +0.04, MEX -0.03
+- export hub 4 (MEX-led, serves USA-hub): MEX +4.35, VNM +2.92, USA -1.22, MYS +0.91, CAN +0.64, THA +0.51
 
 ## Era 2: 2023-09 .. 2024-06
 
@@ -25,10 +25,10 @@
 
 ## Era 3: 2024-07 .. 2026-04
 
-- export hub 1 (CHN-led, serves HKG-hub): CHN +5.55, VNM +0.37, MYS +0.25, SGP -0.13, USA +0.12, ROW +0.06
-- export hub 2 (HKG-led, serves CHN-hub): HKG +5.56, VNM +0.24, SGP -0.19, MEX +0.16, USA -0.13, MYS +0.04
-- export hub 3 (TWN-led, serves USA-hub): TWN +5.57, MYS +0.07, USA -0.07, MEX +0.06, SGP -0.06, VNM +0.05
-- export hub 4 (MEX-led, serves USA-hub): MEX +4.10, SGP +2.88, USA +2.39, MYS +0.35, VNM +0.14, NLD +0.04
+- export hub 1 (CHN-led, serves HKG-hub): CHN +5.54, VNM +0.38, MYS +0.25, USA +0.14, SGP -0.10, ROW +0.06
+- export hub 2 (HKG-led, serves CHN-hub): HKG +5.55, MEX +0.25, VNM +0.24, SGP -0.13, USA -0.07, MYS +0.05
+- export hub 3 (TWN-led, serves USA-hub): TWN +5.57, MEX +0.09, MYS +0.07, VNM +0.05, USA -0.05, SGP -0.03
+- export hub 4 (MEX-led, serves USA-hub): MEX +4.10, SGP +2.89, USA +2.39, MYS +0.35, VNM +0.13, HKG -0.10
 
 ## Cross-era hub crosswalk (|cosine| between anchor loadings, rows = earlier era hub, cols = later era hub)
 
@@ -36,28 +36,28 @@
 
 | | hub 1' | hub 2' | hub 3' | hub 4' |
 |---|---|---|---|---|
-| hub 1 | 0.99 | 0.00 | 0.00 | 0.02 |
-| hub 2 | 0.00 | 1.00 | 0.00 | 0.00 |
-| hub 3 | 0.04 | 0.01 | 0.93 | 0.14 |
-| hub 4 | 0.02 | 0.01 | 0.03 | 0.87 |
+| hub 1 | 0.99 | 0.00 | 0.01 | 0.01 |
+| hub 2 | 0.00 | 1.00 | 0.01 | 0.00 |
+| hub 3 | 0.04 | 0.01 | 0.93 | 0.24 |
+| hub 4 | 0.06 | 0.01 | 0.08 | 0.85 |
 
 ### era 1 -> era 2
 
 | | hub 1' | hub 2' | hub 3' | hub 4' |
 |---|---|---|---|---|
-| hub 1 | 1.00 | 0.00 | 0.00 | 0.02 |
-| hub 2 | 0.00 | 1.00 | 0.00 | 0.01 |
-| hub 3 | 0.00 | 0.00 | 1.00 | 0.00 |
-| hub 4 | 0.02 | 0.03 | 0.05 | 0.19 |
+| hub 1 | 1.00 | 0.00 | 0.00 | 0.01 |
+| hub 2 | 0.00 | 1.00 | 0.00 | 0.00 |
+| hub 3 | 0.00 | 0.00 | 1.00 | 0.01 |
+| hub 4 | 0.06 | 0.03 | 0.06 | 0.19 |
 
 ### era 2 -> era 3
 
 | | hub 1' | hub 2' | hub 3' | hub 4' |
 |---|---|---|---|---|
-| hub 1 | 0.99 | 0.00 | 0.00 | 0.07 |
-| hub 2 | 0.00 | 1.00 | 0.00 | 0.01 |
-| hub 3 | 0.00 | 0.00 | 1.00 | 0.04 |
-| hub 4 | 0.01 | 0.01 | 0.00 | 0.10 |
+| hub 1 | 0.99 | 0.00 | 0.00 | 0.06 |
+| hub 2 | 0.00 | 1.00 | 0.00 | 0.03 |
+| hub 3 | 0.00 | 0.00 | 1.00 | 0.03 |
+| hub 4 | 0.01 | 0.00 | 0.00 | 0.10 |
 
 ## Figures
 

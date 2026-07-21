@@ -4,6 +4,9 @@ Bilateral-trade matrix factor models on the Fed AI-compute codes (847150 AI serv
 847180 baseboards/units, 847330 parts/GPU cards), per Chen, Chen, Bolivar & Chen
 (2024) — see `docs/references/`. All estimation in $B dollar levels (logs bury scale).
 Each analysis folder has `summary.md` (start here), figures, and `stats.json`.
+All loadings are reported in the **nonnegativity-identified basis** — the unique
+admissible bundle basis (warm-started varimax; equivalence and uniqueness
+demonstrated in docs/notes/nonneg-rotation-experiment.md).
 
 ```
 annual/                constant-loading MFM on Atlas annual bilateral data, 2020-2024

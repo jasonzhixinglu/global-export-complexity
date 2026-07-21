@@ -5,7 +5,8 @@ matching accumulates ambiguity through high-drift bursts):
   1. Segment the sample into ERAS: burst months are where the 12m-window loading
      subspace jumps (chordal drift > THR); eras are the calm stretches between bursts
      (eras shorter than MIN_ERA months merge into their successor).
-  2. Estimate a CONSTANT-loading anchor MFM per era (pooled covariances, varimax);
+  2. Estimate a CONSTANT-loading anchor MFM per era (pooled covariances, basis =
+     the nonnegativity-identified rotation -- the unique admissible bundle basis);
      each era's anchor is permutation/sign-matched to the previous era's, so hub
      labels carry across eras as faithfully as the data allows.
   3. Align every month's local (12m trailing) loadings to its era anchor by orthogonal
@@ -117,6 +118,39 @@ def varimax(L, iters=200, tol=1e-8):
     return O
 
 
+def nnf_rotation(L, restarts=6, rng_seed=11):
+    """Return the ROTATION matrix taking L to the nonnegativity-identified basis
+    (minimize negative-mass share over orthogonal rotations + column signs),
+    warm-started from varimax which is ~the optimum for this data (see
+    docs/notes/nonneg-rotation-experiment.md)."""
+    from scipy.linalg import expm
+    from scipy.optimize import minimize
+    rng = np.random.default_rng(rng_seed)
+    k = L.shape[1]
+    iu = np.triu_indices(k, 1)
+
+    def negshare(B):
+        B = B.copy()
+        for j in range(B.shape[1]):
+            if (np.minimum(B[:, j], 0)**2).sum() > (np.minimum(-B[:, j], 0)**2).sum():
+                B[:, j] *= -1
+        return float((np.minimum(B, 0)**2).sum() / (B**2).sum())
+
+    def M(th):
+        S = np.zeros((k, k)); S[iu] = th
+        return expm(S - S.T)
+
+    V = varimax(L)
+    best = (negshare(L @ V), np.eye(k))
+    for th0 in [np.zeros(len(iu[0]))] + [rng.uniform(-.6, .6, len(iu[0]))
+                                         for _ in range(restarts - 1)]:
+        r = minimize(lambda th: negshare(L @ V @ M(th)), th0, method="Nelder-Mead",
+                     options={"maxiter": 2500, "fatol": 1e-10})
+        if r.fun < best[0]:
+            best = (r.fun, M(r.x))
+    return V @ best[1]
+
+
 def perm_sign_match(A, ref):
     """Permute/sign columns of orthonormal-ish A to best match ref (greedy)."""
     S = np.abs(ref.T @ A)
@@ -189,14 +223,15 @@ def main(label="ai_compute"):
     for e, (a, b) in enumerate(eras):
         print(f"  era {e}: {labels[a]} .. {labels[b - 1]} ({b - a} months)")
 
-    # era anchors: pooled covariance over the era's raw months, varimax, chained match
+    # era anchors: pooled covariance over the era's raw months, NNF basis, chained match
     anchorsR, anchorsC = [], []
     for e, (a, b) in enumerate(eras):
         months = range(est_t[a] - 0, est_t[b - 1] + 1)   # raw months covered
         Ye = Y[list(months)]
         A_R = top_eigvecs(np.einsum("sij,skj->ik", Ye, Ye))
         A_C = top_eigvecs(np.einsum("sji,sjk->ik", Ye, Ye))
-        A_R, A_C = A_R @ varimax(A_R * np.sqrt(p)), A_C @ varimax(A_C * np.sqrt(q))
+        A_R = A_R @ nnf_rotation(A_R * np.sqrt(p))
+        A_C = A_C @ nnf_rotation(A_C * np.sqrt(q))
         if anchorsR:
             A_R = perm_sign_match(A_R, anchorsR[-1])
             A_C = perm_sign_match(A_C, anchorsC[-1])

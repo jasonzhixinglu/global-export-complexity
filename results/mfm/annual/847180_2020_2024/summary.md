@@ -3,8 +3,8 @@
 Constant-loading matrix factor model `Y_t = R F_t C' + E_t` on annual bilateral
 export matrices in $B levels (Atlas HS2012 bilateral data), top 40 countries
 covering 97.1% of $210B world trade.
-Estimation per Chen, Chen, Bolivar & Chen (2024), `docs/references/`; varimax
-rotation on each side; hub size = share of fitted signal (exact under the
+Estimation per Chen, Chen, Bolivar & Chen (2024), `docs/references/`; the
+nonnegativity-identified basis on each side; hub size = share of fitted signal (exact under the
 orthonormal-loading decomposition, $B levels).
 
 - **Rank:** eigenvalue-ratio estimator picks 1 (the dominant
@@ -29,24 +29,24 @@ orthonormal-loading decomposition, $B levels).
 ## Hub structure
 
 Export-hub sizes: hub 1 92%, hub 2 8%.
-Import-hub sizes: hub 1 9%, hub 2 91%.
+Import-hub sizes: hub 1 91%, hub 2 9%.
 
 Share of fitted signal by hub pair (rows = export hub, cols = import hub):
 
 | | imp 1 | imp 2 |
 |---|---|---|
-| exp 1 | 3% | 90% |
-| exp 2 | 7% | 1% |
+| exp 1 | 90% | 2% |
+| exp 2 | 1% | 7% |
 
-### Export hubs (varimax loadings, top 8)
+### Export hubs (NNF-basis loadings, top 8)
 
-- **hub 1** (92%): TWN +6.31, MEX +0.36, MYS +0.14, VNM +0.14, HKG +0.11, NLD +0.09, SGP +0.08, CHN -0.04
+- **hub 1** (92%): TWN +6.31, MEX +0.36, MYS +0.14, VNM +0.14, HKG +0.11, NLD +0.09, SGP +0.08, CHN -0.03
 - **hub 2** (8%): CHN +6.18, MYS +0.99, USA +0.51, HKG +0.44, MEX +0.42, SGP +0.30, VNM +0.30, NLD +0.14
 
-### Import hubs (varimax loadings, top 8)
+### Import hubs (NNF-basis loadings, top 8)
 
-- **hub 1** (9%): HKG +5.77, TWN +2.30, THA -0.67, CZE +0.47, NLD +0.44, JPN +0.35, POL +0.28, RUS +0.25
-- **hub 2** (91%): USA +6.10, THA +1.25, MYS +0.58, NLD +0.55, SGP +0.50, MEX +0.44, TWN -0.37, IRL +0.13
+- **hub 1** (91%): USA +6.10, THA +1.25, MYS +0.58, NLD +0.55, SGP +0.50, MEX +0.44, TWN -0.35, HKG +0.18
+- **hub 2** (9%): HKG +5.76, TWN +2.31, THA -0.68, CZE +0.47, NLD +0.44, JPN +0.35, POL +0.28, RUS +0.25
 
 ## Figures
 

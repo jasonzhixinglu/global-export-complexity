@@ -3,8 +3,8 @@
 Constant-loading matrix factor model `Y_t = R F_t C' + E_t` on annual bilateral
 export matrices in $B levels (Atlas HS2012 bilateral data), top 40 countries
 covering 94.6% of $429B world trade.
-Estimation per Chen, Chen, Bolivar & Chen (2024), `docs/references/`; varimax
-rotation on each side; hub size = share of fitted signal (exact under the
+Estimation per Chen, Chen, Bolivar & Chen (2024), `docs/references/`; the
+nonnegativity-identified basis on each side; hub size = share of fitted signal (exact under the
 orthonormal-loading decomposition, $B levels).
 
 - **Rank:** eigenvalue-ratio estimator picks 1 (the dominant
@@ -28,29 +28,29 @@ orthonormal-loading decomposition, $B levels).
 
 ## Hub structure
 
-Export-hub sizes: hub 1 6%, hub 2 10%, hub 3 0%, hub 4 84%.
-Import-hub sizes: hub 1 94%, hub 2 6%.
+Export-hub sizes: hub 1 0%, hub 2 10%, hub 3 6%, hub 4 84%.
+Import-hub sizes: hub 1 6%, hub 2 94%.
 
 Share of fitted signal by hub pair (rows = export hub, cols = import hub):
 
 | | imp 1 | imp 2 |
 |---|---|---|
-| exp 1 | 0% | 6% |
-| exp 2 | 10% | 0% |
-| exp 3 | 0% | 0% |
-| exp 4 | 84% | 0% |
+| exp 1 | 0% | 0% |
+| exp 2 | 0% | 10% |
+| exp 3 | 6% | 0% |
+| exp 4 | 0% | 84% |
 
-### Export hubs (varimax loadings, top 8)
+### Export hubs (NNF-basis loadings, top 8)
 
-- **hub 1** (6%): CHN +6.29, SGP +0.50, MYS +0.35, HKG +0.09, CZE +0.09, NLD +0.07, VNM -0.07, HUN +0.06
-- **hub 2** (10%): TWN +6.29, THA +0.49, VNM +0.23, POL -0.16, SGP +0.16, NLD +0.12, IRL +0.12, HUN +0.09
-- **hub 3** (0%): USA +6.01, CZE +1.15, HUN +0.89, DEU +0.62, HKG +0.57, MYS +0.56, NLD +0.42, VNM +0.39
+- **hub 1** (0%): USA +6.01, CZE +1.15, HUN +0.89, DEU +0.62, HKG +0.57, MYS +0.56, NLD +0.42, VNM +0.39
+- **hub 2** (10%): TWN +6.29, THA +0.49, VNM +0.23, POL -0.16, SGP +0.16, NLD +0.13, IRL +0.12, HUN +0.09
+- **hub 3** (6%): CHN +6.29, SGP +0.50, MYS +0.35, HKG +0.10, CZE +0.09, NLD +0.07, VNM -0.07, HUN +0.06
 - **hub 4** (84%): MEX +6.31, MYS +0.33, DEU +0.11, POL +0.09, CAN +0.07, THA -0.05, GBR +0.04, VNM -0.04
 
-### Import hubs (varimax loadings, top 8)
+### Import hubs (NNF-basis loadings, top 8)
 
-- **hub 1** (94%): USA +6.32, SGP +0.09, DEU +0.04, CAN +0.04, HKG -0.03, NLD +0.03, JPN +0.02, IND +0.02
-- **hub 2** (6%): HKG +5.22, JPN +1.88, NLD +1.29, SGP +1.17, KOR +1.06, DEU +1.05, MYS +0.81, IND +0.74
+- **hub 1** (6%): HKG +5.22, JPN +1.88, NLD +1.29, SGP +1.17, KOR +1.06, DEU +1.05, MYS +0.81, IND +0.74
+- **hub 2** (94%): USA +6.32, SGP +0.09, DEU +0.04, CAN +0.04, NLD +0.03, HKG -0.03, JPN +0.03, IND +0.02
 
 ## Figures
 

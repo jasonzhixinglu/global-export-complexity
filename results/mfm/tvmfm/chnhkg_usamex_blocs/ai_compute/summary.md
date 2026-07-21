@@ -4,17 +4,17 @@
 
 ## Era 0: 2020-12 .. 2025-03
 
-- export hub 1 (TWN-led, serves USM-hub): TWN +5.38, MYS +0.17, THA +0.14, KOR -0.06, NLD +0.06, PHL -0.04
-- export hub 2 (CHK-led, serves USM-hub): CHK +5.32, VNM -0.56, KOR +0.49, NLD +0.20, DEU +0.16, CZE +0.15
-- export hub 3 (KOR-led, serves USM-hub): KOR +3.77, VNM +3.54, MYS +1.15, PHL +0.56, SGP +0.55, THA +0.49
-- export hub 4 (USM-led, serves TWN-hub): USM +4.99, SGP +1.22, KOR -1.06, VNM +0.95, CZE +0.45, MYS +0.33
+- export hub 1 (TWN-led, serves USM-hub): TWN +5.38, MYS +0.17, THA +0.14, NLD +0.06, VNM +0.05, KOR -0.04
+- export hub 2 (CHK-led, serves USM-hub): CHK +5.31, KOR +0.69, VNM -0.41, NLD +0.19, DEU +0.16, CZE +0.14
+- export hub 3 (KOR-led, serves CHK-hub): KOR +3.81, VNM +3.47, MYS +1.11, PHL +0.56, USM -0.53, THA +0.46
+- export hub 4 (USM-led, serves TWN-hub): USM +4.97, SGP +1.26, VNM +1.24, KOR -0.73, CZE +0.44, MYS +0.43
 
 ## Era 1: 2025-04 .. 2026-04
 
-- export hub 1 (TWN-led, serves USM-hub): TWN +5.37, THA +0.23, CHK +0.22, USM -0.22, KOR +0.13, MYS +0.13
-- export hub 2 (CHK-led, serves TWN-hub): CHK +3.81, USM +3.61, KOR -0.66, MYS +0.43, CZE +0.42, VNM +0.38
-- export hub 3 (VNM-led, serves USM-hub): VNM +4.05, KOR +3.19, MYS +0.85, PHL +0.83, THA +0.81, USM +0.47
-- export hub 4 (SGP-led, serves TWN-hub): SGP +5.28, CHK +0.56, KOR +0.55, USM -0.46, VNM -0.35, THA +0.22
+- export hub 1 (TWN-led, serves USM-hub): TWN +5.37, CHK +0.29, THA +0.23, USM -0.15, MYS +0.14, KOR +0.14
+- export hub 2 (SGP-led, serves TWN-hub): SGP +5.27, CHK +0.73, KOR +0.58, USM -0.28, VNM -0.25, THA +0.22
+- export hub 3 (VNM-led, serves USM-hub): VNM +4.03, KOR +3.21, PHL +0.83, THA +0.82, MYS +0.82, CHK -0.53
+- export hub 4 (CHK-led, serves TWN-hub): CHK +3.75, USM +3.65, VNM +0.61, KOR -0.51, MYS +0.47, CZE +0.43
 
 ## Cross-era hub crosswalk (|cosine| between anchor loadings, rows = earlier era hub, cols = later era hub)
 
@@ -22,10 +22,10 @@
 
 | | hub 1' | hub 2' | hub 3' | hub 4' |
 |---|---|---|---|---|
-| hub 1 | 1.00 | 0.00 | 0.00 | 0.01 |
-| hub 2 | 0.04 | 0.70 | 0.08 | 0.13 |
-| hub 3 | 0.01 | 0.04 | 0.97 | 0.14 |
-| hub 4 | 0.05 | 0.69 | 0.12 | 0.11 |
+| hub 1 | 1.00 | 0.01 | 0.00 | 0.01 |
+| hub 2 | 0.06 | 0.16 | 0.07 | 0.67 |
+| hub 3 | 0.01 | 0.14 | 0.96 | 0.09 |
+| hub 4 | 0.03 | 0.16 | 0.16 | 0.69 |
 
 ## Figures
 
