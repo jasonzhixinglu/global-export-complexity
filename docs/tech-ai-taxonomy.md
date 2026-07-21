@@ -1,5 +1,10 @@
 # Tech & AI trade taxonomy — defined baskets and proposed extensions
 
+> **Note:** the operative taxonomy (stages actually used, with codes, sizes and
+> data sources) now lives in [data.md](data.md) §1, the master data reference.
+> This file remains the extended discussion: tier definitions, dual-use
+> reasoning, Tier B/C proposals, and validation against external baskets.
+
 This documents the HS6 product baskets used in the dashboard's **Tech & AI** tab, and proposes
 how to handle the *increasingly borderline* categories around them. The organizing principle is
 **proximity to the GPU**: the closer a product is to the compute silicon, the more cleanly it is
