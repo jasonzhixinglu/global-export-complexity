@@ -40,19 +40,19 @@ so the hub decomposition is an identified object, not a rotation convention;
 varimax and unrotated spectral variants live in exports/ for comparison. Hub
 decompositions fit at R^2 0.95-0.99, so these carry the flows faithfully.
 
-![network](../exports/network/supply_chain_network_2024.png)
-![overview dollar coarse](../exports/overviews/supply_chain_overview_dollar_coarse_2024.png)
-![overview dollar](../exports/overviews/supply_chain_overview_dollar_2024.png)
-![overview normalized](../exports/overviews/supply_chain_overview_normalized_2024.png)
-![overview normalized coarse](../exports/overviews/supply_chain_overview_normalized_coarse_2024.png)
-![raw materials](../exports/hubs_nnf/supply_chain_1_raw_materials_nnf_hubs_2024.png)
-![wafers](../exports/hubs_nnf/supply_chain_2_wafers_nnf_hubs_2024.png)
-![litho optics](../exports/hubs_nnf/supply_chain_3_litho_optics_nnf_hubs_2024.png)
-![equipment](../exports/hubs_nnf/supply_chain_4_equipment_nnf_hubs_2024.png)
-![chips](../exports/hubs_nnf/supply_chain_5_chips_nnf_hubs_2024.png)
-![parts](../exports/hubs_nnf/supply_chain_6_parts_nnf_hubs_2024.png)
-![baseboards](../exports/hubs_nnf/supply_chain_7_baseboards_nnf_hubs_2024.png)
-![servers](../exports/hubs_nnf/supply_chain_8_servers_nnf_hubs_2024.png)
+![network](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/main/exports/network/supply_chain_network_2024.png)
+![overview dollar coarse](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/main/exports/overviews/supply_chain_overview_dollar_coarse_2024.png)
+![overview dollar](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/main/exports/overviews/supply_chain_overview_dollar_2024.png)
+![overview normalized](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/main/exports/overviews/supply_chain_overview_normalized_2024.png)
+![overview normalized coarse](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/main/exports/overviews/supply_chain_overview_normalized_coarse_2024.png)
+![raw materials](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/main/exports/hubs_nnf/supply_chain_1_raw_materials_nnf_hubs_2024.png)
+![wafers](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/main/exports/hubs_nnf/supply_chain_2_wafers_nnf_hubs_2024.png)
+![litho optics](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/main/exports/hubs_nnf/supply_chain_3_litho_optics_nnf_hubs_2024.png)
+![equipment](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/main/exports/hubs_nnf/supply_chain_4_equipment_nnf_hubs_2024.png)
+![chips](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/main/exports/hubs_nnf/supply_chain_5_chips_nnf_hubs_2024.png)
+![parts](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/main/exports/hubs_nnf/supply_chain_6_parts_nnf_hubs_2024.png)
+![baseboards](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/main/exports/hubs_nnf/supply_chain_7_baseboards_nnf_hubs_2024.png)
+![servers](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/main/exports/hubs_nnf/supply_chain_8_servers_nnf_hubs_2024.png)
 
 All charts merge China+Hong Kong (CHK; intra-bloc flows excluded) and show 2024,
 the latest year covered by every stage. Stages 1-5 are Atlas HS2012 annual

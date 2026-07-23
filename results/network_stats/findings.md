@@ -16,9 +16,13 @@ export hub locked onto the tightly-USA import hub, and concentration compounded
 instead of diluting. After the 2025-04 tariffs it fades back toward zero (+0.02 →
 +0.009 by 2026) as the US-bloc channel diversifies across assembly origins.
 
+![AI compute — joint concentration decomposition; the alignment covariance panel (lower left) crosses zero at the first dotted line (2023-07) and peaks in 2024](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/main/results/network_stats/ai_compute/decomposition.png)
+
 The parts basket (847330) never flips: alignment covariance stays negative or zero
 for all 65 months — the same no-breaks result seen in the loadings, now as a single
 series. The parts layer never developed a concentrated-to-concentrated channel.
+
+![HS 847330 parts — the same decomposition; the alignment covariance panel never crosses into positive territory and every series is close to flat](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/main/results/network_stats/847330/decomposition.png)
 
 ## 2. Bloc fragmentation: monotone, and code-specific in the expected way
 
@@ -26,7 +30,11 @@ The cross-bloc CN↔US channel share of `g` falls steadily for the aggregate bas
 (0.098 in 2021 → 0.042 in 2026, roughly halving) while the within-US-bloc share
 rises after 2024 (0.130 → 0.184). Consistent with the flows narrative (direct
 US–CN share collapsing while bloc-internal circuits grow), now stated at the
-channel level rather than the bilateral level. By code:
+channel level rather than the bilateral level.
+
+![AI compute — two notions of fragmentation. Right panel: cross-bloc CN↔US channel share (red) halves over the sample while within-US-bloc (blue) climbs after the tariff break](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/main/results/network_stats/ai_compute/fragmentation.png)
+
+By code:
 
 - **847150 (servers)**: the most bloc-ified. Linkage concentration HHI_F explodes
   0.17 → 0.45 and within-US-bloc reaches 0.61 by 2026 — server trade is becoming
@@ -35,6 +43,10 @@ channel level rather than the bilateral level. By code:
   relative decoupling, fitting the code most exposed to export controls.
 - **847330 (parts)**: everything is flat or gently trending; cross-bloc only
   halves and HHI_F sits near 0.12 throughout. The globally-shared substrate, again.
+
+![HS 847150 servers — within-US-bloc channel share (blue, right panel) climbs toward 0.6: server trade collapsing into one US-bloc program](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/main/results/network_stats/847150/fragmentation.png)
+
+![HS 847180 baseboards — cross-bloc CN↔US share (red, right panel) falls 6×, the sharpest decoupling of the three codes](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/main/results/network_stats/847180/fragmentation.png)
 
 Within-CN-bloc shares are tiny everywhere (~0.002–0.005): China-bloc exporters ship
 out of bloc, not to each other — compute flows to the CN bloc are absorption
@@ -45,12 +57,15 @@ picture is really one thickening US-bloc circuit plus a China spoke.
 
 Agnostic fragmentation sits at 0.87–0.99 everywhere: under the anchor-identified
 basis hubs are near-disjoint by construction, so this measure has little room to
-move (doc IV.4 caveat, confirmed). The one notable move — the aggregate basket
-drifts down from 0.96 to 0.88 by 2026, i.e. hubs *overlapping more* — coincides
-with the months of highest clipped negative mass, so it is ambiguous between
-genuine hub convergence and basis degradation at the sample edge. Treat as a
-diagnostic until the window fills out. The bloc measures, which do not depend on
-hub disjointness, are the ones to quote.
+move (doc IV.4 caveat, confirmed). The one notable move — visible in the left
+panel of the AI-compute fragmentation figure above — is the export side drifting
+down from 0.96 to 0.88 by 2026, i.e. hubs *overlapping more*. It coincides with
+the months of highest clipped negative mass (right panel below), so it is
+ambiguous between genuine hub convergence and basis degradation at the sample
+edge. Treat as a diagnostic until the window fills out. The bloc measures, which
+do not depend on hub disjointness, are the ones to quote.
+
+![AI compute — per-hub linkage concentration (left: which export hubs sell into a single import program) and the clipped-negative-mass basis diagnostic (right), which rises in the same late months where overlap fragmentation falls](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/main/results/network_stats/ai_compute/linkage.png)
 
 ## 4. Concentration vs market power: your-concentration doesn't predict power — your counterparty's does
 
@@ -62,15 +77,21 @@ one repriced 20× under stress and the other was contested away in a quarter.
 Your own concentration on a counterparty measures your *dependence*, not your power.
 
 Where power shows up is the **counterparty's origin concentration on you**:
+
+| relationship | own dest HHI (dependence) | counterparty's origin HHI on the code (power) | outcome under stress |
+|---|---|---|---|
+| MEX → USA, servers 847150 | 0.84 (2023 and 2025) | US origin HHI 0.46 → 0.42 (falling) | corridor contested within a quarter — no power |
+| TWN → USA, baseboards 847180 | 0.23 → 0.37 | US origin HHI 0.37 → **0.79** | 20× unit-value repricing — power |
+
 US baseboard imports' origin HHI jumps 0.37 (2023) → **0.79** (2025) — the US
 became overwhelmingly dependent on one supplier (Taiwan) in exactly the code where
-the 20× repricing happened. Meanwhile US server-import origin HHI *fell* (0.46 →
-0.42) even as Mexico's dependence on the US stayed at 0.84 — the US was never
-locked into Mexico, which is why the corridor was contestable. The bilateral
-asymmetry (my dependence on you vs your dependence on me) is the concentration
-statistic that actually tracks pricing power; either side's own HHI alone does not.
-Upstream raw-material stages (wafers, equipment) await the chips-stage monthly
-panel extension before the same test can be run there.
+the 20× repricing happened. Meanwhile US server-import origin HHI *fell* even as
+Mexico's dependence on the US stayed at 0.84 — the US was never locked into
+Mexico, which is why the corridor was contestable. The bilateral asymmetry (my
+dependence on you vs your dependence on me) is the concentration statistic that
+actually tracks pricing power; either side's own HHI alone does not. Upstream
+raw-material stages (wafers, equipment) await the chips-stage monthly panel
+extension before the same test can be run there.
 
 ## Caveats
 
