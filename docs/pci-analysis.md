@@ -99,7 +99,7 @@ response:
 This is the statistical idea of a **self-calibrating / benchmarked estimator** — but here it is
 automatic, no adjustment needed. **Verified to `1.1e-14`** at every grid point across all years:
 
-![Adding-up of shares to 1.0](../results/figures/adding_up.png)
+![Adding-up of shares to 1.0](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/main/results/figures/adding_up.png)
 
 The *only* thing that breaks this is clipping individual curves to `[0,1]`, so we store shares
 **unclipped** (preserving adding-up) and clip only for display.
@@ -116,7 +116,7 @@ redistributes mass. What is guaranteed:
   from the exact dollars by an `O(h²)·curvature` term that is *signed locally and sums to zero* —
   biased down at peaks, up in troughs. Empirically ~1–2% of total per bin, net bias ≈ 0.
 
-![Mass conservation, China 2024](../results/figures/mass_conservation_CHN.png)
+![Mass conservation, China 2024](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/main/results/figures/mass_conservation_CHN.png)
 
 The smooth curve undershoots China's sharp electronics peak (~PCI 0.85) and overshoots its
 shoulders; the residuals (bottom) sum to zero. **When exact interval dollars are needed, the
@@ -230,32 +230,32 @@ conservation) do not depend on it.
 Reproductions of the original notebook charts (CHN/DEU/JPN/KOR, snapshot years), updated to
 2000–2024 and the fixed-bandwidth estimator. Normalized *shape*:
 
-![Export complexity density (lines)](../results/figures/repro_density_lines.png)
+![Export complexity density (lines)](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/main/results/figures/repro_density_lines.png)
 
 Same curves scaled to nominal dollars — **area under each curve = that year's total exports**:
 
-![Export value by complexity (lines)](../results/figures/repro_value_lines.png)
+![Export value by complexity (lines)](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/main/results/figures/repro_value_lines.png)
 
 All 30 tracked countries as a PCI × year heatmap (per-country normalized):
 
-![Density heatmap](../results/figures/density_heatmap.png)
+![Density heatmap](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/main/results/figures/density_heatmap.png)
 
 ### 4.2 Global market share by complexity
 
 Full time series, all 30 countries (shared color scale):
 
-![Market share heatmap](../results/figures/market_share_heatmap.png)
+![Market share heatmap](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/main/results/figures/market_share_heatmap.png)
 
 Readable snapshots for the major exporters:
 
-![Market share snapshots](../results/figures/market_share_snapshots.png)
+![Market share snapshots](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/main/results/figures/market_share_snapshots.png)
 
 ### 4.3 Cumulative (stacked) share — CHN + JPN + DEU
 
 Each country's share stacked, by complexity, per snapshot year. The black line is their combined
 footprint:
 
-![Stacked cumulative share](../results/figures/stacked_share_by_complexity.png)
+![Stacked cumulative share](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/main/results/figures/stacked_share_by_complexity.png)
 
 The shift is stark: in **2000** the high-complexity share was mostly **Japan + Germany** (~28%
 combined), with China concentrated at low PCI. By **2024** China's band dominates almost the entire
@@ -263,7 +263,7 @@ complexity range, and the three together reach ~40% at the high-PCI end — but 
 
 ### 4.4 Coverage: how many countries to "see" world trade at each complexity
 
-![Coverage by complexity](../results/figures/coverage_by_complexity.png)
+![Coverage by complexity](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/main/results/figures/coverage_by_complexity.png)
 
 Mean cumulative world-export coverage by PCI band (`results/tables/coverage_by_pci.csv`):
 
