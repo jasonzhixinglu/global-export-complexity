@@ -172,9 +172,21 @@ wrong, not the priors. Status added as of 2026-07:
 3. **Lagged cross-correlation** of kit co-shipment (memory leads modules?).
 4. **Per-unit unit values** (QTY1) for cross-form price comparisons; more
    reporters for the within/across-program variance decomposition.
-5. **Tri-NMF (Route B)**: drop orthogonality, remove the ~1% negativity;
-   expected to confirm the basis.
-6. **Layer 2 chain accounting** (mini-TiVA absorption): the Mexico-vs-Taiwan
+5. **True NMF fit (not just rotation)**: the current basis is spectral
+   estimation followed by rotation *within the spectral column space* to the
+   most-nonnegative basis — we never actually fit an NMF, and a genuine one
+   (multiplicative updates / HALS) is free to leave that subspace. Fit it,
+   compare fit quality and hub compositions against rotate-then-clip;
+   agreement vindicates the cheap spectral route, disagreement is a finding.
+   Subsumes the tri-NMF (Route B) idea.
+6. **Concentration-vs-power exercise**: compute upstream (origin) and
+   downstream (destination) concentration per segment via the measures in
+   [concentration-fragmentation-nnf-mfm-trade.md](concentration-fragmentation-nnf-mfm-trade.md)
+   (implemented: `scripts/network_stats.py` -> results/network_stats/) and
+   test whether they predict where pricing power actually showed up
+   (Taiwan yes, Mexico no). Divergence localizes the substitution
+   elasticities.
+7. **Layer 2 chain accounting** (mini-TiVA absorption): the Mexico-vs-Taiwan
    correction as estimates; monthly proportionality assumptions are the new
    work.
-7. Network-statistics module and ToT indices per the research-proposal roadmap.
+8. ToT indices per the research-proposal roadmap.
