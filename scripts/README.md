@@ -20,6 +20,8 @@ in [docs/data.md](../docs/data.md).
 - `prototype_nonneg_rotation.py` — nonnegativity-rotation identification experiment
 
 **Outputs**
+- `network_stats.py` — concentration/fragmentation measure system on the TV-MFM
+  output (docs/concentration-fragmentation-nnf-mfm-trade.md → results/network_stats)
 - `export_supply_chain_sankey.py` — all supply-chain charts (hub charts, overviews, network)
 
 ## PCI workstream (dashboard; see docs/pci-analysis.md)
