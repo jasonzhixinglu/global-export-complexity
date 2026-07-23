@@ -30,8 +30,11 @@ import sys
 import time
 from pathlib import Path
 
+import json
+import urllib.parse
+import urllib.request
+
 import pandas as pd
-import comtradeapicall as ctc
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from gec import comtrade as ct
@@ -80,27 +83,61 @@ def keys():
     return [k for k in ks if k]
 
 
+API = "https://comtradeapi.un.org/data/v1/get/C/M/HS"
+
+
+class QuotaExhausted(Exception):
+    pass
+
+
 class Puller:
+    """Direct HTTP (comtradeapicall swallows 403 quota errors as empty frames,
+    which poisoned batch caches with empty parquets -- never again). Rotates
+    keys on quota exhaustion; when every key is dry, sleeps until replenishment."""
+
     def __init__(self):
         self.ks = keys()
         self.ki = 0
 
+    def _get(self, flow, period_list, codes):
+        params = {"cmdCode": ",".join(codes), "period": ",".join(period_list),
+                  "flowCode": flow, "partner2Code": "0", "customsCode": "C00",
+                  "motCode": "0", "maxRecords": 100000, "format": "JSON",
+                  "breakdownMode": "classic", "includeDesc": False}
+        req = urllib.request.Request(
+            f"{API}?{urllib.parse.urlencode(params)}",
+            headers={"Ocp-Apim-Subscription-Key": self.ks[self.ki]})
+        try:
+            with urllib.request.urlopen(req, timeout=300) as r:
+                payload = json.load(r)
+        except urllib.error.HTTPError as e:
+            body = e.read(300).decode(errors="replace")
+            if e.code == 403 and "quota" in body.lower():
+                raise QuotaExhausted(body)
+            raise RuntimeError(f"HTTP {e.code}: {body}")
+        if payload.get("statusCode") == 403:
+            raise QuotaExhausted(payload.get("message", ""))
+        if "data" not in payload:
+            raise RuntimeError(f"no data field: {str(payload)[:200]}")
+        return pd.DataFrame(payload["data"])
+
     def call(self, flow, period_list, codes):
-        for attempt in range(4):
+        dry = 0
+        for attempt in range(12):
             try:
-                df = ctc.getFinalData(
-                    self.ks[self.ki], typeCode="C", freqCode="M", clCode="HS",
-                    period=",".join(period_list), reporterCode=None,
-                    cmdCode=",".join(codes), flowCode=flow, partnerCode=None,
-                    partner2Code="0", customsCode="C00", motCode="0",
-                    maxRecords=100000, format_output="JSON",
-                    breakdownMode="classic", includeDesc=False)
+                df = self._get(flow, period_list, codes)
                 time.sleep(1)
                 return df
-            except Exception as e:
-                print(f"  attempt {attempt}: {e}; rotating key / retrying", flush=True)
+            except QuotaExhausted as e:
+                dry += 1
                 self.ki = (self.ki + 1) % len(self.ks)
-                time.sleep(5)
+                if dry >= len(self.ks):
+                    print(f"  all keys out of quota ({e}); sleeping 30 min", flush=True)
+                    time.sleep(1800)
+                    dry = 0
+            except Exception as e:
+                print(f"  attempt {attempt}: {e}; retrying", flush=True)
+                time.sleep(10)
         raise RuntimeError(f"failed batch {flow} {period_list[0]}")
 
     def fetch(self, flow, period_list, codes):
