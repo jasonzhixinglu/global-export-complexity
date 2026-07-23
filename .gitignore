@@ -1,5 +1,9 @@
-# Raw + derived trade data (large; download/regenerate, see data/README.md)
-data/raw/
+# Raw + derived trade data (large; download/regenerate, see data/README.md).
+# Exception: Comtrade monthly batch caches are committed (public UN data, small
+# per-batch parquets) so the panel is reproducible without re-pulling quota.
+# TDM extracts are subscription-licensed and must NEVER be committed.
+data/raw/*
+!data/raw/comtrade_monthly/
 data/derived/
 
 # Byte-compiled / optimized / DLL files
