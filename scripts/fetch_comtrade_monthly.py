@@ -38,7 +38,11 @@ from gec import comtrade as ct
 from gec import config as cfg
 from gec.classifications import SEMICONDUCTOR_OECD as OECD
 
-BEGIN, END = "2020-01", "2026-06"
+# 2017 start: matches the HS2017 vintage of the OECD code list (pre-2017 needs
+# HS2012 concordance for some codes -- deliberately out of scope) and puts the
+# 2018-19 tariff war in sample. 36 months before 2020 is divisible by every
+# group's batch span, so pre-existing 2020+ batch caches still align and hit.
+BEGIN, END = "2017-01", "2026-06"
 OUT_DIR = cfg.RAW_DIR / "comtrade_monthly"
 KEEP_COLS = ["period", "reporterCode", "reporterISO", "flowCode", "partnerCode",
              "partnerISO", "cmdCode", "primaryValue", "netWgt", "qty", "qtyUnitAbbr"]

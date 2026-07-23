@@ -50,6 +50,12 @@ STANDING = [
     ("TW", "E", "202001", "202606"), ("TW", "I", "202001", "202606"),
     ("CN", "E", "202401", "202606"), ("CN", "I", "202401", "202606"),
     ("VN2", "E", "202001", "202606"), ("VN2", "I", "202001", "202606"),
+    # 2017-2019 backfill (sample cutoff 2017 = HS2017 vintage; disjoint period
+    # ranges keep filenames distinct from the 2020+ extracts). VN2 is the
+    # preliminary edition and may not reach back -- failures fall through to
+    # mirror construction in the panel builder.
+    ("TW", "E", "201701", "201912"), ("TW", "I", "201701", "201912"),
+    ("VN2", "E", "201701", "201912"), ("VN2", "I", "201701", "201912"),
 ]
 
 
