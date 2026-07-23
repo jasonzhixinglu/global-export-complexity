@@ -31,6 +31,7 @@ import time
 from pathlib import Path
 
 import json
+import re
 import urllib.parse
 import urllib.request
 
@@ -121,9 +122,19 @@ class Puller:
             raise RuntimeError(f"no data field: {str(payload)[:200]}")
         return pd.DataFrame(payload["data"])
 
+    @staticmethod
+    def _wait_seconds(msg):
+        """Parse 'replenished in HH:MM:SS' from the 403 body; default 30 min."""
+        m = re.search(r"in (\d+):(\d\d):(\d\d)", str(msg))
+        if not m:
+            return 1800
+        h, mn, s = map(int, m.groups())
+        return min(h * 3600 + mn * 60 + s + 60, 6 * 3600)
+
     def call(self, flow, period_list, codes):
+        errors = 0
         dry = 0
-        for attempt in range(12):
+        while True:
             try:
                 df = self._get(flow, period_list, codes)
                 time.sleep(1)
@@ -131,14 +142,18 @@ class Puller:
             except QuotaExhausted as e:
                 dry += 1
                 self.ki = (self.ki + 1) % len(self.ks)
-                if dry >= len(self.ks):
-                    print(f"  all keys out of quota ({e}); sleeping 30 min", flush=True)
-                    time.sleep(1800)
+                if dry >= len(self.ks):     # quota waits never count as failures
+                    wait = self._wait_seconds(e)
+                    print(f"  all keys out of quota; sleeping {wait/60:.0f} min "
+                          f"({e})", flush=True)
+                    time.sleep(wait)
                     dry = 0
             except Exception as e:
-                print(f"  attempt {attempt}: {e}; retrying", flush=True)
-                time.sleep(10)
-        raise RuntimeError(f"failed batch {flow} {period_list[0]}")
+                errors += 1
+                if errors >= 8:
+                    raise RuntimeError(f"failed batch {flow} {period_list[0]}: {e}")
+                print(f"  error {errors}: {e}; retrying", flush=True)
+                time.sleep(15 * errors)
 
     def fetch(self, flow, period_list, codes):
         """Fetch, splitting recursively (periods first, then codes) on the row cap."""
