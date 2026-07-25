@@ -126,10 +126,14 @@ code and a sub-window first, then scales.
 ## 4. Known residual differences and what they mean for analysis
 
 1. **A fairly uniform level offset (~+10% median, +11% aggregate on the CHK
-   basis).** Consistent with Atlas's XXXX step draining discrepant value out of
-   real codes, entrepot netting, and annual-file revisions. A near-uniform
-   scalar cancels in shares and compositions — which is what the factor model
-   consumes.
+   basis).** Tested, not guessed (audit, final pilots): our monthly sums are
+   identical to the annual submissions Atlas ingests (median 1.000, IQR 0.003),
+   and the offset is FLAT across mirror-discrepancy quartiles — so it is not
+   revisions and not their XXXX trimming; it is Atlas's pair-total blend
+   (their estimated CIF deflators and reliability weights vs our measured
+   ones), spread uniformly by the proportional rescale. A near-uniform scalar
+   cancels in shares and compositions — which is what the factor model
+   consumes; we keep the measured parameters.
 2. **Mixed-coverage cells are the widest cut (IQR 0.35).** Months where a
    corridor flips between both-sided and single-sided make monthly and annual
    reconciliation genuinely differ. Second-order; shrinks as laggards file.

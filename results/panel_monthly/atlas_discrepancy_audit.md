@@ -128,3 +128,29 @@ with (a) Atlas's XXXX step removing discrepant value from real codes and (b)
 entrepot netting (the offset shrinks on the CHK basis). A uniform scalar cancels
 in the shares/compositions the factor model consumes. Level-based (value-
 weighted) statistics are now part of the standing build report per-code table.
+
+## Exhausting the remaining fruit (final pilots before re-estimation)
+
+Three further candidates were piloted (854231/2023 slice) before declaring the
+construction done:
+
+1. **Benchmark monthly sums to annual submissions — dead.** Our monthly sums
+   ARE the annual reports: median ratio 1.000, IQR 0.003, 99% of corridors
+   within rounding (13/650 differ >10%, scattered small reporters). The gap vs
+   Atlas exists identically in the annual files Atlas ingests, so it is created
+   by Atlas processing, not by our assembly.
+2. **XXXX trimming as the cause of the +5% exporter-side offset — rejected.**
+   Atlas sits below the exporter report UNIFORMLY across mirror-discrepancy
+   quartiles (0.950-0.953); a trimming rule would bite where reports disagree.
+   The uniform haircut is their pair-total blend (estimated CIF deflators and
+   reliability weights slightly different from our measured ones), spread
+   evenly by the proportional rescale. Matching it would mean replacing
+   measured parameters with copied ones — cosmetic; cancels in shares.
+3. **HKG re-export netting — nothing to net.** No separate RX flow exists for
+   these codes; re-exports are inside X, and the CHK merge handles the
+   double-count at analysis level.
+
+Verdict: data construction is at parity with Atlas's inputs; residual
+differences are Atlas processing parameters (uniform scalar) plus irreducible
+blend noise on poorly-reported corridors. Construction closed; proceed to
+re-estimation on panel_semi_monthly.
