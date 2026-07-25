@@ -2,7 +2,7 @@
 
 Measures per docs/concentration-fragmentation-nnf-mfm-trade.md, computed monthly from the era-anchored TV-MFM (CHN+HKG bloc, NNF basis, clipped shares). Full series in `series.csv`.
 
-Coverage 2020-12 .. 2026-04 (65 months). Mean clipped negative mass: R 0.233, C 0.154 (max 0.382).
+Coverage 2017-12 .. 2026-04 (101 months). Mean clipped negative mass: R 0.029, C 0.114 (max 0.434).
 
 ## Readings around the structural breaks (3m before vs 3m from the break)
 
@@ -10,27 +10,27 @@ Coverage 2020-12 .. 2026-04 (65 months). Mean clipped negative mass: R 0.233, C 
 
 | measure | before | after | change |
 |---|---|---|---|
-| hhi_F | 0.2488 | 0.3200 | +0.0713 |
-| aligncov | 0.0609 | 0.1076 | +0.0466 |
-| hhi_flat | 0.1210 | 0.0937 | -0.0273 |
-| hhi_bilat | 0.1220 | 0.0957 | -0.0263 |
-| frag_exp | 0.9763 | 0.8705 | -0.1058 |
-| crossbloc_cnus | 0.0360 | 0.0808 | +0.0448 |
-| within_us | 0.3821 | 0.3402 | -0.0419 |
-| within_cn | 0.0015 | 0.0076 | +0.0061 |
+| hhi_F | 0.1744 | 0.1558 | -0.0186 |
+| aligncov | 0.0725 | 0.0704 | -0.0021 |
+| hhi_flat | 0.0674 | 0.0519 | -0.0155 |
+| hhi_bilat | 0.0690 | 0.0533 | -0.0157 |
+| frag_exp | 0.9798 | 0.9879 | +0.0082 |
+| crossbloc_cnus | 0.0345 | 0.0365 | +0.0020 |
+| within_us | 0.2809 | 0.1928 | -0.0881 |
+| within_cn | 0.0075 | 0.0071 | -0.0004 |
 
 ### 2025-04 (tariffs)
 
 | measure | before | after | change |
 |---|---|---|---|
-| hhi_F | 0.4412 | 0.3464 | -0.0948 |
-| aligncov | 0.0382 | 0.0386 | +0.0003 |
-| hhi_flat | 0.2914 | 0.2159 | -0.0755 |
-| hhi_bilat | 0.2925 | 0.2171 | -0.0754 |
-| frag_exp | 0.9459 | 0.9756 | +0.0297 |
-| crossbloc_cnus | 0.0610 | 0.0250 | -0.0360 |
-| within_us | 0.5707 | 0.4812 | -0.0895 |
-| within_cn | 0.0122 | 0.0033 | -0.0088 |
+| hhi_F | 0.1748 | 0.2178 | +0.0430 |
+| aligncov | 0.0868 | 0.0777 | -0.0091 |
+| hhi_flat | 0.0742 | 0.0830 | +0.0088 |
+| hhi_bilat | 0.0766 | 0.0846 | +0.0080 |
+| frag_exp | 0.9183 | 0.9710 | +0.0528 |
+| crossbloc_cnus | 0.0347 | 0.0258 | -0.0089 |
+| within_us | 0.2714 | 0.2355 | -0.0360 |
+| within_cn | 0.0049 | 0.0029 | -0.0020 |
 
 ## Figures
 

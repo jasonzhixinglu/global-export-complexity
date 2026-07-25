@@ -38,7 +38,10 @@ K = 4
 WINDOW = 12
 THR = 0.20               # drift threshold marking a structural burst
 MIN_ERA = 6              # months; shorter calm stretches merge into the next era
-PANEL = cfg.DATA_DIR / "derived" / "panel_ai_compute_monthly.parquet"
+# panel_semi_monthly: 60-code panel, 2017-01 start, audited GL reconciliation
+# (docs/data.md section 3). Estimates begin 2017-12 (12m trailing window),
+# so the 2018-19 tariff tranches are in the estimable sample.
+PANEL = cfg.DATA_DIR / "derived" / "panel_semi_monthly.parquet"
 
 ALL_CODES = ["847150", "847180", "847330"]
 # China+HKG bloc: CHN and HKG merged into one entity CHK; intra-bloc flows (the

@@ -42,7 +42,7 @@ from gec import config as cfg
 LABELS = ["ai_compute", "847150", "847180", "847330"]
 SRC = cfg.RESULTS_DIR / "mfm" / "tvmfm" / "chn_hkg_bloc"
 OUT = cfg.RESULTS_DIR / "network_stats"
-PANEL = cfg.DATA_DIR / "derived" / "panel_ai_compute_monthly.parquet"
+PANEL = cfg.DATA_DIR / "derived" / "panel_semi_monthly.parquet"
 TITLES = {"ai_compute": "AI compute (3 codes)", "847150": "HS 847150 (AI servers)",
           "847180": "HS 847180 (baseboards)", "847330": "HS 847330 (parts/GPU cards)"}
 BREAKS = {"202307": "2023-07 (H100 ramp)", "202504": "2025-04 (tariffs)"}
