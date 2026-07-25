@@ -86,7 +86,7 @@ def flows_json(baskets):
 
 
 def flows_panel(code, year=YEAR):
-    p = pd.read_parquet(cfg.DATA_DIR / "derived" / "panel_ai_compute_monthly.parquet")
+    p = pd.read_parquet(cfg.DATA_DIR / "derived" / "panel_semi_monthly.parquet")
     p = p[(p.code == code) & (p.period.str[:4] == year)]
     g = p.groupby(["exporter", "importer"]).value.sum() / 1e9
     return apply_bloc({k: float(v) for k, v in g.items()})
@@ -231,7 +231,7 @@ def hubs_from_json(baskets, k=4, rotate=True):
 def hubs_from_panel_pooled(code, year=YEAR, rotate=True, k=4):
     """Constant-loading MFM pooled over the year's monthly matrices (panel codes),
     optionally without varimax -- the unrotated spectral basis."""
-    pdf = pd.read_parquet(cfg.DATA_DIR / "derived" / "panel_ai_compute_monthly.parquet")
+    pdf = pd.read_parquet(cfg.DATA_DIR / "derived" / "panel_semi_monthly.parquet")
     pdf = pdf[(pdf.code == code) & (pdf.period.str[:4] == year)]
     flows = {}
     for (per, o, t), v in pdf.groupby(["period", "exporter", "importer"]).value.sum().items():
