@@ -5,7 +5,7 @@ in [docs/data.md](../docs/data.md).
 
 ## Supply-chain workstream (active research)
 
-**Data acquisition & panel** (methodology: docs/panel-methodology.md)
+**Data acquisition & panel** (methodology & audit: docs/data.md §3)
 - `fetch_comtrade_monthly.py` — Comtrade monthly bilateral pulls (backbone, 60 codes)
 - `fetch_tdm.py` — TDM API pulls (TWN/CHN/VN2)
 - `fetch_comtrade_totals.py` — annual all-product totals with cif/fob (BY Steps 2-3 inputs)
