@@ -133,25 +133,29 @@ TradeMap (no advantage over Comtrade for us).
 
 ## 3. What we build: the derived datasets
 
-**The monthly bilateral panel** (`data/derived/panel_ai_compute_monthly.parquet`,
-build: `scripts/build_monthly_panel.py`; report:
-`results/panel_monthly/build_report.md`):
+**The monthly bilateral panel** (`data/derived/panel_semi_monthly.parquet`,
+build: `scripts/build_monthly_panel.py`) — **full methodology and validation:
+[panel-methodology.md](panel-methodology.md)**; standing per-code validation
+table: `results/panel_monthly/build_report.md`. Summary:
 
-- **Scope:** 30 countries + ROW, codes 847150/847180/847330, 2020-01 → balanced
-  endpoint (currently 2026-04; rolls forward on re-fetch).
+- **Scope:** 30 countries + ROW, all 60 codes (stages 1–8), 2017-01 → balanced
+  endpoint (currently 2026-04; rolls forward on re-fetch). 3.5M rows.
 - **Sources & hierarchy:** Comtrade backbone; TDM where Comtrade is silent
-  (TWN always; CHN > 2024-12; VNM; laggard top-ups). Comtrade beats TDM when
-  both report the same flow.
-- **Reconciliation (simplified Bustos–Yildirim):** each corridor-month observed
-  up to twice (exporter FOB, importer CIF/1.10); both present → mean + recorded
-  mirror gap; one → that one. Per-cell provenance. Taiwan partner code 490
-  mapped to TWN.
-- **Balanced endpoint rule:** last month every kept country reports on some
-  side; stragglers (FRA + 1-month laggards) covered by mirror, their ROW cells
-  dark and flagged.
-- **Validation:** aggregated to annual vs Atlas bilateral 2020–24:
-  log-correlation 0.94–0.95, median ratio ~0.92–0.95 per code.
-- ~205k rows; ~6–7 MB/code as CSV.
+  (TWN always; CHN > 2024-12; VNM via VN2). Comtrade beats TDM when both
+  report the same flow. Taiwan partner code 490 mapped to TWN.
+- **Reconciliation: the Growth Lab mirroring pipeline** (Bustos–Yildirim,
+  GL WP 251), implemented faithfully after an audit — gravity-estimated
+  CIF/FOB ratios from dual-basis importer reports, network-estimated annual
+  reliability scores, softmax pair weights reconciling pair TOTALS, exporter
+  composition at code level (their Step 5). Audit record:
+  `results/panel_monthly/atlas_discrepancy_audit.md`.
+- **Validation vs Atlas 2017–24 (164k corridor-code-years):** log-corr 0.977,
+  middle half of cells within ~0.99x–1.22x, 79% of value within ±25%; a
+  near-uniform ~+10% level offset remains (cancels in shares); details and
+  caveats in panel-methodology.md §3–4.
+- The legacy 3-code panel (`panel_ai_compute_monthly.parquet`, 2020+,
+  pre-audit method) stays on disk for reproducibility of existing results;
+  new work reads `panel_semi_monthly.parquet`.
 
 **Annual stage flows** (`dashboard/public/data/techai_bilateral.json`, build:
 `scripts/export_tech_bilateral.py` from the hs12 bilateral files): origin ×
