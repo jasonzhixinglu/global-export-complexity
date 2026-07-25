@@ -150,6 +150,9 @@ definition the power metrics should run on. And the within-kit elasticity is
 identifiable from loading–price comovement (shares rising in a component's
 price ⇒ complements), a route neither flows nor prices alone provide.
 
+
+> **Estimation vintage note (2026-07).** Figures in this section that come from the monthly panel were computed on the pre-audit 3-code panel (2020+). The audited 60-code panel (docs/data.md §3) and re-estimated TV-MFM confirm the qualitative test-case results; exact panel-based numbers are queued for re-verification. Atlas-based figures are unaffected.
+
 ## IV. Test cases the finished system must get right
 
 Judged against industry knowledge; if the system fails these, the model is

@@ -199,7 +199,7 @@ value importance — the Mexico-vs-Taiwan correction; (v) the semi-structural mo
 The questions above are not open-ended: the data already supports first-pass
 answers, which the full analysis will confirm, refine, or overturn. Each is
 tagged **[measured]** (computed from our data), **[provisional]** (partly
-computed), or **[conjecture]** (prior to be tested).
+computed), or **[conjecture]** (prior to be tested). Panel-based [measured] figures were computed on the pre-audit panel; the audited panel (docs/data.md §3) confirms the qualitative statements, and exact numbers are queued for re-verification. Atlas-based figures are unaffected.
 
 **Where are the bottlenecks?** At and immediately around the fabs. Trade value
 exploded for chips and everything downstream while upstream stages grew modestly —
