@@ -5,12 +5,14 @@ in [docs/data.md](../docs/data.md).
 
 ## Supply-chain workstream (active research)
 
-**Data acquisition & panel**
-- `fetch_comtrade_monthly.py` — Comtrade monthly bilateral pulls (backbone)
-- `fetch_tdm.py` — TDM API pulls (TWN/CHN/VN2 + top-ups)
+**Data acquisition & panel** (methodology: docs/panel-methodology.md)
+- `fetch_comtrade_monthly.py` — Comtrade monthly bilateral pulls (backbone, 60 codes)
+- `fetch_tdm.py` — TDM API pulls (TWN/CHN/VN2)
+- `fetch_comtrade_totals.py` — annual all-product totals with cif/fob (BY Steps 2-3 inputs)
 - `fetch_comtrade.py` — annual HS4 pulls with PCI proxy (early-warning years)
 - `extract_ai_compute.py` — slice the 3 compute codes from the Atlas bilateral file
-- `build_monthly_panel.py` — assemble the reconciled balanced monthly panel
+- `build_monthly_panel.py` — assemble the reconciled balanced monthly panel (GL mirroring)
+- `audit_atlas_discrepancy.py` — attribute panel-vs-Atlas discrepancies to tested causes
 
 **Estimation**
 - `prototype_mfm.py` — constant-loading annual MFMs (results/mfm/annual)
