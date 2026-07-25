@@ -27,8 +27,14 @@ tvmfm/                 time-varying MFM on the monthly panel (results/panel_mont
    labels: 847150 847180 847330 ai_compute ai_compute_chnhkg 847150_chnhkg 847180_chnhkg 847330_chnhkg ai_compute_2blocs)
 ```
 
-Headline findings so far: the parts network (847330) shows no structural breaks over
-65 months while the systems layers reorganize repeatedly; at country level the
-2023-07 break is the birth of a solo Taiwan hub; with CHN+HKG merged, only 2023-07
-(Taiwan's rise) and 2025-04 (tariffs) survive as breaks — the 2024-10 country-level
-burst was Hong Kong entrepot noise.
+Headline findings (re-estimated on the audited 60-code panel, 2017-12..2026-04;
+see docs/data.md §3 for the panel and docs/supply-chain-narrative.md for the
+story): the parts network (847330) runs 91 months without a structural break
+while the systems layers reorganize repeatedly; the single dominant break is
+2023-08 (Taiwan's separation — one unbroken 68-month era precedes it at both
+country level and CHK basis); the CHK-basis eras then turn at 2024-10 (China-bloc
+hub dissolves, Singapore factor born — the HBM-controls quarter) and 2025-09
+(hub purification). In the strictest double-bloc run every major policy regime
+start is a break — 2019-04/2019-12 (first tariff war), 2022-10 (first export
+controls), 2025-04 (tariffs, the CHK+USM entanglement break): demand breaks
+countries, policy breaks blocs.
