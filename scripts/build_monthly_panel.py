@@ -13,9 +13,11 @@ Sources and hierarchy (per user direction + Atlas methodology, docs/data.md):
   3. Reconciliation follows the Growth Lab mirroring pipeline (Bustos, Yildirim et
      al., "Tackling Discrepancies in Trade Data", GL WP 251 / Scientific Data 2026),
      implemented faithfully at annual country-pair level and applied to code-months:
-       Step 2  CIF->FOB: gravity regression ln(M/X) ~ ln(dist) + contiguity +
-               exporter FE + importer FE (CEPII GeoDist), per year, on both-sides
-               pairs; predicted ratios clipped to [1.00, 1.20] (their 20% cap).
+       Step 2  CIF->FOB: gravity regression ln(CIF/FOB) ~ ln(dist) + contiguity +
+               exporter FE + importer FE (CEPII GeoDist), fit per year on the
+               importer reports that carry BOTH bases for the same flow (~4-5k
+               observations/year in the aggregate pull); predicted ratios
+               constrained non-negative and capped at 1.20 (their cap).
        Step 3  Reliability: pair discrepancy D = |X - M_fob|/(X + M_fob) (D = 1 for
                single-sided pairs); OLS D = a_j + a_k over the trade network;
                negative a clipped to 0; base country chosen by R^2 search;
@@ -23,14 +25,34 @@ Sources and hierarchy (per user direction + Atlas methodology, docs/data.md):
        Step 4  Pair weights: softmax over (rel_exp, rel_imp); reporters in the
                bottom decile of reliability are disregarded in favor of the
                reliable side; single-sided flows taken at full weight.
-       Step 5  Weights applied per code-month within the pair-year.
-     Data-forced adaptations (documented, not method changes): reliability and the
-     CIF regression run on our 60-code basket totals rather than all-product
-     totals; the CIF regression uses both-sides corridors (monthly pulls carry no
-     dual-basis values); ROW pairs are excluded from estimation (ROW never
-     reports) and use the importer's predicted CIF ratio; the product-level
-     consistency rescale/XXXX residual code is inapplicable without all-product
-     pair totals.
+       Step 5  Product level: reliability weights reconcile the PAIR TOTALS only;
+               code-month values follow the EXPORTER's reported composition,
+               rescaled by the pair-year factor (reconciled total / exporter
+               total); the importer side is used only where the exporter does
+               not report. Verified against Atlas directly: their published
+               value is a single reconciled number per flow (export and
+               reverse-import perspectives identical to <0.1% in 100% of
+               corridors tested) that tracks the exporter report at HS6 level
+               (IQR of log ratio ~0.13 vs ~0.8 for code-level blending) --
+               importer product-level classification noise is what their XXXX
+               residual code absorbs, so it must not be blended into code cells.
+     Steps 2-3 are estimated on ANNUAL ALL-PRODUCT bilateral totals over the full
+     reporting network (scripts/fetch_comtrade_totals.py), which is the level BY
+     specify ("to avoid concordance issues ... we use data only at the aggregate
+     importer-exporter level"); the resulting pair weights are then applied to our
+     code-month cells (their Step 5).
+     Remaining deviations from the published pipeline (documented, deliberate):
+       - No ANS (Areas-Not-Specified) subtraction: our cells are bilateral and
+         unknown-partner trade lands in ROW rather than double-counting a partner.
+       - No product-level rescale to reconciled country totals and no XXXX
+         residual code: both require all-product coverage per pair, while our
+         basket is 60 codes.
+       - No LT vintage harmonisation: codes are taken as reported. This is the
+         one substantive difference and it is measured, not assumed -- see
+         results/panel_monthly/atlas_discrepancy_audit.md.
+       - ROW is an aggregate, not a reporter: ROW cells are single-sided by
+         construction and take the counterparty's report with an importer-average
+         CIF ratio.
 
 Panel: top-30 countries + ROW, per HS6 code, monthly from 2020-01. The balanced
 endpoint is the last month at which every kept country has reported (or is covered by
@@ -122,12 +144,21 @@ def load_tdm():
 
 
 def normalize(rec):
-    """Map to (exporter, importer, basis); bucket non-kept and non-country to ROW."""
+    """Map to (exporter, importer, basis); bucket non-kept and non-country to ROW.
+
+    Order matters: Comtrade/TDM duplicates are resolved at the ORIGINAL partner
+    level, and only then are non-kept partners collapsed into ROW and summed.
+    (Deduping after the ROW collapse would keep one partner's value and discard
+    every other non-kept partner in the same cell.)"""
     rec = rec[rec.value > 0].copy()
-    valid = rec.partner.astype(str).str.fullmatch(r"[A-Z]{3}")
-    rec.loc[~valid.fillna(False), "partner"] = ROW
-    rec.loc[~rec.partner.isin(KEEP), "partner"] = ROW
     rec = rec[rec.reporter.isin(KEEP)]  # only kept countries' reports are usable
+    valid = rec.partner.astype(str).str.fullmatch(r"[A-Z]{3}")
+    rec.loc[~valid.fillna(False), "partner"] = "__NONISO__"
+    # same reporter/partner/code/period/flow from both sources: Comtrade wins
+    rec = (rec.sort_values("source")   # 'comtrade' < 'tdm'
+              .groupby(["reporter", "partner", "code", "period", "flow"], as_index=False)
+              .first())
+    rec.loc[~rec.partner.isin(KEEP), "partner"] = ROW
     exp = np.where(rec.flow == "X", rec.reporter, rec.partner)
     imp = np.where(rec.flow == "X", rec.partner, rec.reporter)
     out = pd.DataFrame({"exporter": exp, "importer": imp, "code": rec.code,
@@ -135,123 +166,174 @@ def normalize(rec):
                         "side": np.where(rec.flow == "X", "x", "m"),
                         "source": rec.source})
     out = out[out.exporter != out.importer]
-    # duplicate reports of the same side of the same cell: comtrade beats tdm
-    out = (out.sort_values("source")  # 'comtrade' < 'tdm'
-              .groupby(["exporter", "importer", "code", "period", "side"], as_index=False)
-              .first())
-    # aggregate ROW buckets (many partners collapsed into one)
-    return out
+    # now sum the collapsed ROW buckets (many partners -> one cell)
+    return (out.groupby(["exporter", "importer", "code", "period", "side"], as_index=False)
+               .agg(value=("value", "sum"), source=("source", "first")))
 
 
 def load_cepii():
-    """CEPII GeoDist: (iso_o, iso_d) -> ln(dist), contiguity."""
+    """CEPII GeoDist: (iso_o, iso_d) -> distance, contiguity (all countries)."""
     d = pd.read_excel(cfg.RAW_DIR / "dist_cepii.xls",
                       usecols=["iso_o", "iso_d", "dist", "contig"])
-    d = d[d.iso_o.isin(KEEP) & d.iso_d.isin(KEEP) & (d.iso_o != d.iso_d)]
-    return d.set_index(["iso_o", "iso_d"])[["dist", "contig"]]
+    d = d[d.iso_o != d.iso_d]
+    return d.groupby(["iso_o", "iso_d"])[["dist", "contig"]].first()
 
 
-def pair_year_totals(piv):
-    """Aggregate the cell table to annual country-pair totals (kept-kept only)."""
-    py = piv.assign(year=piv.period.str[:4])
-    py = py[(py.exporter != ROW) & (py.importer != ROW)]
-    return py.groupby(["exporter", "importer", "year"], as_index=False)[["x", "m"]] \
-             .sum(min_count=1)
+def load_totals():
+    """Annual ALL-PRODUCT bilateral totals (BY estimate Steps 2-3 at this level).
+
+    Returns (py, dual):
+      py   -- exporter/importer/year with x (exporter-reported) and m (importer CIF)
+      dual -- importer reports carrying BOTH cifvalue and fobvalue: the direct
+              freight observations BY's CIF-to-FOB regression is fit on.
+    """
+    import comtradeapicall as ctc
+    files = sorted((cfg.RAW_DIR / "comtrade_totals").glob("*.parquet"))
+    df = pd.concat([pd.read_parquet(f) for f in files], ignore_index=True)
+    ref = ctc.getReference("partner")
+    c2i = {int(c): i for c, i in zip(ref["PartnerCode"], ref["PartnerCodeIsoAlpha3"])
+           if isinstance(i, str) and len(i) == 3}
+    c2i[490] = "TWN"
+    df["rep"] = df.reporterCode.map(c2i)
+    df["ptn"] = df.partnerCode.map(c2i)
+    df = df[df.rep.notna() & df.ptn.notna() & (df.rep != df.ptn) & (df.partnerCode != 0)]
+    df["year"] = df.period.astype(str).str[:4]
+    x = df[df.flowCode == "X"].rename(columns={"rep": "exporter", "ptn": "importer"})
+    m = df[df.flowCode == "M"].rename(columns={"rep": "importer", "ptn": "exporter"})
+    py = (x.groupby(["exporter", "importer", "year"]).primaryValue.sum().rename("x")
+          .to_frame().join(
+              m.groupby(["exporter", "importer", "year"]).primaryValue.sum().rename("m"),
+              how="outer").reset_index())
+    dual = m[(m.cifvalue.fillna(0) > 0) & (m.fobvalue.fillna(0) > 0)][
+        ["exporter", "importer", "year", "cifvalue", "fobvalue"]].copy()
+    return py, dual
 
 
-def cif_fob_ratios(py, geo):
-    """BY Step 2: per-year gravity regression of ln(M/X) on ln(dist), contiguity,
-    exporter FE, importer FE; predicted CIF/FOB ratio per pair, clipped [1, 1.2].
-    Returns dict (exporter, importer, year) -> ratio, plus per-importer fallback."""
-    py = py.merge(geo, left_on=["exporter", "importer"], right_index=True, how="left")
+def cif_fob_ratios(dual, geo, pairs):
+    """BY Step 2, faithful: ln(CIF/FOB) = a + t1 ln(dist) + t2 contiguity
+    + exporter FE + importer FE, fit per year on importer reports that carry BOTH
+    bases; predicted ratios applied to all pairs, constrained non-negative and
+    capped at 1.20 (their cap). Countries absent from the estimation sample take
+    the sample-average effect (FE = 0).
+
+    Returns dict (exporter, importer, year) -> ratio and an importer-average
+    fallback for cells whose counterparty is the ROW aggregate.
+    """
+    dual = dual.merge(geo, left_on=["exporter", "importer"], right_index=True, how="left")
+    dual = dual[dual.dist.notna()].copy()
+    # Estimation-sample hygiene: raw dual-basis rows contain impossible ratios
+    # (max observed 1.3e5 -- fob mis-keyed or partial). Keep economically
+    # plausible freight ratios on non-trivial flows.
+    dual["ratio"] = dual.cifvalue / dual.fobvalue
+    dual = dual[(dual.ratio > 0.9) & (dual.ratio < 3.0) & (dual.fobvalue > 1e5)]
     out, imp_fallback = {}, {}
-    for year, g in py.groupby("year"):
-        est = g[(g.x > 0) & (g.m > 0) & g.dist.notna()].copy()
-        if len(est) < 50:
+    for year, est in dual.groupby("year"):
+        y = np.log(est.ratio)
+        ok = np.isfinite(y)
+        est, y = est[ok], y[ok]
+        if len(est) < 100:
             continue
-        y = np.log(est.m / est.x)
         Xe = pd.get_dummies(est.exporter, prefix="e", dtype=float)
         Xi = pd.get_dummies(est.importer, prefix="i", dtype=float)
         X = pd.concat([pd.Series(np.log(est.dist.values), index=est.index, name="lndist"),
-                       est.contig.astype(float), Xe, Xi], axis=1)
+                       est.contig.astype(float).rename("contig"), Xe, Xi], axis=1)
         X.insert(0, "const", 1.0)
         beta, *_ = np.linalg.lstsq(X.values, y.values, rcond=None)
         coef = pd.Series(beta, index=X.columns)
-        # predict for every kept pair with distance data
-        allp = py[(py.year == year) & py.dist.notna()]
-        Pe = pd.get_dummies(allp.exporter, prefix="e", dtype=float).reindex(
+        # Only ~36 countries report both bases, so most of our reporters have no
+        # estimated fixed effect. Centre the FEs into the constant so an unseen
+        # country takes the AVERAGE country effect rather than the arbitrary
+        # zero level (leaving FE=0 biased predictions up by ~exp(0.24)).
+        for pre in ("e_", "i_"):
+            fe = [c for c in coef.index if c.startswith(pre)]
+            if fe:
+                mu = coef[fe].mean()
+                coef[fe] -= mu
+                coef["const"] += mu
+        pr = pairs.merge(geo, left_on=["exporter", "importer"], right_index=True, how="left")
+        pr = pr[pr.dist.notna()]
+        Pe = pd.get_dummies(pr.exporter, prefix="e", dtype=float).reindex(
             columns=Xe.columns, fill_value=0.0)
-        Pi = pd.get_dummies(allp.importer, prefix="i", dtype=float).reindex(
+        Pi = pd.get_dummies(pr.importer, prefix="i", dtype=float).reindex(
             columns=Xi.columns, fill_value=0.0)
-        P = pd.concat([pd.Series(np.log(allp.dist.values), index=allp.index, name="lndist"),
-                       allp.contig.astype(float), Pe, Pi], axis=1)
+        P = pd.concat([pd.Series(np.log(pr.dist.values), index=pr.index, name="lndist"),
+                       pr.contig.astype(float).rename("contig"), Pe, Pi], axis=1)
         P.insert(0, "const", 1.0)
-        pred = np.clip(np.exp(P.values @ coef.values), 1.0, 1.2)
-        for (e, i), r in zip(zip(allp.exporter, allp.importer), pred):
+        pred = np.clip(np.exp(P.values @ coef.values.astype(float)), 1.0, 1.2)
+        for (e, i), r in zip(zip(pr.exporter, pr.importer), pred):
             out[(e, i, year)] = float(r)
-        # importer-average ratio for ROW-exporter cells (exporter FE at sample mean)
-        for i in KEEP:
-            rs = [v for (e2, i2, y2), v in out.items() if i2 == i and y2 == year]
-            if rs:
-                imp_fallback[(i, year)] = float(np.mean(rs))
+        for i, sub in pd.DataFrame({"i": pr.importer.values, "r": pred}).groupby("i"):
+            imp_fallback[(i, year)] = float(sub.r.mean())
     return out, imp_fallback
 
 
-def reliability_scores(py, ratios):
-    """BY Step 3 per year: discrepancy regression over the trade network with
-    base-country R^2 search; returns dict (country, year) -> reliability in [0,1]."""
-    rel = {}
+def reliability_scores(py, ratios, imp_fallback):
+    """BY Step 3, per year, over the FULL trade network (all reporting countries,
+    all-product totals): D = |X - M_fob| / (X + M_fob), with D = 1 when only one
+    side reports; OLS D = alpha_exporter + alpha_importer; negative alphas clipped
+    to zero; base country chosen by highest R^2; reliability = 1 - alpha.
+
+    The base-country search solves the same normal equations A = B'B with one row
+    and column dropped, so all N candidate baselines cost one matrix build.
+    """
+    rel, diag = {}, {}
     for year, g in py.groupby("year"):
-        g = g.copy()
-        r = np.array([ratios.get((e, i, year), 1.1)
+        r = np.array([ratios.get((e, i, year),
+                                 imp_fallback.get((i, year), CIF_FOB))
                       for e, i in zip(g.exporter, g.importer)])
-        g["m_fob"] = g.m / r
-        both = g.x.notna() & g.m_fob.notna()
-        D = np.where(both,
-                     (g.x - g.m_fob).abs() / (g.x + g.m_fob),
-                     1.0)                       # single-sided pairs: D = 1
+        m_fob = g.m.values / r
+        x = g.x.values
+        both = np.isfinite(x) & np.isfinite(m_fob)
+        with np.errstate(invalid="ignore"):
+            D = np.where(both, np.abs(x - m_fob) / (x + m_fob), 1.0)
+        D = np.nan_to_num(D, nan=1.0)
         countries = sorted(set(g.exporter) | set(g.importer))
         cidx = {c: n for n, c in enumerate(countries)}
-        B = np.zeros((len(g), len(countries)))
-        B[np.arange(len(g)), [cidx[c] for c in g.exporter]] = 1.0
-        B[np.arange(len(g)), [cidx[c] for c in g.importer]] = 1.0
+        n, nc = len(g), len(countries)
+        ei = np.array([cidx[c] for c in g.exporter])
+        ii = np.array([cidx[c] for c in g.importer])
+        B = np.zeros((n, nc))
+        B[np.arange(n), ei] += 1.0
+        B[np.arange(n), ii] += 1.0
+        A, BtD = B.T @ B, B.T @ D
+        tss = ((D - D.mean()) ** 2).sum()
         best = None
-        for base in range(len(countries)):        # base-country search (alpha_base = 0)
-            cols = [c for c in range(len(countries)) if c != base]
-            a, *_ = np.linalg.lstsq(B[:, cols], D, rcond=None)
-            alpha = np.zeros(len(countries))
-            alpha[cols] = np.maximum(a, 0.0)      # clip negatives to 0 (their rule)
-            resid = D - B @ alpha
-            r2 = 1 - (resid ** 2).sum() / ((D - D.mean()) ** 2).sum()
-            if best is None or r2 > best[0]:
-                best = (r2, alpha)
-        for c, n in cidx.items():
-            rel[(c, year)] = float(np.clip(1.0 - best[1][n], 0.0, 1.0))
-    return rel
-
-
-def pair_weights(py, rel):
-    """BY Step 4: softmax of (rel_exp, rel_imp) -> weight on the importer report;
-    bottom-decile reporters disregarded in favor of the reliable side.
-    Returns dict (exporter, importer, year) -> w_importer in [0, 1]."""
-    w = {}
-    for year in py.year.unique():
-        rs = {c: r for (c, y), r in rel.items() if y == year}
-        if not rs:
-            continue
-        thr = np.percentile(list(rs.values()), 10)
-        for e, i in {(e, i) for e, i, y in zip(py.exporter, py.importer, py.year)
-                     if y == year}:
-            re_, ri = rs.get(e, np.nan), rs.get(i, np.nan)
-            if np.isnan(re_) or np.isnan(ri):
+        for base in range(nc):
+            keep = np.arange(nc) != base
+            try:
+                a = np.linalg.solve(A[np.ix_(keep, keep)], BtD[keep])
+            except np.linalg.LinAlgError:
                 continue
-            lo_e, lo_i = re_ < thr, ri < thr
-            if lo_e and not lo_i:
-                w[(e, i, year)] = 1.0             # disregard unreliable exporter
-            elif lo_i and not lo_e:
-                w[(e, i, year)] = 0.0             # disregard unreliable importer
-            else:
-                w[(e, i, year)] = float(np.exp(ri) / (np.exp(re_) + np.exp(ri)))
+            alpha = np.zeros(nc)
+            alpha[keep] = np.maximum(a, 0.0)        # their non-negativity rule
+            r2 = 1 - ((D - B @ alpha) ** 2).sum() / tss
+            if best is None or r2 > best[0]:
+                best = (r2, alpha, countries[base])
+        for c, k in cidx.items():
+            rel[(c, year)] = float(np.clip(1.0 - best[1][k], 0.0, 1.0))
+        diag[year] = {"r2": best[0], "base": best[2], "n_edges": n, "n_countries": nc}
+    return rel, diag
+
+
+def pair_weights(rel, years):
+    """BY Step 4: softmax over (reliability_exporter, reliability_importer) giving
+    the weight on the importer report; reporters below the 10th percentile of the
+    reliability distribution are disregarded in favour of the reliable partner.
+    Computed for every country pair on demand via the returned closure."""
+    thr = {y: float(np.percentile([v for (c, yy), v in rel.items() if yy == y], 10))
+           for y in years if any(yy == y for (c, yy) in rel)}
+
+    def w(e, i, year):
+        re_, ri = rel.get((e, year)), rel.get((i, year))
+        t = thr.get(year)
+        if re_ is None or ri is None or t is None:
+            return np.nan
+        lo_e, lo_i = re_ < t, ri < t
+        if lo_e and not lo_i:
+            return 1.0                  # unreliable exporter: use the importer report
+        if lo_i and not lo_e:
+            return 0.0                  # unreliable importer: use the exporter report
+        return float(np.exp(ri) / (np.exp(re_) + np.exp(ri)))
     return w
 
 
@@ -286,22 +368,45 @@ def main():
             piv[c] = np.nan
 
     geo = load_cepii()
-    py = pair_year_totals(piv)
-    ratios, imp_fallback = cif_fob_ratios(py, geo)          # BY Step 2
-    rel = reliability_scores(py, ratios)                    # BY Step 3
-    w = pair_weights(py, rel)                               # BY Step 4
+    tot_py, dual = load_totals()
+    pairs = tot_py[["exporter", "importer"]].drop_duplicates()
+    ratios, imp_fallback = cif_fob_ratios(dual, geo, pairs)          # BY Step 2
+    rel, rel_diag = reliability_scores(tot_py, ratios, imp_fallback)  # BY Step 3
+    print("reliability regression by year:")
+    for y, d in sorted(rel_diag.items()):
+        print(f"  {y}: R^2 {d['r2']:.3f}, base {d['base']}, "
+              f"{d['n_edges']} edges, {d['n_countries']} countries")
+    wfun = pair_weights(rel, sorted(rel_diag))                        # BY Step 4
+    # BY Step 5: reconcile pair-year TOTALS with the reliability weights, then
+    # carry the exporter's code-level composition, rescaled to the reconciled
+    # total. s_e = T / X_tot multiplies exporter-reported cells; s_i = T / M_fob_tot
+    # multiplies importer-reported cells (used only where the exporter is silent).
+    tk = list(zip(tot_py.exporter, tot_py.importer, tot_py.year))
+    rt = np.array([ratios.get(k, imp_fallback.get((k[1], k[2]), CIF_FOB)) for k in tk])
+    wt = np.array([wfun(*k) for k in tk])
+    Xt, Mt_fob = tot_py.x.values, tot_py.m.values / rt
+    have_x, have_m = np.isfinite(Xt), np.isfinite(Mt_fob)
+    w_eff_t = np.where(np.isnan(wt), 0.5, wt)
+    T = np.where(have_x & have_m, (1 - w_eff_t) * Xt + w_eff_t * Mt_fob,
+                 np.where(have_x, Xt, Mt_fob))
+    MIN_TOT = 1e6            # below this the scale factor is noise; fall back to 1
+    s_e = {k: float(T[n] / Xt[n]) for n, k in enumerate(tk)
+           if have_x[n] and Xt[n] > MIN_TOT}
+    s_i = {k: float(T[n] / Mt_fob[n]) for n, k in enumerate(tk)
+           if have_m[n] and Mt_fob[n] > MIN_TOT}
     yr = piv.period.str[:4]
     keys = list(zip(piv.exporter, piv.importer, yr))
     r_pair = np.array([ratios.get(k, imp_fallback.get((k[1], k[2]), CIF_FOB))
                        for k in keys])
-    w_pair = np.array([w.get(k, np.nan) for k in keys])
     fob_m = piv["m"] / r_pair
+    se = np.array([s_e.get(k, 1.0) for k in keys])
+    si = np.array([s_i.get(k, 1.0) for k in keys])
+    piv["value"] = np.where(piv["x"].notna(), piv["x"] * se, fob_m * si)
     both = piv["x"].notna() & piv["m"].notna()
-    # softmax weight where both sides + weights exist; single side at full weight;
-    # both-sides pairs outside the estimation set (ROW) fall back to equal weights
-    w_eff = np.where(np.isnan(w_pair), 0.5, w_pair)
-    piv["value"] = np.where(both, (1 - w_eff) * piv["x"] + w_eff * fob_m,
-                            piv["x"].fillna(fob_m))
+    print(f"pair-total rescale factors: s_e median {np.median(list(s_e.values())):.3f} "
+          f"IQR [{np.quantile(list(s_e.values()), .25):.3f}, "
+          f"{np.quantile(list(s_e.values()), .75):.3f}]; "
+          f"cells on exporter composition {piv['x'].notna().mean():.1%}")
     piv["provenance"] = np.select(
         [both, piv["x"].notna()],
         ["both:" + piv["x_src"].fillna("") + "+" + piv["m_src"].fillna(""),
@@ -309,8 +414,10 @@ def main():
         default="m_only:" + piv["m_src"].fillna(""))
     piv["mirror_gap"] = np.where(both, np.log(piv["x"] / fob_m), np.nan)
     rel_summary = pd.Series(rel).rename_axis(["country", "year"]).unstack()
-    print("reliability scores (last estimated year):")
-    print(rel_summary.iloc[:, -2].sort_values(ascending=False).round(3).to_string())
+    print("reliability scores, kept countries (2024):")
+    print(rel_summary.reindex(KEEP)["2024"].sort_values(ascending=False)
+          .round(3).to_string())
+    globals()["_REL"] = rel_summary
 
     # balanced endpoint: every kept country reporting (either side, any source),
     # except designated mirror-fallback countries
@@ -409,11 +516,30 @@ def validate_vs_atlas(panel):
     out = {}
     for code, g in m.groupby("code"):
         lr = np.log(g.value / g.export_value)
+        wt = g.export_value / g.export_value.sum()
         out[code] = {"n_corridor_years": len(g),
                      "log_corr": float(np.corrcoef(np.log(g.value),
                                                    np.log(g.export_value))[0, 1]),
                      "median_ratio": float(np.exp(lr.median())),
-                     "iqr_log_ratio": float(lr.quantile(0.75) - lr.quantile(0.25))}
+                     "iqr_log_ratio": float(lr.quantile(0.75) - lr.quantile(0.25)),
+                     # level-based (value-weighted) measures: logs overstate the
+                     # role of small linkages; these are dominated by the large
+                     # corridors the analysis actually rides on
+                     "aggregate_ratio": float(g.value.sum() / g.export_value.sum()),
+                     "wtd_within25": float(((lr.abs() < np.log(1.25)) * wt).sum()),
+                     "wtd_mape": float((np.abs(g.value - g.export_value)
+                                        / g.export_value * wt).sum())}
+    lr = np.log(m.value / m.export_value)
+    wt = m.export_value / m.export_value.sum()
+    out["ALL"] = {"n_corridor_years": len(m),
+                  "log_corr": float(np.corrcoef(np.log(m.value),
+                                                np.log(m.export_value))[0, 1]),
+                  "median_ratio": float(np.exp(lr.median())),
+                  "iqr_log_ratio": float(lr.quantile(0.75) - lr.quantile(0.25)),
+                  "aggregate_ratio": float(m.value.sum() / m.export_value.sum()),
+                  "wtd_within25": float(((lr.abs() < np.log(1.25)) * wt).sum()),
+                  "wtd_mape": float((np.abs(m.value - m.export_value)
+                                     / m.export_value * wt).sum())}
     return out
 
 
@@ -448,11 +574,18 @@ def write_report(panel, horizons, endpoint):
     lines += lag_analysis(panel, horizons, endpoint)
     lines += ["", "## Validation vs Atlas annual bilateral (2017–2024, kept-kept "
               "corridors > $0.1M)", "",
-              "| code | corridor-years | log-corr | median panel/Atlas | IQR(log ratio) |",
-              "|---|---|---|---|---|"]
+              "Log-based columns treat every corridor equally (they overstate small "
+              "linkages); the value-weighted columns are dominated by the large "
+              "corridors the analysis actually rides on.", "",
+              "| code | corridor-years | log-corr | median ratio | IQR(log) | "
+              "aggregate ratio | value-wtd within ±25% | value-wtd MAPE |",
+              "|---|---|---|---|---|---|---|---|"]
     for code, v in val.items():
-        lines.append(f"| {code} | {v['n_corridor_years']} | {v['log_corr']:.3f} | "
-                     f"{v['median_ratio']:.2f} | {v['iqr_log_ratio']:.2f} |")
+        lines.append(f"| {'**ALL**' if code == 'ALL' else code} | "
+                     f"{v['n_corridor_years']} | {v['log_corr']:.3f} | "
+                     f"{v['median_ratio']:.2f} | {v['iqr_log_ratio']:.2f} | "
+                     f"{v['aggregate_ratio']:.2f} | {v['wtd_within25']:.0%} | "
+                     f"{v['wtd_mape']:.0%} |")
     lines += ["", "_Generated by `scripts/build_monthly_panel.py`; panel parquet in "
               "`data/derived/` (git-ignored)._"]
     (REPORT_DIR / "build_report.md").write_text("\n".join(lines), encoding="utf-8")

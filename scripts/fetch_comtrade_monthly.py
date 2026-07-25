@@ -84,7 +84,7 @@ def keys():
     return [k for k in ks if k]
 
 
-API = "https://comtradeapi.un.org/data/v1/get/C/M/HS"
+API = "https://comtradeapi.un.org/data/v1/get/C/{freq}/HS"
 
 
 class QuotaExhausted(Exception):
@@ -100,13 +100,13 @@ class Puller:
         self.ks = keys()
         self.ki = 0
 
-    def _get(self, flow, period_list, codes):
+    def _get(self, flow, period_list, codes, freq="M"):
         params = {"cmdCode": ",".join(codes), "period": ",".join(period_list),
                   "flowCode": flow, "partner2Code": "0", "customsCode": "C00",
                   "motCode": "0", "maxRecords": 100000, "format": "JSON",
                   "breakdownMode": "classic", "includeDesc": False}
         req = urllib.request.Request(
-            f"{API}?{urllib.parse.urlencode(params)}",
+            f"{API.format(freq=freq)}?{urllib.parse.urlencode(params)}",
             headers={"Ocp-Apim-Subscription-Key": self.ks[self.ki]})
         try:
             with urllib.request.urlopen(req, timeout=300) as r:
@@ -131,12 +131,12 @@ class Puller:
         h, mn, s = map(int, m.groups())
         return min(h * 3600 + mn * 60 + s + 60, 6 * 3600)
 
-    def call(self, flow, period_list, codes):
+    def call(self, flow, period_list, codes, freq="M"):
         errors = 0
         dry = 0
         while True:
             try:
-                df = self._get(flow, period_list, codes)
+                df = self._get(flow, period_list, codes, freq)
                 time.sleep(1)
                 return df
             except QuotaExhausted as e:
