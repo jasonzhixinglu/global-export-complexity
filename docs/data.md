@@ -19,14 +19,22 @@ further out, the more dual-use dilution — the reason for tiering (below).
 
 | stage | codes | 2024 world trade | monthly? |
 |---|---|---|---|
-| 1 raw materials | 280461 silicon, rare gases 280421/29, Ga/Ge/In 282560/8112xx, chemicals | $13B | no (annual) |
-| 2 wafers & inputs | 381800, 3701xx/370790 | $25B | no |
-| 3 litho & optics inputs | 9001xx/9002xx, 901210/90, 903141 | $38B | no |
-| 4 fab equipment | 8486xx, metrology 903082/84/9033, fab plant | $244B | no |
-| 5 chips | 8542xx (854231 processors, 854232 memories incl HBM, 854239 other ICs), 8541xx discretes, 8523 media | $823B | no (extension planned) |
-| 6 parts & GPU modules | **847330** (also: consumer GPU cards) | $132B | **yes** |
-| 7 baseboards / units | **847180** (HGX trays; purest AI code) | $73B | **yes** |
-| 8 AI servers | **847150** (DGX, assembled systems) | $117B | **yes** |
+| 1 raw materials | 280461 silicon, rare gases 280421/29, Ga/Ge/In 282560/8112xx, chemicals | $13B | **yes** (2017-01+) |
+| 2 wafers & inputs | 381800, 3701xx/370790 | $25B | **yes** (2017-01+) |
+| 3 litho & optics inputs | 9001xx/9002xx, 901210/90, 903141 | $38B | **yes** (2017-01+) |
+| 4 fab equipment | 8486xx, metrology 903082/84/9033, fab plant | $244B | **yes** (2017-01+) |
+| 5 chips | 8542xx (854231 processors, 854232 memories incl HBM, 854239 other ICs), 8541xx discretes, 8523 media | $823B | **yes** (2017-01+) |
+| 6 parts & GPU modules | **847330** (also: consumer GPU cards) | $132B | **yes** (2017-01+) |
+| 7 baseboards / units | **847180** (HGX trays; purest AI code) | $73B | **yes** (2017-01+) |
+| 8 AI servers | **847150** (DGX, assembled systems) | $117B | **yes** (2017-01+) |
+
+Monthly raw pulls now cover **all 60 codes across all 8 stages, 2017-01 →
+2026-06** (Comtrade batch caches in `data/raw/comtrade_monthly/`, committed:
+15.1M rows; TDM fills in git-ignored `data/raw/tdm/`: TWN always, CHN >2024-12,
+VNM via VN2 — VN2 confirmed to reach back to 2017). The 2017 sample start
+matches the HS2017 vintage of the OECD code list and puts the 2018-19 tariff
+war in sample. The reconciled *panel* still covers stages 6-8 only
+(`build_monthly_panel.py`); extending it to the new stages is the next step.
 
 (2024 values CHK basis — China+Hong Kong merged, intra-bloc excluded. The OECD
 "photosensitive" basket is deliberately excluded: solar-dominated, a fab output.)
