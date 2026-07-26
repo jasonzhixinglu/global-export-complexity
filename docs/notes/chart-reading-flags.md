@@ -1,7 +1,62 @@
 # Chart-reading flags (running note)
 
 Questions raised while reviewing the chart pack, with the resolution of each.
-Started 2026-07-26; append as new flags come up.
+Started 2026-07-26; append as new flags come up. The overview below records the
+overall takeaways of the review; the numbered flags follow.
+
+## Overview: takeaways after reviewing the chart pack
+
+The parts of the project that are trusted: the panel (checked against Atlas),
+the stage taxonomy, and the hub-level MFM estimation. The problem sits after
+that: it is usually unclear what the results are telling us.
+
+When a result looks strange there are three possible reasons, and nothing in
+our output says which applies — we adjudicate by hand, case by case (the flags
+below are exactly that). Sometimes the strange thing is true: Taiwan really
+does import little relative to what it exports, because most of a chip's value
+is created inside the fab. Sometimes the chart hides it: Taiwan's wafer
+imports are drawn too thin to see under the common dollar scale. And sometimes
+the measure itself is off: the series named "fragmentation" does not measure
+what anyone means by fragmentation, and the other overlap and concentration
+measures deserve the same suspicion until each is vetted.
+
+The stories this data exists to tell are few, specific, and supported both
+inside and outside our results:
+
+- **Flows and concentration in the AI boom.** Three trade channels of sixteen
+  carry essentially the whole boom (Taiwan to the US and both legs of the
+  US-Mexico assembly loop); everything else is flat. Concentration rose
+  because one giant new buyer appeared.
+- **US vs China investment.** The US buys finished machines through other
+  countries — the large cloud firms spent roughly $400B on capital equipment
+  in 2025, arriving via Taiwanese chips and Mexican assembly: an American boom
+  running through foreign factories (US supply chains are international).
+  China buys the machines that make chips — $41B of equipment in 2024, about
+  40% of the world total; a $47.5B state fund aimed at equipment and
+  materials; rules favoring domestic tools — building at home, more upstream,
+  more self-contained. Our data shows both: the US takes 42% of world compute
+  imports; China's equipment imports rose while its chip-import share fell.
+- **Policy and events.** The model breaks where the events are, with dates
+  (2019 tariff war, October 2022 export controls, April 2025 tariffs), and
+  with a regularity: demand shocks appear at the country level, policy shocks
+  at the bloc level.
+- **Economic meaning.** The reading that the boom's concentration partly
+  reflects security policy, and that China's inward upstream build-out is
+  likewise security-driven, is consistent with everything measured here and
+  with outside work (the IMF documents the same rerouting through Mexico and
+  Vietnam that our bloc results show). But trade data shows what moved, not
+  why: "for security reasons" fits the timing everywhere and remains an
+  interpretation, to be labeled as such wherever it appears.
+
+The core concern: the evidence for these stories is in the results but
+scattered. Outputs are filed by how they were made (run, measure, stage), not
+by which question they answer, so no one can open the project and see each
+story with its two or three supporting charts, plainly told, with a note on
+what the chart hides and which measures to trust. Arranging the evidence
+around the questions — and vetting each measure along the way — is the
+remaining work. The measuring is done; the telling is not.
+
+## Numbered flags
 
 1. **Taiwan/Korea appear to import no inputs** (whole-chain overview).
    Resolution: they do — but on the dollar-mode overview the common scale is
