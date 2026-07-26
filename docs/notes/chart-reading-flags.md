@@ -86,3 +86,22 @@ stage hub charts answer "who trades with whom".
    vs domestic fabrication is not measurable here. In the AI-specific compute
    codes the picture inverts: China's import share is ~5% by 2025 and the US
    is the pole.
+
+8. **The TV-MFM results read as a disorganized set — unclear what is shown,
+   in what order, and how the runs break down.**
+   The structure that exists (stated nowhere in the outputs themselves, which
+   is the problem): the nine runs form a grid of code basket x bloc
+   treatment. Baskets: the three codes separately (847150, 847180, 847330)
+   and their sum (ai_compute). Bloc treatments, in increasing order of
+   netting: by_country (no merging), chn_hkg_bloc (China+HKG merged, the
+   preferred basis for interpretation), chnhkg_usamex_blocs (both blocs
+   merged, ai_compute only — the policy lens). Every run produces the same
+   four figures: drift.png (when the structure breaks — read first),
+   loadings_export.png and loadings_import.png (who constitutes each hub,
+   era-anchored), factors.png (the 4x4 hub-to-hub dollar intensities), plus
+   summary.md with era compositions and cross-era crosswalk tables. Intended
+   reading order: chn_hkg_bloc/ai_compute first (the headline run), then
+   by_country/ai_compute and by_country/847330 as contrasts (demand break,
+   parts stability), then the per-code CHK runs, then the double-bloc run for
+   policy dates. The chart pack's section 2 follows roughly this order but
+   does not say so.
