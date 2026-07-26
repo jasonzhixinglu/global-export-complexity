@@ -56,3 +56,16 @@ stage hub charts answer "who trades with whom".
    for chip making, and the trade data cannot tell the chip-bound share apart.
    The closer a code is to the GPU, the more of its trade is genuinely about
    chips (see data.md section 1).
+
+6. **The US does not stand out as the import hub in the whole-chain overview.**
+   Resolution, three parts. (a) The chart never sums a country across columns:
+   US inbound is split between chips (small), parts, baseboards, servers and
+   equipment, so no single column shows its aggregate, while China's inbound
+   is concentrated in the two biggest columns (chips, equipment). (b) Not all
+   chips are for AI: the chips stage is the whole electronics industry
+   (phones, cars, PCs), the AI slice is a minority of it, and bare AI silicon
+   is mostly packaged in Asia rather than imported by the US. In the compute
+   codes, the layer closest to AI, the US is unambiguously the import hub
+   (about a third of world imports in 2024, 42.5% in 2025, and a dedicated USA
+   import factor in every model run). (c) The chart shows 2024; the US share
+   and the Taiwan-to-US corridors are much larger in 2025-26.
