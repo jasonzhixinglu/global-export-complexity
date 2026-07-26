@@ -1,7 +1,6 @@
 # Chart-reading flags (running note)
 
 Questions raised while reviewing the chart pack, with the resolution of each.
-Items marked "candidate fix" are presentation improvements not yet made.
 Started 2026-07-26; append as new flags come up.
 
 1. **Taiwan/Korea appear to import no inputs** (whole-chain overview).
@@ -30,8 +29,6 @@ Started 2026-07-26; append as new flags come up.
    threshold of a $220B stage, while its outbound is one fat server ribbon —
    opposite of Taiwan: thin margin pass-through vs large value-added.
    Timing matters: the inbound ramp is 2025 (TWN $16B, USA $25B).
-   Candidate fix: a 2025 chart edition once every stage's data closes, and/or
-   a lower fold threshold for the intra-assembly column.
 
 4. **Taiwan's chips seem to flow only to CHK** (chips column).
    Resolution: mostly real — bare chips flow to the Asian assembly complex
@@ -40,10 +37,20 @@ Started 2026-07-26; append as new flags come up.
    parts/baseboards codes, skipping the chips column entirely. Folding
    sharpens it: the chips stage's 10% threshold ≈ $80B, so all non-CHK
    destinations bundle into Other.
-   Candidate fix: per-column threshold overrides so second-tier chip
-   importers (SGP/MYS/KOR/USA) stay named.
 
 Standing reading rules that come out of 1–4: thin ribbon = small dollars, not
 missing data; Other = an exact bundle of sub-threshold counterparties; the
 dollar overview answers "where is the money", the normalized overview and
 stage hub charts answer "who trades with whom".
+
+5. **Large stage-1 flows into Other — surprising for a focused supply chain.**
+   Resolution: the raw-materials codes are generic industrial commodities that
+   also feed fabs — rare gases (welding/medical), silicon carbide (abrasives),
+   copper sulphate (agriculture), borates (glass/detergents). Customs codes do
+   not see purity grade or end use, so most trade in these codes is
+   non-semiconductor and disperses across many mid-sized industrial importers,
+   each below the fold threshold. The exception: 280461 (silicon >= 99.99%) has
+   a purity threshold in its definition and flows concentrate toward fab
+   countries. This is the dual-use dilution gradient documented in data.md
+   section 1: the further from the GPU, the more the code sweeps in unrelated
+   trade.
