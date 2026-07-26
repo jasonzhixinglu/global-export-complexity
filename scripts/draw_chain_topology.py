@@ -4,20 +4,23 @@ The simplified narrative shape (docs/data.md §1 "How stages combine"):
 two parallel input branches — materials (raw -> wafers/chemicals) and tools
 (optics -> equipment) — converge on chip fabrication; chips then run
 sequentially through parts/GPU modules, baseboards, and AI servers.
-Edge styles carry the combination rule: solid = consumed per unit of output,
-dashed = capacity investment (leads output 6-12 months in fab countries).
+Circle areas follow the log of 2024 world trade (illustrative). Edge styles
+carry the combination rule: solid = consumed per unit of output, dashed =
+capacity investment (leads output 6-12 months in fab countries).
 
 Output: exports/chain_topology.png (+ .pdf, vector) — referenced from
 docs/data.md, docs/supply-chain-narrative.md, and the chart pack.
 """
 from __future__ import annotations
 import sys
+import textwrap
 from pathlib import Path
 
+import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
+from matplotlib.patches import Circle, FancyArrowPatch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from gec import config as cfg
@@ -27,114 +30,100 @@ SURFACE, INK, INK2, MUTED = "#fcfcfb", "#0b0b0b", "#52514e", "#898781"
 FILL = {"input": "#eef3fb", "fab": "#e8f5ee", "down": "#fdf1e7"}
 EDGE = {"input": "#2a78d6", "fab": "#008300", "down": "#eb6834"}
 
-
-def codes(group):
-    return sorted(O[group])
-
-
-# 2024 world trade per node ($B, CHK basis; stages 1-5 Atlas, 6-8 audited panel).
+# 2024 world trade per node ($B, CHK basis; stages 1-5 Atlas, 6-8 audited panel)
 VAL = {"raw": 13, "wafer": 25, "optic": 38, "equip": 244, "fab": 823,
        "parts": 146, "board": 101, "srv": 127}
-
-# Node heights scale with log10 of the 2024 value (illustrative: keeps chips
-# from dwarfing raw materials while preserving the ordering).
-import numpy as np
 _l = {k: np.log10(v) for k, v in VAL.items()}
-_s = {k: 0.66 + 0.34 * _l[k] / max(_l.values()) for k in _l}
+RAD = {k: 0.095 + 0.115 * _l[k] / max(_l.values()) for k in _l}
+# dense nodes need room for their code block regardless of dollar size
+for _k, _n in {"raw": 15, "optic": 8, "equip": 14}.items():
+    RAD[_k] = max(RAD[_k], 0.150 if _n > 10 else 0.138)
 
 NODES = {
-    # key: (x, y, w, h, kind, title, subtitle, code list)
-    "raw":   (0.010, 0.975 - 0.34 * _s["raw"], 0.155, 0.34 * _s["raw"], "input",
-              "Raw materials", "silicon, gases, Ga/Ge, chemicals", codes("Raw materials")),
-    "wafer": (0.225, 0.860 - 0.26 * _s["wafer"], 0.145, 0.26 * _s["wafer"], "input",
-              "Wafers & chemical inputs", "wafers, photoresists, masks", codes("Wafer inputs")),
-    "optic": (0.010, 0.060, 0.155, 0.24 * _s["optic"], "input",
-              "Litho & optics inputs", "lenses, e-beam, inspection", codes("Foundry inputs")),
-    "equip": (0.215, 0.060, 0.145, 0.30 * _s["equip"], "input",
-              "Fab equipment", "litho, dep/etch, metrology", codes("Manufacturing equipment")),
-    "fab":   (0.435, 0.300, 0.165, 0.42 * _s["fab"], "fab",
-              "CHIP FABRICATION", "logic + memory + discretes", codes("Chips")),
-    "parts": (0.675, 0.820 - 0.26 * _s["parts"], 0.135, 0.26 * _s["parts"], "down",
-              "Parts & GPU modules", "accelerator cards, components", ["847330"]),
-    "board": (0.675, 0.140, 0.135, 0.26 * _s["board"], "down",
-              "Baseboards", "HGX trays, subassemblies", ["847180"]),
-    "srv":   (0.865, 0.320, 0.125, 0.42 * _s["srv"], "down",
-              "AI servers", "assembled systems, racks", ["847150"]),
+    # key: (cx, cy, kind, title, code list)
+    "raw":   (0.175, 0.780, "input", "Raw materials", sorted(O["Raw materials"])),
+    "wafer": (0.530, 0.780, "input", "Wafers & inputs", sorted(O["Wafer inputs"])),
+    "optic": (0.175, 0.235, "input", "Litho & optics", sorted(O["Foundry inputs"])),
+    "equip": (0.530, 0.235, "input", "Fab equipment", sorted(O["Manufacturing equipment"])),
+    "fab":   (1.000, 0.500, "fab", "CHIP FABRICATION", sorted(O["Chips"])),
+    "parts": (1.430, 0.760, "down", "Parts & GPU modules", ["847330"]),
+    "board": (1.430, 0.255, "down", "Baseboards", ["847180"]),
+    "srv":   (1.830, 0.500, "down", "AI servers", ["847150"]),
 }
 
 ARROWS = [  # (from, to, style, label)
     ("raw", "wafer", "solid", ""),
-    ("wafer", "fab", "solid", "consumed per unit of output"),
+    ("wafer", "fab", "solid", "consumed per unit\nof output"),
     ("optic", "equip", "solid", ""),
     ("equip", "fab", "dashed", "capacity investment;\nleads output 6-12m"),
     ("fab", "parts", "solid", ""),
-    ("parts", "board", "solid", ""),
-    ("board", "srv", "solid", ""),
+    ("fab", "board", "solid", ""),
     ("parts", "srv", "solid", ""),
+    ("board", "srv", "solid", ""),
 ]
 
 
-def centre(k, side):
-    x, y, w, h, *_ = NODES[k]
-    return {"r": (x + w, y + h / 2), "l": (x, y + h / 2),
-            "t": (x + w / 2, y + h), "b": (x + w / 2, y)}[side]
-
-
 def main():
-    fig, ax = plt.subplots(figsize=(13.5, 6.8))
+    fig, ax = plt.subplots(figsize=(14.5, 7.6))
     fig.patch.set_facecolor(SURFACE)
-    ax.set_xlim(0, 1)
-    ax.set_ylim(0, 1)
+    ax.set_xlim(0, 2.0)
+    ax.set_ylim(-0.10, 1.06)
+    ax.set_aspect("equal")
     ax.axis("off")
 
-    for k, (x, y, w, h, kind, title, sub, cl) in NODES.items():
-        ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.008",
-                                    fc=FILL[kind], ec=EDGE[kind], lw=1.6, zorder=2))
-        ax.text(x + w / 2, y + h - 0.028, f"{title}  (${VAL[k]}B)", ha="center",
-                va="top", fontsize=9.8, weight="bold", color=INK, zorder=3)
-        ax.text(x + w / 2, y + h - 0.072, sub, ha="center", va="top",
-                fontsize=7.6, color=INK2, style="italic", zorder=3)
+    for k, (cx, cy, kind, title, cl) in NODES.items():
+        r = RAD[k]
+        ax.add_patch(Circle((cx, cy), r, fc=FILL[kind], ec=EDGE[kind],
+                            lw=1.8, zorder=2))
+        dense = len(cl) > 8
+        ax.text(cx, cy + r * (0.72 if dense else 0.66), title, ha="center",
+                va="center", fontsize=9.6, weight="bold", color=INK, zorder=3)
+        ax.text(cx, cy + r * (0.52 if dense else 0.44), f"${VAL[k]}B in 2024",
+                ha="center", va="center", fontsize=7.4, color=INK2, zorder=3)
         ncol = 3 if len(cl) > 8 else (2 if len(cl) >= 4 else 1)
         rows = -(-len(cl) // ncol)
-        spacing = max(0.024, min(0.032, (h - 0.125) / max(rows, 1)))
+        fs = 5.9 if len(cl) > 8 else 6.6
+        dy = 0.038 if len(cl) > 8 else 0.05
+        block_mid = cy - r * (0.20 if dense else 0.16)
         for i, c in enumerate(cl):
-            cx = x + w * (0.5 + (i // rows - (ncol - 1) / 2) * (0.32 if ncol == 3 else 0.42))
-            cy = y + h - 0.110 - (i % rows) * spacing
-            ax.text(cx, cy, c, ha="center", va="top", fontsize=6.4,
+            col, row = i // rows, i % rows
+            x = cx + (col - (ncol - 1) / 2) * (r * 0.56)
+            y = block_mid + (rows - 1) / 2 * dy - row * dy
+            ax.text(x, y, c, ha="center", va="center", fontsize=fs,
                     family="monospace", color=MUTED, zorder=3)
 
     for a, b, style, lab in ARROWS:
-        # pick sides: rightward flow generally; vertical inside columns
-        if a == "raw":
-            p1, p2 = centre("raw", "r"), centre("wafer", "l")
-        elif a == "optic":
-            p1, p2 = centre("optic", "r"), centre("equip", "l")
-        elif (a, b) == ("parts", "board"):
-            p1, p2 = centre("parts", "b"), centre("board", "t")
-        else:
-            p1, p2 = centre(a, "r"), centre(b, "l")
-        ax.add_patch(FancyArrowPatch(p1, p2, arrowstyle="-|>", mutation_scale=16,
-                                     lw=2.0 if style == "solid" else 1.8,
+        (x1, y1), (x2, y2) = NODES[a][:2], NODES[b][:2]
+        v = np.array([x2 - x1, y2 - y1])
+        u = v / np.linalg.norm(v)
+        p1 = (x1 + u[0] * (RAD[a] + 0.012), y1 + u[1] * (RAD[a] + 0.012))
+        p2 = (x2 - u[0] * (RAD[b] + 0.012), y2 - u[1] * (RAD[b] + 0.012))
+        ax.add_patch(FancyArrowPatch(p1, p2, arrowstyle="-|>", mutation_scale=17,
+                                     lw=2.1 if style == "solid" else 1.9,
                                      ls="-" if style == "solid" else (0, (5, 3)),
                                      color=INK2, zorder=1,
-                                     connectionstyle="arc3,rad=0.08"))
+                                     connectionstyle="arc3,rad=0.06"))
         if lab:
-            mx = (p1[0] + p2[0]) / 2 - (0.075 if a == "wafer" else 0.0)
-            my = (p1[1] + p2[1]) / 2 + (0.07 if a == "equip" else 0.045)
-            ax.text(mx, my, lab, ha="center", fontsize=7.2, color=MUTED, zorder=3)
+            n = np.array([-u[1], u[0]])       # normal: offset the label off the arrow
+            mx = (p1[0] + p2[0]) / 2 + n[0] * 0.075
+            my = (p1[1] + p2[1]) / 2 + n[1] * 0.075
+            ax.text(mx, my, lab, ha="center", va="center", fontsize=7.3,
+                    color=MUTED, zorder=3)
 
-    ax.text(0.518, 0.24, "memory (KOR) joins logic at advanced packaging,\n"
+    ax.text(1.0, 0.055, "memory (KOR) joins logic at advanced packaging,\n"
             "largely inside Taiwan — invisible to customs data",
-            ha="center", fontsize=7.2, color=MUTED)
-    ax.text(0.5, 0.985, "The AI-compute supply chain — stylized shape, with the HS6 codes in each node",
-            ha="center", va="top", fontsize=12.5, weight="bold", color=INK)
-    ax.text(0.5, 0.005,
-            "Two parallel input branches converge on fabrication; the output side is sequential. "
-            "Node heights scale with the log of 2024 world trade (illustrative -- so chips does not dwarf raw materials). "
-            "Solid arrows: inputs consumed per unit of output. Dashed: capacity investment. "
-            "Design/EDA/IP value enters as services, never as goods trade. Codes: OECD semiconductor "
-            "mapping + Fed AI-compute basket (docs/data.md §1).",
-            ha="center", va="bottom", fontsize=7.2, color=MUTED)
+            ha="center", fontsize=7.3, color=MUTED)
+    ax.text(1.0, 1.050, "The AI-compute supply chain — stylized shape, "
+            "with the HS6 codes in each node",
+            ha="center", va="top", fontsize=13, weight="bold", color=INK)
+    foot = ("Two parallel input branches converge on fabrication; the output side is "
+            "sequential. Circle areas follow the log of 2024 world trade (illustrative, "
+            "so chips does not dwarf raw materials). Solid arrows: inputs consumed per "
+            "unit of output. Dashed: capacity investment. Design/EDA/IP value enters as "
+            "services, never as goods trade. Codes: OECD semiconductor mapping + Fed "
+            "AI-compute basket (docs/data.md §1).")
+    ax.text(1.0, -0.040, "\n".join(textwrap.wrap(foot, 116)), ha="center",
+            va="top", fontsize=7.4, color=MUTED)
 
     out = cfg.ROOT / "exports" / "chain_topology.png"
     fig.savefig(out, dpi=180, bbox_inches="tight", facecolor=SURFACE)
