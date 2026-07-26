@@ -120,3 +120,22 @@ stage hub charts answer "who trades with whom".
    loop). All other cells are flat or drifting: in the demand-programs
    reading, those three cells are the AI build-out program's budget lines and
    the flat cells are what remains of the PC-era programs.
+
+10. **The drift/burst measure: threshold undefined on the chart, bursts
+    unexplained, but conceptually useful — constant loadings would imply no
+    breaks.**
+    What the measure is: for each month, the chordal distance between the
+    loading subspaces of two consecutive 12-month windows,
+    sqrt(K - ||R'_{t-1} R_t||_F^2) / sqrt(K), in [0,1] — zero when the hub
+    space is unchanged, one when it is orthogonal. The threshold (0.20) is a
+    fixed tuning constant, chosen by judgment, not derived from a null
+    distribution; a companion rule merges calm stretches shorter than 6
+    months. There is no significance test behind it. The conceptual point in
+    the flag is right: if loadings were constant, drift would sit at a
+    sampling-noise floor — and it does, at roughly 0.02-0.08 for the entire
+    2018-2023 stretch — so the sustained excursions after mid-2023 are direct
+    evidence against loading constancy, which is exactly why the estimation
+    is era-anchored rather than a single constant-loading model. What
+    explains any individual burst is answered (to the extent it is) by the
+    era summaries' crosswalk tables, which show which hubs reorganized at
+    that break; the drift series itself only says that the space moved.
