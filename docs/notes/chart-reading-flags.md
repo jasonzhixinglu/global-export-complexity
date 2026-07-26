@@ -166,3 +166,23 @@ stage hub charts answer "who trades with whom".
     codes); the monthly model is where hub interpretation carries weight.
     The documented route to separating varieties inside a code is national
     tariff-line data (the standing top open item in modeling-brainstorm V).
+
+12. **The concentration/fragmentation measures are unclear, and the series
+    named "fragmentation" contradicts the intuition that fragmentation has
+    generally increased.**
+    The intuition is confirmed by the data; the naming misleads. The series
+    labeled fragmentation in the charts is hub-overlap disjointness — a
+    property of the model's hub compositions, range-compressed by
+    construction under the anchored basis, and not a geopolitical quantity.
+    The series that matches the ordinary meaning of fragmentation is the
+    bloc channel shares: the cross-bloc CN-US share of trade falls ~70% over
+    2017-2026 in two legs (2019; 2023 onward) with no recovery between, while
+    the within-US-bloc share rises — fragmentation in the geopolitical sense
+    increased, monotonically. The underlying problem: the module carries
+    several measures with overlapping vocabulary (two fragmentations, four
+    concentration levels, an alignment covariance), defined precisely in
+    docs/concentration-fragmentation-nnf-mfm-trade.md but never restated
+    where the results are displayed.
+    AGREED FUTURE PASS: walk through each measure and each result
+    stage-by-stage to establish what each one reflects and which are worth
+    keeping — not yet scheduled.
