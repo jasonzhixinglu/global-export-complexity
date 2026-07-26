@@ -105,3 +105,18 @@ stage hub charts answer "who trades with whom".
    parts stability), then the per-code CHK runs, then the double-bloc run for
    policy dates. The chart pack's section 2 follows roughly this order but
    does not say so.
+
+9. **Loadings show sharp breaks but the charts don't say which events they
+   align with; some factor-intensity cells grew almost exponentially.**
+   Both observations are correct. (a) The figures shade era boundaries but do
+   not name events; the mapping lives only in the summaries and the narrative
+   (2023-08 = H100 volume shipments; 2024-10 = the quarter the HBM controls
+   were signaled, China-bloc hub dissolves, Singapore hub born; 2025-04 =
+   tariffs + H20 ban, visible in the double-bloc run). (b) Measured on the
+   CHK-basis aggregate run, three of sixteen intensity cells carry the boom
+   (2022 avg -> 2026 avg, $B/month units): TWN-hub -> USA-hub 0.04 -> 0.54
+   (the dominant AI channel), MEX-hub -> USA-hub 0.09 -> 0.42, and
+   USA-hub -> MEX-hub 0.03 -> 0.19 (the two legs of the US-Mexico assembly
+   loop). All other cells are flat or drifting: in the demand-programs
+   reading, those three cells are the AI build-out program's budget lines and
+   the flat cells are what remains of the PC-era programs.
