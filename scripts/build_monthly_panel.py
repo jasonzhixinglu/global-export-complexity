@@ -8,8 +8,9 @@ and filter codes/periods as needed.
 
 Sources and hierarchy (per user direction + Atlas methodology, docs/data.md):
   1. UN Comtrade monthly (validated national submissions) is the backbone.
-  2. TDM fills where Comtrade is silent: Taiwan (always), China 2025+, Vietnam 2024+
-     (edition VN2, preliminary), and recent-month top-ups (KR/SG/FR/TR/TH).
+  2. TDM fills where Comtrade is silent: Taiwan (always), China 2025+, Vietnam
+     beyond 2023-12 (edition VN2, confirmed back to 2017), plus legacy compute-
+     code top-up extracts (KR/SG/TH/TR) still in data/raw/tdm.
   3. Reconciliation follows the Growth Lab mirroring pipeline (Bustos, Yildirim et
      al., "Tackling Discrepancies in Trade Data", GL WP 251 / Scientific Data 2026),
      implemented faithfully at annual country-pair level and applied to code-months:
@@ -44,9 +45,10 @@ Sources and hierarchy (per user direction + Atlas methodology, docs/data.md):
      Remaining deviations from the published pipeline (documented, deliberate):
        - No ANS (Areas-Not-Specified) subtraction: our cells are bilateral and
          unknown-partner trade lands in ROW rather than double-counting a partner.
-       - No product-level rescale to reconciled country totals and no XXXX
-         residual code: both require all-product coverage per pair, while our
-         basket is 60 codes.
+       - No XXXX residual code (their bucket for large unexplained product-
+         level discrepancies): identifying it requires all-product coverage
+         per pair, while our basket is 60 codes. The pair-total rescale itself
+         IS implemented (Step 5 above).
        - No LT vintage harmonisation: codes are taken as reported. This is the
          one substantive difference and it is measured, not assumed -- see
          results/panel_monthly/atlas_discrepancy_audit.md.
@@ -54,14 +56,14 @@ Sources and hierarchy (per user direction + Atlas methodology, docs/data.md):
          construction and take the counterparty's report with an importer-average
          CIF ratio.
 
-Panel: top-30 countries + ROW, per HS6 code, monthly from 2020-01. The balanced
+Panel: top-30 countries + ROW, per HS6 code, monthly from 2017-01. The balanced
 endpoint is the last month at which every kept country has reported (or is covered by
 TDM) on at least one side; within the balanced window, absent corridors are true zeros.
 Cells between two non-reporting parties do not exist by construction (ROW-ROW is the
 one structural hole; it is set to 0 and flagged).
 
 Outputs:
-  data/derived/panel_ai_compute_monthly.parquet   (long; git-ignored)
+  data/derived/panel_semi_monthly.parquet         (long; git-ignored)
   results/panel_monthly/build_report.md           (committed summary + validation)
 Run after fetch_comtrade_monthly.py and fetch_tdm.py.
 """

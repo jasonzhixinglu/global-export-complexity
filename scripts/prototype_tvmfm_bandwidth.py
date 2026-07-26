@@ -12,7 +12,9 @@ project Y_{t+1} onto them; OOS R^2 = ||P_R Y_{t+1} P_C||^2 / ||Y_{t+1}||^2. Fres
 noisy vs stale-but-stable resolves here.
 Criterion 2 (stability): mean chordal distance between consecutive row loading spaces.
 
-Data: balanced monthly panel (build_monthly_panel.py), all three codes summed,
+Data: the LEGACY 3-code panel (2020+), on which this experiment was run and
+its recorded results depend; repoint PANEL to panel_semi_monthly to redo it
+on the audited 60-code panel. All three compute codes summed,
 $B levels (levels convention per results/mfm), 31x31 incl ROW. Rank fixed at k=r=4
 across schemes (paper's rank; comparability).
 

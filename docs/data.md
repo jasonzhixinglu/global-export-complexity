@@ -112,8 +112,8 @@ filed what; monthly bilateral detail; broad reporter set. Disadvantages: raw
 (poll before relying: THA was 10 months behind; VNM 2.5 years), recent years
 served only in as-reported revision (HS2022-ish). Key limits (free tier): 100k
 rows/call, 500 calls/day, keys in `.env` (`COMTRADE_API_KEY`, `_SECONDARY`).
-Monthly pull: `scripts/fetch_comtrade_monthly.py` (4-month batches, all
-reporters, 3 codes, both flows). Annual HS4 pull with PCI proxy:
+Monthly pull: `scripts/fetch_comtrade_monthly.py` (all 60 codes in seven
+density-sized batch groups, all reporters, both flows, quota-aware). Annual HS4 pull with PCI proxy:
 `scripts/fetch_comtrade.py` (direct vs mirror per `--mode auto`; mirror = Σ
 partners' imports, CIF deflated by 1.10). China files year Y each ~Apr–Jun of
 Y+1.

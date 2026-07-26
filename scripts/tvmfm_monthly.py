@@ -9,7 +9,8 @@ Spec (per bandwidth experiment, results/mfm/tv_bandwidth_ai_compute_monthly):
     varimax rotation estimated on the stacked aligned loadings and applied to all t
   - drift diagnostic: chordal distance between consecutive (pre-rotation) subspaces
 
-Outputs -> results/mfm/tv_ai_compute_monthly_12m/
+Outputs -> results/mfm/tvmfm/archive/ai_compute_chained/ (kept only to
+reproduce the archived pre-anchoring run; reads the legacy 3-code panel)
 Run after build_monthly_panel.py.
 """
 from __future__ import annotations

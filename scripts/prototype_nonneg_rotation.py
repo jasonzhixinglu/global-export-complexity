@@ -31,6 +31,8 @@ rng = np.random.default_rng(7)
 
 
 def estimate(codes):
+    # legacy 3-code panel: the recorded experiment (docs/notes/nonneg-rotation-
+    # experiment.md) was run on it; repoint to panel_semi_monthly to redo
     p = pd.read_parquet(cfg.DATA_DIR / "derived" / "panel_ai_compute_monthly.parquet")
     p = p[p.code.isin(codes) & (p.period.str[:4] == YEAR)]
     flows = {}

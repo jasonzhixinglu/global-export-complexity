@@ -1,7 +1,7 @@
 """Fetch monthly bilateral flows for the supply-chain HS6 codes from UN Comtrade.
 
 Backbone of the monthly panel (see docs/data.md for the TDM supplement): all
-reporters, all partners, monthly 2020-01 onward, both flows.
+reporters, all partners, monthly 2017-01 onward, both flows.
 
 Code groups (docs/data.md taxonomy; OECD lists in src/gec/classifications.py):
   compute        847150/847180/847330 (Fed AI-compute codes -- the original panel)
