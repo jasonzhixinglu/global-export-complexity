@@ -39,6 +39,26 @@ validation, and audit in section 3 below.
 (2024 values CHK basis — China+Hong Kong merged, intra-bloc excluded. The OECD
 "photosensitive" basket is deliberately excluded: solar-dominated, a fab output.)
 
+**How stages combine.** The OECD list defines *membership* — which codes belong
+to the chain. The stage numbering above is presentation order; stages combine
+by three different rules, each with a measured signature
+([notes/edge-type-tests.md](notes/edge-type-tests.md); firm-level edge
+inventory: [notes/firm-level-supply-chain-data.md](notes/firm-level-supply-chain-data.md)):
+
+- **consumables** (wafers, resists, chemicals → fabs): flow per unit of output;
+  contemporaneous with downstream exports (TWN wafer imports vs chip exports:
+  r = 0.52 at 0 months, gone by 12);
+- **capacity goods** (equipment → fabs): investment building a stock; lead
+  downstream exports by 6–12 months in fab countries (TWN peak at +12, KOR at
+  +6..12) and must not be treated as current intermediates in chain accounting;
+- **kits** (KOR memory + TWN logic converging at advanced packaging): a
+  composition fact — cross-destination proportionality 0.83, joint repricing —
+  not a monthly-timing fact.
+
+Two things the linear ordering cannot show: the packaging convergence node
+sits *inside* Taiwan (why stage charts appear to show Taiwan making chips from
+nothing), and design/EDA/IP value enters the chain with no goods flow at all.
+
 Key facts about the codes: HS6 codes are revision-stable for stages 6–8
 (8471.50/80, 8473.30 unchanged HS2012→HS2022) but semiconductor codes diverge
 between HS92 and HS2012+ (ICs are 8542.31/32/33/39 in HS2012 vs 8542.11/19 in

@@ -191,5 +191,8 @@ wrong, not the priors. Status added as of 2026-07:
    elasticities.
 7. **Layer 2 chain accounting** (mini-TiVA absorption): the Mexico-vs-Taiwan
    correction as estimates; monthly proportionality assumptions are the new
-   work.
+   work. Constraint from the edge-type tests (docs/notes/edge-type-tests.md):
+   equipment flows are investment, not intermediates — absorb consumables
+   contemporaneously, capitalize equipment (its 6–12 month lead in fab
+   countries also yields a capacity-stock proxy series).
 8. ToT indices per the research-proposal roadmap.
