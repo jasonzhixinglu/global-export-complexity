@@ -45,3 +45,20 @@ supporting the network-measures and structural-model sections of
 | grossman-helpman-lhuillier-2023-supply-chain-resilience… | diversification-vs-reshoring theory |
 | alfaro-chor-2023-great-reallocation… | the descriptive reallocation facts our panel sharpens |
 | gopinath-et-al-2024-changing-global-linkages… | bloc-based fragmentation measurement (our fragmentation baseline) |
+
+## The AI-boom-specific literatures (added 2026-07)
+
+Papers behind the proposal's "AI-boom-specific literatures" review (research-
+proposal.md, Related literature): descriptive staff work on the boom, firm-level
+export-control effects, and the two booms observed separately in firm data.
+
+| file | paper | why it's here |
+|---|---|---|
+| [crosignani-han-macchiavelli-silva-2025-cost-of-export-controls-nyfed-sr1096.pdf](crosignani-han-macchiavelli-silva-2025-cost-of-export-controls-nyfed-sr1096.pdf) | Crosignani, Han, Macchiavelli & Silva, "Securing Technological Leadership? The Cost of Export Controls on Firms" (NY Fed SR 1096; J. Financial Economics, forthcoming) | firm-level effects of the controls: US suppliers lose Chinese customers and fail to replace them; complements our flow-level 2022-10 break |
+| [beraja-yang-yuchtman-2020-data-intensive-innovation-state-nber-w27723.pdf](beraja-yang-yuchtman-2020-data-intensive-innovation-state-nber-w27723.pdf) | Beraja, Yang & Yuchtman, "Data-intensive Innovation and the State" (NBER w27723; QJE 2023) | China's AI boom as state procurement demand — the demand side of the state-led pattern |
+| [beraja-kao-yang-yuchtman-2021-ai-tocracy-nber-w29466.pdf](beraja-kao-yang-yuchtman-2021-ai-tocracy-nber-w29466.pdf) | Beraja, Kao, Yang & Yuchtman, "AI-tocracy" (NBER w29466; QJE 2023) | the political-economy loop between state demand and AI capability in China |
+| [beraja-peng-yang-yuchtman-2024-government-as-vc-in-ai-nber-w32701.pdf](beraja-peng-yang-yuchtman-2024-government-as-vc-in-ai-nber-w32701.pdf) | Beraja, Peng, Yang & Yuchtman, "Government as Venture Capitalists in AI" (NBER w32701) | China's AI boom as state equity — the financing side of the state-led pattern |
+| [bis-2026-annual-report-ch1-ai-and-the-macroeconomy.pdf](bis-2026-annual-report-ch1-ai-and-the-macroeconomy.pdf) | BIS Annual Report 2026, ch. 1 | the macro framing: AI capex ~0.4pp of US GDP growth; China's investment rotation into advanced manufacturing |
+| [bis-2026-bulletin120-financing-the-ai-boom.pdf](bis-2026-bulletin120-financing-the-ai-boom.pdf) | BIS Bulletin 120, "Financing the AI boom" | how the US buildout is financed (cash flow to debt) |
+| link only: [SSRN 3651052](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3651052) | Babina, Fedyk, He & Hodson, "Artificial Intelligence, Firm Growth, and Product Innovation" (J. Financial Economics 2024) | the US boom in firm data: AI investment drives growth that accrues to the largest firms (boom-driven concentration). SSRN blocks scripted download; fetch manually if the PDF is wanted in-repo |
+| link only: [IMF WP 2025/129](https://www.imf.org/en/Publications/WP/Issues/2025/06/27/Demystifying-Trade-Patterns-In-A-Fragmenting-World-567071) | "Demystifying Trade Patterns in a Fragmenting World" | reallocation vs transshipment through connector economies; the flow-level counterpart to our bloc-merged results. IMF site blocks scripted download |
