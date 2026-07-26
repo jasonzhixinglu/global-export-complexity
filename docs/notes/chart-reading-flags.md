@@ -5,18 +5,24 @@ Items marked "candidate fix" are presentation improvements not yet made.
 Started 2026-07-26; append as new flags come up.
 
 1. **Taiwan/Korea appear to import no inputs** (whole-chain overview).
-   Resolution: they do — the input stages are $13–38B against $823B of chips,
-   so inbound ribbons are hairlines on the dollar scale and sub-threshold
-   importers fold into Other; part of fab inputs is also domestic/on-site and
-   never crosses customs. The 30:1 output-to-traded-input ratio is the
-   value-creation fact, not a data hole. Readable views: normalized overview,
-   per-stage hub charts.
+   Resolution: they do — but on the dollar-mode overview the common scale is
+   set by the chips stage (~$926B), so the inbound ribbons are drawn at
+   sub-pixel height: Japan→Taiwan wafers 2024 = $1.6B (all wafer flows into
+   TWN ≈ $2.9B) → ≈0.2% of figure height. This is dollar-scale extinction,
+   NOT folding — Taiwan clears the fold rule ($10B absolute OR 10% of stage;
+   $2.9B vs the $25B wafer stage) and is a named importer node; the ribbon is
+   drawn to it, invisibly thin. Part of fab inputs is also domestic/on-site
+   and never crosses customs. The ~30:1 traded-output-to-traded-input ratio
+   is the value-creation fact. Readable views: normalized overview (equal
+   stage heights), per-stage hub charts.
 
 2. **What does folding do to small flows?**
    Resolution (semantics, not a bug): folding collapses sub-threshold
    *countries* into a column's Other node; flows keep their true endpoints and
-   Other totals are exact sums. Japan→Taiwan wafers plot as Japan→Taiwan,
-   thin; Japan→(small destinations) plot as Japan→Other.
+   Other totals are exact sums. Two distinct reasons a flow can be hard to
+   see: its country folded into Other (small share of the stage), or —
+   as in item 1 — it is drawn to a named node but at sub-pixel width on the
+   dollar scale.
 
 3. **Mexico shows no imports in the intra-assembly stage** (2024 overview).
    Resolution: its 2024 inbound (~$4.8B TWN boards, ~$12.8B USA parts, some
