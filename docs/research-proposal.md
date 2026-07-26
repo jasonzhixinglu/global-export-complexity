@@ -267,7 +267,7 @@ chain's *outputs* (import share of final compute 27% → 40%+), China buys the
 *means of production* (fab equipment import share 22% → 26% in 2024, wafer inputs
 18% → 24%, with control-deadline stockpiling spikes) while its final-compute share
 fell by a third (21% → 16%, still falling through 2026). China remains the
-world's assembly floor (~44% of chips imports, flat) — the visible strategy is
+largest chips importer (~44% of the stage, flat) — the visible strategy is
 substituting imported chips with domestically fabricated ones. **[measured]**
 Supplier diversification trends (is each pole concentrating or diversifying its
 sources?) remain to compute. **[open]**

@@ -72,15 +72,17 @@ stage hub charts answer "who trades with whom".
 
 7. **China appears to be the single largest node overall, most visibly at the
    chips stage.**
-   Resolution: faithful, and an electronics fact rather than an AI fact. China
-   is where the world's chips are assembled into devices: the China sphere
-   absorbs just over 40% of the chips stage (TWN chips $52B, KOR $45B,
-   CHN-to-HK conduit $72B in 2024), a share that has stayed roughly flat. What
-   it absorbs mostly leaves again inside finished electronics whose codes are
-   outside this chart, so China's inbound shows at full size while the
-   matching outbound is invisible — making it look even more like the
-   network's terminus than it is. In the AI-specific compute codes the picture
-   inverts: China's import share is ~5% by 2025 and the US is the pole. The
-   model agrees from the other side: upstream stages drain into China,
-   downstream stages into the US (the authority handoff in
-   notes/network-measures-first-pass.md).
+   Resolution: faithful, and an electronics fact rather than an AI fact —
+   with China in two roles at once, both large. It is the biggest chips
+   importer (the China sphere absorbs just over 40% of the stage: TWN chips
+   $52B, KOR $45B, CHN-to-HK conduit $72B in 2024, roughly flat as a share),
+   and it is also a major chips producer and exporter (17% of stage exports,
+   and a leading exporter in several discrete/power codes), with measured
+   equipment imports showing capacity still being built. Much of what it
+   imports leaves again inside finished electronics whose codes are outside
+   this chart, so inbound shows at full size while that outbound is invisible.
+   What the data cannot tell us: the share of its chip imports or exports by
+   where the die was fabricated — so how much of each role is device assembly
+   vs domestic fabrication is not measurable here. In the AI-specific compute
+   codes the picture inverts: China's import share is ~5% by 2025 and the US
+   is the pole.
