@@ -395,6 +395,44 @@ reshoring; Elliott–Golub–Leduc on network fragility. (vi) *Matrix factor
 econometrics*: the Chen et al. lineage our estimation builds on, which uses trade
 data as an illustration rather than a subject.
 
+**The AI-boom-specific literatures (reviewed 2026-07).** Work speaking directly
+to our questions falls into three groups, none of which occupies the comparison
+we make.
+(a) *Descriptive staff work on the boom itself*: the Fed's FEDS notes on the
+[trade effects of the AI buildout](https://www.federalreserve.gov/econres/notes/feds-notes/)
+(2026-02; the source of our basket) and on
+[the buildout in domestic data](https://www.federalreserve.gov/econres/notes/feds-notes/the-ai-buildout-and-the-economy-publicly-available-data-to-assess-ais-impact-20260717.html)
+(2026-07); the [BIS Annual Report 2026 ch. 1](https://www.bis.org/publ/arpdf/ar2026e1.htm)
+(AI capex ~0.4pp of US GDP growth; China's investment rotating into advanced
+manufacturing) and [BIS Bulletin 120](https://www.bis.org/publ/bisbull120.pdf) on
+its financing. Aggregate or corridor description; no structure estimated.
+(b) *Effects of the export controls, firm-level*:
+[Crosignani–Han–Macchiavelli–Silva](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4799563)
+(J. Financial Economics, forthcoming) — controlled US suppliers lose Chinese
+customers and fail to replace them (~$130B market-cap loss); CEPR work on
+[ripples through Japanese suppliers](https://cepr.org/voxeu/columns/ripple-beyond-borders-indirect-effects-us-export-controls-japanese-firms);
+the NY Fed's [anatomy of export controls](https://libertystreeteconomics.newyorkfed.org/2024/04/the-anatomy-of-export-controls/).
+Complements our flow-level finding that the first controls broke cross-bloc
+structure at exactly 2022-10.
+(c) *The two booms observed separately in firm data* — and this is where the
+asymmetry we measure already has one-sided academic support. For China, the
+Beraja–Yang–Yuchtman line: *Data-intensive Innovation and the State* (QJE 2023,
+state procurement demand driving AI innovation), *AI-tocracy* (QJE 2023), and
+[*Government as Venture Capitalists in AI*](https://www.nber.org/system/files/working_papers/w32701/w32701.pdf)
+(NBER 32701, state equity leading private money), plus a second-tier empirical
+literature on the guidance funds and the Big Fund. For the US,
+Babina–Fedyk–He–Hodson (J. Financial Economics 2024): AI investment measured
+from hiring data, producing growth through product innovation that accrues to
+the largest firms — boom-driven concentration in accounting data, mirroring
+what we find in flows.
+The gap all three groups leave: no work observes both booms in a single
+consistently measured system. The China literature uses Chinese administrative
+data, the US literature US firm data, the BIS juxtaposes aggregates. Trade
+flows are one of the few windows both booms pass through — the US boom as
+demand for finished computation provisioned internationally, China's as upstream
+capacity accumulation turned inward — and that single-frame comparison is the
+seat this project occupies.
+
 **What is securely new but not conceptual: the instrument.** A balanced,
 reconciled, monthly bilateral panel of the AI-compute chain, current to ~3 months,
 with a stable-labeled dynamic factor structure on top. Nothing comparable is
