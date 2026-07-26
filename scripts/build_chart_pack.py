@@ -8,6 +8,10 @@ measured statements only), and the figure. Sections:
 
 Every figure is produced by the scripts noted on its page; rerun those first if
 data changed. Output: exports/chart_pack.pdf (committed).
+
+`python scripts/build_chart_pack.py mobile` writes chart_pack_mobile.pdf
+instead: phone-width portrait pages (one chart per page, page height sized to
+the chart, larger type) for reading on a phone without pinching.
 """
 from __future__ import annotations
 import sys
@@ -145,6 +149,11 @@ SECTIONS = [
 ]
 
 
+def _wrap(text, width):
+    import textwrap
+    return "\n".join(textwrap.wrap(text, width)) if text else ""
+
+
 def page(pdf, img_path, title, caption, section):
     fig = plt.figure(figsize=(11.69, 8.27))
     fig.text(0.06, 0.955, title, fontsize=15, weight="bold", va="top")
@@ -169,35 +178,84 @@ def divider(pdf, title, blurb):
     plt.close(fig)
 
 
-def main():
+W = 6.0  # phone page width, inches
+
+
+def page_mobile(pdf, img_path, title, caption, section):
+    t = _wrap(title, 44)
+    c = _wrap(caption, 62)
+    img = mpimg.imread(img_path)
+    img_h = W * img.shape[0] / img.shape[1]
+    head = 0.52 + 0.24 * t.count("\n") + (0.16 * (c.count("\n") + 1) + 0.12 if c else 0.06)
+    fig = plt.figure(figsize=(W, head + img_h + 0.15))
+    H = fig.get_figheight()
+    fig.text(0.04, 1 - 0.10 / H, section, fontsize=7.5, color="#888", va="top")
+    fig.text(0.04, 1 - 0.24 / H, t, fontsize=13, weight="bold", va="top")
+    if c:
+        fig.text(0.04, 1 - (0.46 + 0.24 * t.count("\n")) / H, c, fontsize=9.5,
+                 va="top", color="#333")
+    ax = fig.add_axes([0.0, 0.10 / H, 1.0, img_h / H])
+    ax.imshow(img)
+    ax.axis("off")
+    pdf.savefig(fig)
+    plt.close(fig)
+
+
+def divider_mobile(pdf, title, blurb):
+    b = _wrap(blurb, 58)
+    fig = plt.figure(figsize=(W, 3.2))
+    fig.text(0.5, 0.72, title, fontsize=18, weight="bold", ha="center")
+    fig.text(0.5, 0.58, b, fontsize=9.5, ha="center", va="top", color="#333")
+    pdf.savefig(fig)
+    plt.close(fig)
+
+
+def main(mobile=False):
     missing = [str(p) for _, _, items in SECTIONS for p, _, _ in items
                if not p.exists()]
     if missing:
         sys.exit("missing figures (regenerate first):\n" + "\n".join(missing))
-    with PdfPages(OUT) as pdf:
-        fig = plt.figure(figsize=(11.69, 8.27))
-        fig.text(0.5, 0.62, "AI-compute supply chain: chart pack",
-                 fontsize=28, weight="bold", ha="center")
-        fig.text(0.5, 0.52,
-                 "Current state of the analysis. Data: UN Comtrade + TDM monthly "
-                 "panel (60 HS6 codes, 2017-01..2026-04, audited vs Atlas) and "
-                 "Atlas HS2012 annual.\nSections: 1 the chain as flows (2024) -- "
-                 "2 the time-varying factor model -- 3 concentration & "
-                 "fragmentation.\nDetails: docs/data.md, "
-                 "docs/supply-chain-narrative.md, results/.",
-                 fontsize=11, ha="center", color="#333")
-        import datetime
-        fig.text(0.5, 0.40, datetime.date.today().isoformat(),
-                 fontsize=10, ha="center", color="#888")
-        pdf.savefig(fig)
-        plt.close(fig)
-        for title, blurb, items in SECTIONS:
-            divider(pdf, title, blurb)
-            for p, t, c in items:
-                page(pdf, p, t, c, title)
+    import datetime
+    out = EX / ("chart_pack_mobile.pdf" if mobile else "chart_pack.pdf")
+    intro = ("Current state of the analysis. Data: UN Comtrade + TDM monthly "
+             "panel (60 HS6 codes, 2017-01..2026-04, audited vs Atlas) and "
+             "Atlas HS2012 annual. Sections: 1 the chain as flows (2024) -- "
+             "2 the time-varying factor model -- 3 concentration & "
+             "fragmentation. Details: docs/data.md, "
+             "docs/supply-chain-narrative.md, results/.")
+    with PdfPages(out) as pdf:
+        if mobile:
+            fig = plt.figure(figsize=(W, 4.6))
+            fig.text(0.5, 0.80, _wrap("AI-compute supply chain: chart pack", 26),
+                     fontsize=20, weight="bold", ha="center", va="top")
+            fig.text(0.5, 0.55, _wrap(intro, 58), fontsize=9.5, ha="center",
+                     va="top", color="#333")
+            fig.text(0.5, 0.08, datetime.date.today().isoformat(),
+                     fontsize=9, ha="center", color="#888")
+            pdf.savefig(fig)
+            plt.close(fig)
+            for title, blurb, items in SECTIONS:
+                divider_mobile(pdf, title, blurb)
+                for p, t, c in items:
+                    page_mobile(pdf, p, t, c, title)
+        else:
+            fig = plt.figure(figsize=(11.69, 8.27))
+            fig.text(0.5, 0.62, "AI-compute supply chain: chart pack",
+                     fontsize=28, weight="bold", ha="center")
+            fig.text(0.5, 0.52, intro.replace(" Sections:", "\nSections:")
+                     .replace(" Details:", "\nDetails:"),
+                     fontsize=11, ha="center", color="#333")
+            fig.text(0.5, 0.40, datetime.date.today().isoformat(),
+                     fontsize=10, ha="center", color="#888")
+            pdf.savefig(fig)
+            plt.close(fig)
+            for title, blurb, items in SECTIONS:
+                divider(pdf, title, blurb)
+                for p, t, c in items:
+                    page(pdf, p, t, c, title)
     n = 1 + sum(1 + len(items) for _, _, items in SECTIONS)
-    print(f"{OUT} written: {n} pages")
+    print(f"{out} written: {n} pages")
 
 
 if __name__ == "__main__":
-    main()
+    main(mobile="mobile" in sys.argv[1:])
