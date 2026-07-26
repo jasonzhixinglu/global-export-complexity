@@ -18,7 +18,9 @@ matching accumulates ambiguity through high-drift bursts):
      each export hub is labeled by its dominant destination import hub in the era-
      average F, plus its top member for display.
 
-Outputs -> results/mfm/tv_ai_compute_monthly_12m_anchored/
+Outputs -> results/mfm/tvmfm/<group>/<code>/ per the ANALYSES dict below
+(groups: by_country, chn_hkg_bloc, chnhkg_usamex_blocs); each run writes
+stats.json, summary.md, and four figures. See results/mfm/README.md.
 """
 from __future__ import annotations
 import json
