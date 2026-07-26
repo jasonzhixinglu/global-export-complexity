@@ -105,6 +105,13 @@ stage hub charts answer "who trades with whom".
    parts stability), then the per-code CHK runs, then the double-bloc run for
    policy dates. The chart pack's section 2 follows roughly this order but
    does not say so.
+   Addendum (pack pages ~15-22): the section also switches organizing
+   principle midway without announcing it — pages 15-18 are ONE run shown in
+   full (AI compute, CHK basis: drift, export loadings, import loadings,
+   factors), pages 19-20 are single contrast figures from OTHER runs
+   (country-level aggregate; parts), pages 21-22 are the double-bloc policy
+   run. Captions identify each run but nothing signals the change from
+   "one run, all figures" to "one figure, several runs".
 
 9. **Loadings show sharp breaks but the charts don't say which events they
    align with; some factor-intensity cells grew almost exponentially.**
