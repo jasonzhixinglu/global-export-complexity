@@ -24,9 +24,9 @@ further out, the more dual-use dilution — the reason for tiering (below).
 | 3 litho & optics inputs | 9001xx/9002xx, 901210/90, 903141 | $38B | **yes** (2017-01+) |
 | 4 fab equipment | 8486xx, metrology 903082/84/9033, fab plant | $244B | **yes** (2017-01+) |
 | 5 chips | 8542xx (854231 processors, 854232 memories incl HBM, 854239 other ICs), 8541xx discretes, 8523 media | $823B | **yes** (2017-01+) |
-| 6 parts & GPU modules | **847330** (also: consumer GPU cards) | $132B | **yes** (2017-01+) |
-| 7 baseboards / units | **847180** (HGX trays; purest AI code) | $73B | **yes** (2017-01+) |
-| 8 AI servers | **847150** (DGX, assembled systems) | $117B | **yes** (2017-01+) |
+| 6 parts & GPU modules | **847330** (also: consumer GPU cards) | $146B | **yes** (2017-01+) |
+| 7 baseboards / units | **847180** (HGX trays; purest AI code) | $101B | **yes** (2017-01+) |
+| 8 AI servers | **847150** (DGX, assembled systems) | $127B | **yes** (2017-01+) |
 
 Monthly raw pulls cover **all 60 codes across all 8 stages, 2017-01 →
 2026-06** (Comtrade batch caches in `data/raw/comtrade_monthly/`, committed:
@@ -40,7 +40,10 @@ validation, and audit in section 3 below.
 "photosensitive" basket is deliberately excluded: solar-dominated, a fab output.)
 
 **How stages combine.** The OECD list defines *membership* — which codes belong
-to the chain. The stage numbering above is presentation order; stages combine
+to the chain. The stage numbering above is presentation order; the shape is
+simpler: two parallel input branches (materials; tools) converge on chip
+fabrication, and the output side runs sequentially to servers — drawn with the
+codes and 2024 sizes per node in the stylized map below. Stages combine
 by three different rules, each with a measured signature
 ([notes/edge-type-tests.md](notes/edge-type-tests.md); firm-level edge
 inventory: [notes/firm-level-supply-chain-data.md](notes/firm-level-supply-chain-data.md)):
@@ -58,6 +61,12 @@ inventory: [notes/firm-level-supply-chain-data.md](notes/firm-level-supply-chain
 Two things the linear ordering cannot show: the packaging convergence node
 sits *inside* Taiwan (why stage charts appear to show Taiwan making chips from
 nothing), and design/EDA/IP value enters the chain with no goods flow at all.
+
+![stylized chain topology](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/main/exports/chain_topology.png)
+
+(Regenerate: `python scripts/draw_chain_topology.py`. Node heights scale with
+the log of 2024 world trade — illustrative, so chips does not dwarf raw
+materials; stage-table values above are the same numbers unlogged.)
 
 Key facts about the codes: HS6 codes are revision-stable for stages 6–8
 (8471.50/80, 8473.30 unchanged HS2012→HS2022) but semiconductor codes diverge
