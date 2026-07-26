@@ -7,13 +7,14 @@ Started 2026-07-26; append as new flags come up.
    Resolution: they do — but on the dollar-mode overview the common scale is
    set by the chips stage (~$926B), so the inbound ribbons are drawn at
    sub-pixel height: Japan→Taiwan wafers 2024 = $1.6B (all wafer flows into
-   TWN ≈ $2.9B) → ≈0.2% of figure height. This is dollar-scale extinction,
-   NOT folding — Taiwan clears the fold rule ($10B absolute OR 10% of stage;
+   TWN ≈ $2.9B) → ≈0.2% of figure height. The flow is too small to see at that scale,
+   not folded — Taiwan clears the fold rule ($10B absolute OR 10% of stage;
    $2.9B vs the $25B wafer stage) and is a named importer node; the ribbon is
-   drawn to it, invisibly thin. Part of fab inputs is also domestic/on-site
-   and never crosses customs. The ~30:1 traded-output-to-traded-input ratio
-   is the value-creation fact. Readable views: normalized overview (equal
-   stage heights), per-stage hub charts.
+   drawn to it, invisibly thin. Part of fab inputs is also produced in the
+   fab country itself and never crosses customs. Traded inputs are ~1/30 of
+   traded chip output because most of a chip's value is added inside the fab.
+   Readable views: normalized overview (equal stage heights), per-stage hub
+   charts.
 
 2. **What does folding do to small flows?**
    Resolution (semantics, not a bug): folding collapses sub-threshold
@@ -51,6 +52,7 @@ stage hub charts answer "who trades with whom".
    non-semiconductor and disperses across many mid-sized industrial importers,
    each below the fold threshold. The exception: 280461 (silicon >= 99.99%) has
    a purity threshold in its definition and flows concentrate toward fab
-   countries. This is the dual-use dilution gradient documented in data.md
-   section 1: the further from the GPU, the more the code sweeps in unrelated
-   trade.
+   countries. In short: the inputs at the top of the chain are not only used
+   for chip making, and the trade data cannot tell the chip-bound share apart.
+   The closer a code is to the GPU, the more of its trade is genuinely about
+   chips (see data.md section 1).
