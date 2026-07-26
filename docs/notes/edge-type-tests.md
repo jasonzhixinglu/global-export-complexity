@@ -29,9 +29,14 @@ keeps rising).
 
 CHN equipment imports vs CHN chip exports: 0.28 / 0.35 / 0.10 / 0.01 / −0.06 at
 k = 0/6/12/18/24 — nearly the same profile as its wafer imports (0.19 / 0.29 /
-0.11). China's chip exports are dominated by assembly/test output and
-re-export, not leading-edge fab output, so the country aggregate does not
-isolate the fab investment cycle.
+0.11). That is the measured fact; why is not established. One interpretation
+consistent with the flow patterns (large inbound chip flows from TWN/KOR
+alongside outbound ICs, equipment imports rising while the chip-import share
+falls) is that China's chip exports and its new fab capacity concern different
+chips — packaging/test throughput vs domestically absorbed output — but
+customs data cannot separate a foreign-fabbed die packaged in China from a
+Chinese-fabbed one within the same code, and we have not measured that
+decomposition. Treat the China null result as unexplained.
 
 ## Result 3: no lead found in the within-stage tier (Zeiss→ASML)
 
