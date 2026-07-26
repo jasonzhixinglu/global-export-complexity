@@ -139,3 +139,23 @@ stage hub charts answer "who trades with whom".
     explains any individual burst is answered (to the extent it is) by the
     era summaries' crosswalk tables, which show which hubs reorganized at
     that break; the drift series itself only says that the space moved.
+
+11. **The per-stage hub charts are hard to interpret — many kinds of trade
+    seem merged into one estimation.**
+    Correct on both counts. Two layers of merging are at work. First, each
+    stage chart is estimated on a multi-code basket (up to 16 HS6 codes for
+    chips), and within even a single HS6 code very different products and
+    purposes travel together — the documented within-code spread of exporter
+    unit values is 10-100x, and upstream codes carry large non-semiconductor
+    trade (item 5). The hubs of a stage chart therefore group countries that
+    co-trade for possibly unrelated reasons: AI hardware, commodity
+    electronics, and non-chip industrial demand can all sit inside one hub.
+    Second, these charts decompose a single year's flow matrix (2024, k=4) —
+    they find the dominant blocks of that one cross-section. That is a weaker
+    identification than the monthly TV-MFM, where hubs are pinned down by
+    co-movement over 100+ months and can be read as spending programs. The
+    stage hub charts are best read as "who trades with whom, compressed",
+    crisp only where one purpose dominates the basket (wafers, the compute
+    codes); the monthly model is where hub interpretation carries weight.
+    The documented route to separating varieties inside a code is national
+    tariff-line data (the standing top open item in modeling-brainstorm V).
