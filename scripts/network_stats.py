@@ -180,6 +180,7 @@ def figs(df, label, out):
                  "(3m MA; dotted = 2023-07, 2025-04)", color=INK)
     fig.tight_layout()
     fig.savefig(out / "decomposition.png", dpi=150, bbox_inches="tight")
+    fig.savefig(out / "decomposition.pdf", bbox_inches="tight")
     plt.close(fig)
 
     # 2. fragmentation: agnostic (hub overlap) vs bloc (channel shares)
@@ -200,6 +201,7 @@ def figs(df, label, out):
     fig.suptitle(f"{title} — two notions of fragmentation (3m MA)", color=INK)
     fig.tight_layout()
     fig.savefig(out / "fragmentation.png", dpi=150, bbox_inches="tight")
+    fig.savefig(out / "fragmentation.pdf", bbox_inches="tight")
     plt.close(fig)
 
     # 3. per-hub linkage concentration + basis diagnostic
@@ -221,6 +223,7 @@ def figs(df, label, out):
     fig.suptitle(f"{title} — linkage structure and basis diagnostics", color=INK)
     fig.tight_layout()
     fig.savefig(out / "linkage.png", dpi=150, bbox_inches="tight")
+    fig.savefig(out / "linkage.pdf", bbox_inches="tight")
     plt.close(fig)
 
 

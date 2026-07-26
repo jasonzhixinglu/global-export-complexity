@@ -12,8 +12,13 @@ data changed. Output: exports/chart_pack.pdf (committed).
 `python scripts/build_chart_pack.py mobile` writes chart_pack_mobile.pdf
 instead: phone-width portrait pages (one chart per page, page height sized to
 the chart, larger type) for reading on a phone without pinching.
+
+Charts are embedded as VECTOR pages when a .pdf sibling of the .png exists
+(the generator scripts save both since 2026-07) -- text and lines stay sharp
+at any zoom; the .png is the fallback.
 """
 from __future__ import annotations
+from io import BytesIO
 import sys
 from pathlib import Path
 
@@ -149,65 +154,105 @@ SECTIONS = [
 ]
 
 
+from pypdf import PdfReader, PdfWriter, Transformation, PageObject
+
+PT = 72.0
+W = 6.0  # phone page width, inches
+
+
 def _wrap(text, width):
     import textwrap
     return "\n".join(textwrap.wrap(text, width)) if text else ""
 
 
-def page(pdf, img_path, title, caption, section):
-    fig = plt.figure(figsize=(11.69, 8.27))
-    fig.text(0.06, 0.955, title, fontsize=15, weight="bold", va="top")
-    fig.text(0.94, 0.955, section, fontsize=8, color="#888", va="top", ha="right")
-    if caption:
-        fig.text(0.06, 0.915, caption, fontsize=9, va="top", wrap=True,
-                 color="#333", family="sans-serif")
+def _mpl_page(w_in, h_in, draw):
+    """Render a matplotlib figure to a single vector PDF page object."""
+    fig = plt.figure(figsize=(w_in, h_in))
+    draw(fig)
+    buf = BytesIO()
+    fig.savefig(buf, format="pdf")
+    plt.close(fig)
+    return PdfReader(buf).pages[0]
+
+
+def _chart_src(img_path):
+    """The chart as a PDF page: vector sibling if present, else the PNG wrapped."""
+    vec = Path(img_path).with_suffix(".pdf")
+    if vec.exists():
+        return PdfReader(str(vec)).pages[0]
     img = mpimg.imread(img_path)
-    top = 0.83 if caption else 0.90
-    ax = fig.add_axes([0.03, 0.02, 0.94, top - 0.02])
-    ax.imshow(img)
-    ax.axis("off")
-    pdf.savefig(fig)
-    plt.close(fig)
+    w_in, h_in = 10.0, 10.0 * img.shape[0] / img.shape[1]
+
+    def draw(fig):
+        ax = fig.add_axes([0, 0, 1, 1])
+        ax.imshow(img)
+        ax.axis("off")
+    return _mpl_page(w_in, h_in, draw)
 
 
-def divider(pdf, title, blurb):
-    fig = plt.figure(figsize=(11.69, 8.27))
-    fig.text(0.5, 0.58, title, fontsize=26, weight="bold", ha="center")
-    fig.text(0.5, 0.48, blurb, fontsize=11, ha="center", wrap=True, color="#333")
-    pdf.savefig(fig)
-    plt.close(fig)
+def _compose(writer, header, chart, page_w, page_h, chart_box):
+    """Blank page + header at top + chart scaled into chart_box (x, y, w, h)."""
+    target = PageObject.create_blank_page(None, page_w, page_h)
+    hh = float(header.mediabox.height)
+    target.merge_transformed_page(header, Transformation().translate(0, page_h - hh))
+    sw, sh = float(chart.mediabox.width), float(chart.mediabox.height)
+    x, y, bw, bh = chart_box
+    s = min(bw / sw, bh / sh)
+    tx = x + (bw - s * sw) / 2
+    ty = y + (bh - s * sh) / 2
+    target.merge_transformed_page(chart, Transformation().scale(s).translate(tx, ty))
+    writer.add_page(target)
 
 
-W = 6.0  # phone page width, inches
+def page(writer, img_path, title, caption, section):
+    pw, ph = 11.69 * PT, 8.27 * PT
+    head_in = 1.15 if caption else 0.65
+
+    def draw(fig):
+        fig.text(0.06, 0.90, title, fontsize=15, weight="bold", va="top")
+        fig.text(0.94, 0.90, section, fontsize=8, color="#888", va="top", ha="right")
+        if caption:
+            fig.text(0.06, 0.55, _wrap(caption, 150), fontsize=9, va="top", color="#333")
+    header = _mpl_page(11.69, head_in, draw)
+    chart = _chart_src(img_path)
+    _compose(writer, header, chart, pw, ph,
+             (14, 14, pw - 28, ph - head_in * PT - 24))
 
 
-def page_mobile(pdf, img_path, title, caption, section):
+def divider(writer, title, blurb):
+    def draw(fig):
+        fig.text(0.5, 0.58, title, fontsize=26, weight="bold", ha="center")
+        fig.text(0.5, 0.48, blurb, fontsize=11, ha="center", wrap=True, color="#333")
+    writer.add_page(_mpl_page(11.69, 8.27, draw))
+
+
+def page_mobile(writer, img_path, title, caption, section):
     t = _wrap(title, 44)
     c = _wrap(caption, 62)
-    img = mpimg.imread(img_path)
-    img_h = W * img.shape[0] / img.shape[1]
-    head = 0.52 + 0.24 * t.count("\n") + (0.16 * (c.count("\n") + 1) + 0.12 if c else 0.06)
-    fig = plt.figure(figsize=(W, head + img_h + 0.15))
-    H = fig.get_figheight()
-    fig.text(0.04, 1 - 0.10 / H, section, fontsize=7.5, color="#888", va="top")
-    fig.text(0.04, 1 - 0.24 / H, t, fontsize=13, weight="bold", va="top")
-    if c:
-        fig.text(0.04, 1 - (0.46 + 0.24 * t.count("\n")) / H, c, fontsize=9.5,
-                 va="top", color="#333")
-    ax = fig.add_axes([0.0, 0.10 / H, 1.0, img_h / H])
-    ax.imshow(img)
-    ax.axis("off")
-    pdf.savefig(fig)
-    plt.close(fig)
+    head_in = (0.52 + 0.24 * t.count("\n")
+               + (0.16 * (c.count("\n") + 1) + 0.12 if c else 0.06))
+
+    def draw(fig):
+        fig.text(0.04, 0.96, section, fontsize=7.5, color="#888", va="top")
+        fig.text(0.04, 0.96 - 0.14 / head_in, t, fontsize=13, weight="bold", va="top")
+        if c:
+            fig.text(0.04, 0.96 - (0.36 + 0.24 * t.count("\n")) / head_in, c,
+                     fontsize=9.5, va="top", color="#333")
+    header = _mpl_page(W, head_in, draw)
+    chart = _chart_src(img_path)
+    sw, sh = float(chart.mediabox.width), float(chart.mediabox.height)
+    img_h = W * PT * sh / sw
+    ph = head_in * PT + img_h + 0.15 * PT
+    _compose(writer, header, chart, W * PT, ph, (0, 0.08 * PT, W * PT, img_h))
 
 
-def divider_mobile(pdf, title, blurb):
+def divider_mobile(writer, title, blurb):
     b = _wrap(blurb, 58)
-    fig = plt.figure(figsize=(W, 3.2))
-    fig.text(0.5, 0.72, title, fontsize=18, weight="bold", ha="center")
-    fig.text(0.5, 0.58, b, fontsize=9.5, ha="center", va="top", color="#333")
-    pdf.savefig(fig)
-    plt.close(fig)
+
+    def draw(fig):
+        fig.text(0.5, 0.72, title, fontsize=18, weight="bold", ha="center")
+        fig.text(0.5, 0.58, b, fontsize=9.5, ha="center", va="top", color="#333")
+    writer.add_page(_mpl_page(W, 3.2, draw))
 
 
 def main(mobile=False):
@@ -223,23 +268,22 @@ def main(mobile=False):
              "2 the time-varying factor model -- 3 concentration & "
              "fragmentation. Details: docs/data.md, "
              "docs/supply-chain-narrative.md, results/.")
-    with PdfPages(out) as pdf:
-        if mobile:
-            fig = plt.figure(figsize=(W, 4.6))
+    writer = PdfWriter()
+    if mobile:
+        def draw_title(fig):
             fig.text(0.5, 0.80, _wrap("AI-compute supply chain: chart pack", 26),
                      fontsize=20, weight="bold", ha="center", va="top")
             fig.text(0.5, 0.55, _wrap(intro, 58), fontsize=9.5, ha="center",
                      va="top", color="#333")
             fig.text(0.5, 0.08, datetime.date.today().isoformat(),
                      fontsize=9, ha="center", color="#888")
-            pdf.savefig(fig)
-            plt.close(fig)
-            for title, blurb, items in SECTIONS:
-                divider_mobile(pdf, title, blurb)
-                for p, t, c in items:
-                    page_mobile(pdf, p, t, c, title)
-        else:
-            fig = plt.figure(figsize=(11.69, 8.27))
+        writer.add_page(_mpl_page(W, 4.6, draw_title))
+        for title, blurb, items in SECTIONS:
+            divider_mobile(writer, title, blurb)
+            for p, t, c in items:
+                page_mobile(writer, p, t, c, title)
+    else:
+        def draw_title(fig):
             fig.text(0.5, 0.62, "AI-compute supply chain: chart pack",
                      fontsize=28, weight="bold", ha="center")
             fig.text(0.5, 0.52, intro.replace(" Sections:", "\nSections:")
@@ -247,14 +291,18 @@ def main(mobile=False):
                      fontsize=11, ha="center", color="#333")
             fig.text(0.5, 0.40, datetime.date.today().isoformat(),
                      fontsize=10, ha="center", color="#888")
-            pdf.savefig(fig)
-            plt.close(fig)
-            for title, blurb, items in SECTIONS:
-                divider(pdf, title, blurb)
-                for p, t, c in items:
-                    page(pdf, p, t, c, title)
+        writer.add_page(_mpl_page(11.69, 8.27, draw_title))
+        for title, blurb, items in SECTIONS:
+            divider(writer, title, blurb)
+            for p, t, c in items:
+                page(writer, p, t, c, title)
+    with open(out, "wb") as f:
+        writer.write(f)
     n = 1 + sum(1 + len(items) for _, _, items in SECTIONS)
-    print(f"{out} written: {n} pages")
+    vec = sum(1 for _, _, items in SECTIONS for p, _, _ in items
+              if Path(p).with_suffix(".pdf").exists())
+    tot = sum(len(items) for _, _, items in SECTIONS)
+    print(f"{out} written: {n} pages ({vec}/{tot} charts vector)")
 
 
 if __name__ == "__main__":

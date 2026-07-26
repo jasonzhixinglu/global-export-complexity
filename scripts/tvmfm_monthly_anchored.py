@@ -333,6 +333,7 @@ def fig_paths(Ls, countries, labels, eras, side):
                  "(12m window; shaded bands = eras)", color=INK)
     fig.tight_layout()
     fig.savefig(OUT_DIR / f"loadings_{side}.png", dpi=150, bbox_inches="tight")
+    fig.savefig(OUT_DIR / f"loadings_{side}.pdf", bbox_inches="tight")
     plt.close(fig)
 
 
@@ -353,6 +354,7 @@ def fig_factors(F, F_ma, labels, eras):
     fig.suptitle(f"{TITLE} — hub-to-hub F_t, era-anchored (3m MA thick)", color=INK)
     fig.tight_layout()
     fig.savefig(OUT_DIR / "factors.png", dpi=150, bbox_inches="tight")
+    fig.savefig(OUT_DIR / "factors.pdf", bbox_inches="tight")
     plt.close(fig)
 
 
@@ -368,6 +370,7 @@ def fig_drift(drift, labels, eras):
     ax.set_ylabel("subspace change")
     fig.tight_layout()
     fig.savefig(OUT_DIR / "drift.png", dpi=150, bbox_inches="tight")
+    fig.savefig(OUT_DIR / "drift.pdf", bbox_inches="tight")
     plt.close(fig)
 
 

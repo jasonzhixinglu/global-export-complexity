@@ -418,6 +418,7 @@ def draw_hub_chart(fname, title, codes_txt, code_or_baskets, kind, year=YEAR):
     (OUT_DIR / sub).mkdir(parents=True, exist_ok=True)
     out = OUT_DIR / sub / f"supply_chain_{fname}_hubs_{year}.png"
     fig.savefig(out, dpi=150, bbox_inches="tight", facecolor=SURFACE)
+    fig.savefig(out.with_suffix(".pdf"), bbox_inches="tight", facecolor=SURFACE)
     plt.close(fig)
     print(f"-> {out}")
 
@@ -652,6 +653,7 @@ def draw_chain_overview(input_stages, seq_stages, MODE="dollar", fold_min=10.0, 
     (OUT_DIR / "overviews").mkdir(exist_ok=True)
     out = OUT_DIR / "overviews" / f"supply_chain_overview_{MODE}{suffix}_{YEAR}.png"
     fig.savefig(out, dpi=150, bbox_inches="tight", facecolor=SURFACE)
+    fig.savefig(out.with_suffix(".pdf"), bbox_inches="tight", facecolor=SURFACE)
     plt.close(fig)
     print(f"-> {out}")
 
@@ -729,6 +731,7 @@ def draw_network(stage_groups):
     (OUT_DIR / "network").mkdir(exist_ok=True)
     out = OUT_DIR / "network" / f"supply_chain_network_{YEAR}.png"
     fig.savefig(out, dpi=150, bbox_inches="tight", facecolor=SURFACE)
+    fig.savefig(out.with_suffix(".pdf"), bbox_inches="tight", facecolor=SURFACE)
     plt.close(fig)
     print(f"-> {out}")
 
