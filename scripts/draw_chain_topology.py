@@ -27,9 +27,10 @@ from gec import config as cfg
 from gec.classifications import SEMICONDUCTOR_OECD as O
 
 SURFACE, INK, INK2, MUTED = "#fcfcfb", "#0b0b0b", "#52514e", "#898781"
-# the three Fed AI-compute codes (the monthly-panel focus) are highlighted blue
-FILL = {"input": "#f1f1ee", "fab": "#e8f5ee", "down": "#dce8fb"}
-EDGE = {"input": "#8f8d85", "fab": "#008300", "down": "#2a78d6"}
+# color coding: materials branch pink, equipment branch orange, fabrication
+# green, the three Fed AI-compute codes (the monthly-panel focus) blue
+FILL = {"mat": "#fbe9f0", "tool": "#fdf1e7", "fab": "#e8f5ee", "down": "#dce8fb"}
+EDGE = {"mat": "#e87ba4", "tool": "#eb6834", "fab": "#008300", "down": "#2a78d6"}
 
 # 2024 world trade per node ($B, CHK basis; stages 1-5 Atlas, 6-8 audited panel)
 VAL = {"raw": 13, "wafer": 25, "optic": 38, "equip": 244, "fab": 823,
@@ -40,10 +41,10 @@ RAD = {k: 0.165 * np.sqrt(_l[k] / max(_l.values())) for k in _l}
 
 NODES = {
     # key: (cx, cy, kind, title, code list)
-    "raw":   (0.150, 0.780, "input", "Raw materials", sorted(O["Raw materials"])),
-    "wafer": (0.600, 0.780, "input", "Wafers & inputs", sorted(O["Wafer inputs"])),
-    "optic": (0.150, 0.235, "input", "Litho & optics", sorted(O["Foundry inputs"])),
-    "equip": (0.615, 0.235, "input", "Fab equipment", sorted(O["Manufacturing equipment"])),
+    "raw":   (0.150, 0.780, "mat", "Raw materials", sorted(O["Raw materials"])),
+    "wafer": (0.600, 0.780, "mat", "Wafers & inputs", sorted(O["Wafer inputs"])),
+    "optic": (0.150, 0.235, "tool", "Litho & optics", sorted(O["Foundry inputs"])),
+    "equip": (0.615, 0.235, "tool", "Fab equipment", sorted(O["Manufacturing equipment"])),
     "fab":   (1.070, 0.500, "fab", "CHIP FABRICATION", sorted(O["Chips"])),
     "parts": (1.510, 0.760, "down", "Parts & GPU modules", ["847330"]),
     "board": (1.510, 0.255, "down", "Baseboards", ["847180"]),
@@ -125,8 +126,10 @@ def main():
             ha="center", va="top", fontsize=16, weight="bold", color=INK)
     foot = ("Two parallel input branches converge on fabrication; the output side is "
             "sequential. Circle areas follow the log of 2024 world trade (illustrative, "
-            "so chips does not dwarf raw materials). Solid arrows: inputs consumed per "
-            "unit of output. Dashed: capacity investment. Design/EDA/IP value enters as "
+            "so chips does not dwarf raw materials). The materials branch (pink) is "
+            "consumed per unit of output; the equipment branch (orange) is capacity "
+            "investment (solid vs dashed arrows mark the same distinction). "
+            "Design/EDA/IP value enters as "
             "services, never as goods trade. The three AI-compute codes of the Fed basket -- the "
             "monthly panel's focus -- are highlighted blue. Some small niche inputs sit outside the 60 codes "
             "(laser sources, vacuum pumps and valves, ABF substrates -- see "
