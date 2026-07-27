@@ -42,7 +42,7 @@ so the hub decomposition is an identified object, not a rotation convention;
 varimax and unrotated spectral variants live in exports/ for comparison. Hub
 decompositions fit at R^2 0.95-0.99, so these carry the flows faithfully.
 
-![stylized chain topology](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/main/exports/chain_topology.png)
+![stylized chain topology](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/main/exports/chain_topology.png?v=b67a82a)
 ![network](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/main/exports/network/supply_chain_network_2024.png)
 ![overview dollar coarse](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/main/exports/overviews/supply_chain_overview_dollar_coarse_2024.png)
 ![overview dollar](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/main/exports/overviews/supply_chain_overview_dollar_2024.png)
