@@ -34,10 +34,8 @@ EDGE = {"input": "#2a78d6", "fab": "#008300", "down": "#eb6834"}
 VAL = {"raw": 13, "wafer": 25, "optic": 38, "equip": 244, "fab": 823,
        "parts": 146, "board": 101, "srv": 127}
 _l = {k: np.log10(v) for k, v in VAL.items()}
-RAD = {k: 0.095 + 0.115 * _l[k] / max(_l.values()) for k in _l}
-# dense nodes need room for their code block regardless of dollar size
-for _k, _n in {"raw": 15, "optic": 8, "equip": 14}.items():
-    RAD[_k] = max(RAD[_k], 0.150 if _n > 10 else 0.138)
+# circle AREA proportional to log10(2024 value): r = rmax * sqrt(l / lmax)
+RAD = {k: 0.210 * np.sqrt(_l[k] / max(_l.values())) for k in _l}
 
 NODES = {
     # key: (cx, cy, kind, title, code list)
@@ -76,16 +74,17 @@ def main():
         r = RAD[k]
         ax.add_patch(Circle((cx, cy), r, fc=FILL[kind], ec=EDGE[kind],
                             lw=1.8, zorder=2))
-        dense = len(cl) > 8
+        dense = len(cl) >= 8
         ax.text(cx, cy + r * (0.72 if dense else 0.66), title, ha="center",
                 va="center", fontsize=11.5, weight="bold", color=INK, zorder=3)
         ax.text(cx, cy + r * (0.52 if dense else 0.44), f"${VAL[k]}B in 2024",
                 ha="center", va="center", fontsize=9.0, color=INK2, zorder=3)
         ncol = 3 if len(cl) > 8 else (2 if len(cl) >= 4 else 1)
         rows = -(-len(cl) // ncol)
-        fs = 7.0 if len(cl) > 8 else 7.8
-        dy = 0.038 if len(cl) > 8 else 0.05
-        block_mid = cy - r * (0.20 if dense else 0.16)
+        # code text scales with the circle so the block always fits inside
+        fs = 45 * r if dense else min(7.8, 52 * r)
+        dy = (0.24 if dense else 0.33) * r
+        block_mid = cy - r * (0.24 if dense else 0.16)
         for i, c in enumerate(cl):
             col, row = i // rows, i % rows
             x = cx + (col - (ncol - 1) / 2) * (r * 0.56)
