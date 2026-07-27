@@ -121,19 +121,17 @@ def main():
     ax.text(1.04, 1.050, "The AI-compute supply chain — stylized shape, "
             "with the HS6 codes in each node",
             ha="center", va="top", fontsize=16, weight="bold", color=INK)
-    foot = ("The chain has two input branches and one output line. Materials (pink) -- "
-            "silicon, chemicals, wafers -- are used up with every chip made, so those flows "
-            "move together with chip output (solid arrows). Equipment (orange) -- lithography "
-            "and other fab tools -- is investment in future capacity: in Taiwan and Korea, "
-            "equipment imports rise six to twelve months before chip exports do (dashed arrow). "
-            "Korean memory chips meet the processors at the packaging step, mostly inside "
-            "Taiwan, so that step never appears in trade data; chip design earns money as a "
-            "service and crosses no border at all. Circle diameters grow with the log of 2024 "
-            "world trade, keeping big and small stages comparable. Blue marks the three codes "
-            "of our monthly panel (the Fed's AI-compute basket). A few niche inputs -- lasers, "
-            "vacuum pumps and valves, chip substrates -- fall outside the 60 codes. Code "
-            "lists: OECD semiconductor mapping plus the Fed basket (docs/data.md, section 1).")
-    ax.text(1.04, -0.135, "\n".join(textwrap.wrap(foot, 116)), ha="center",
+    foot = ("Two input branches, one output line. Materials (pink) -- silicon, chemicals, "
+            "wafers -- are used up with every chip made (solid arrows). Equipment (orange) -- "
+            "lithography and other fab tools -- is investment in capacity: in Taiwan and Korea, "
+            "equipment imports rise six to twelve months before chip exports (dashed arrow). "
+            "Korean memory meets the processors at packaging, mostly inside Taiwan -- a step "
+            "trade data never sees; chip design earns as a service and crosses no border. "
+            "Circle diameters grow with the log of 2024 world trade. Blue marks the three "
+            "codes of our monthly panel (the Fed AI-compute basket). A few niche inputs "
+            "(lasers, vacuum pumps and valves, chip substrates) fall outside the 60 codes. "
+            "Codes: OECD semiconductor mapping + Fed basket (docs/data.md, section 1).")
+    ax.text(1.04, -0.135, "\n".join(textwrap.wrap(foot, 172)), ha="center",
             va="top", fontsize=8.8, color=MUTED)
 
     out = cfg.ROOT / "exports" / "chain_topology.png"
