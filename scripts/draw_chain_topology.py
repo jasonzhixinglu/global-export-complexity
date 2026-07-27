@@ -43,19 +43,19 @@ NODES = {
     # key: (cx, cy, kind, title, code list)
     "raw":   (0.150, 0.780, "mat", "Raw materials", sorted(O["Raw materials"])),
     "wafer": (0.600, 0.780, "mat", "Wafers & inputs", sorted(O["Wafer inputs"])),
-    "optic": (0.150, 0.235, "tool", "Litho & optics", sorted(O["Foundry inputs"])),
-    "equip": (0.615, 0.235, "tool", "Fab equipment", sorted(O["Manufacturing equipment"])),
+    "optic": (0.150, 0.290, "tool", "Litho & optics", sorted(O["Foundry inputs"])),
+    "equip": (0.615, 0.290, "tool", "Fab equipment", sorted(O["Manufacturing equipment"])),
     "fab":   (1.070, 0.500, "fab", "CHIP FABRICATION", sorted(O["Chips"])),
     "parts": (1.510, 0.760, "down", "Parts & GPU modules", ["847330"]),
-    "board": (1.510, 0.255, "down", "Baseboards", ["847180"]),
+    "board": (1.510, 0.280, "down", "Baseboards", ["847180"]),
     "srv":   (1.930, 0.500, "down", "AI servers", ["847150"]),
 }
 
 ARROWS = [  # (from, to, style, label[, label xy])
     ("raw", "wafer", "solid", ""),
-    ("wafer", "fab", "solid", "consumed per unit\nof output", (0.735, 0.630)),
+    ("wafer", "fab", "solid", "consumed per unit\nof output", (0.805, 0.545)),
     ("optic", "equip", "solid", ""),
-    ("equip", "fab", "dashed", "capacity investment;\nleads output 6-12m", (0.845, 0.245)),
+    ("equip", "fab", "dashed", "capacity investment;\nleads output 6-12m", (0.770, 0.195)),
     ("fab", "parts", "solid", ""),
     ("fab", "board", "solid", ""),
     ("parts", "board", "solid", ""),
@@ -68,7 +68,7 @@ def main():
     fig, ax = plt.subplots(figsize=(17.0, 9.0))
     fig.patch.set_facecolor(SURFACE)
     ax.set_xlim(-0.02, 2.16)
-    ax.set_ylim(-0.10, 1.06)
+    ax.set_ylim(-0.22, 1.10)
     ax.set_aspect("equal")
     ax.axis("off")
 
@@ -76,22 +76,22 @@ def main():
         r = RAD[k]
         ax.add_patch(Circle((cx, cy), r, fc=FILL[kind], ec=EDGE[kind],
                             lw=1.8, zorder=2))
-        # title and value sit ABOVE the circle; the code block is centered on
-        # the circle and may overflow it (readable fixed-size text; the circle
-        # is purely the size glyph)
-        ax.text(cx, cy + r + 0.055, title, ha="center", va="center",
-                fontsize=11.5, weight="bold", color=INK, zorder=3)
-        ax.text(cx, cy + r + 0.018, f"${VAL[k]}B in 2024", ha="center",
-                va="center", fontsize=9.0, color=INK2, zorder=3)
+        # name and value sit in the CENTER of the circle (may overflow small
+        # circles); the HS6 codes list sits just BELOW the circle
+        ax.text(cx, cy + 0.020, title, ha="center", va="center",
+                fontsize=10.5, weight="bold", color=INK, zorder=3)
+        ax.text(cx, cy - 0.024, f"${VAL[k]}B in 2024", ha="center",
+                va="center", fontsize=8.6, color=INK2, zorder=3)
         ncol = 3 if len(cl) > 8 else (2 if len(cl) >= 4 else 1)
         rows = -(-len(cl) // ncol)
-        fs = 7.2 if len(cl) >= 8 else 7.8
-        dy = 0.037 if len(cl) >= 8 else 0.05
-        xsp = 0.085 if ncol == 3 else 0.10
+        fs = 7.0 if len(cl) >= 8 else 7.6
+        dy = 0.031 if len(cl) >= 8 else 0.040
+        xsp = 0.082 if ncol == 3 else 0.095
+        top = cy - r - 0.038
         for i, c in enumerate(cl):
-            col, row = i // rows, i % rows
+            row, col = i // ncol, i % ncol      # fill row-wise below the circle
             x = cx + (col - (ncol - 1) / 2) * xsp
-            y = cy + (rows - 1) / 2 * dy - row * dy
+            y = top - row * dy
             ax.text(x, y, c, ha="center", va="center", fontsize=fs,
                     family="monospace", color=MUTED, zorder=3)
 
@@ -118,7 +118,7 @@ def main():
             ax.text(mx, my, lab, ha="center", va="center", fontsize=8.6,
                     color=MUTED, zorder=3)
 
-    ax.text(1.045, 0.055, "memory (KOR) joins logic at advanced packaging,\n"
+    ax.text(1.045, 0.045, "memory (KOR) joins logic at advanced packaging,\n"
             "largely inside Taiwan — invisible to customs data",
             ha="center", fontsize=8.6, color=MUTED)
     ax.text(1.04, 1.050, "The AI-compute supply chain — stylized shape, "
@@ -135,7 +135,7 @@ def main():
             "(laser sources, vacuum pumps and valves, ABF substrates -- see "
             "notes/firm-level-supply-chain-data.md). Codes: OECD semiconductor mapping + Fed "
             "AI-compute basket (docs/data.md §1).")
-    ax.text(1.04, -0.040, "\n".join(textwrap.wrap(foot, 116)), ha="center",
+    ax.text(1.04, -0.135, "\n".join(textwrap.wrap(foot, 116)), ha="center",
             va="top", fontsize=8.8, color=MUTED)
 
     out = cfg.ROOT / "exports" / "chain_topology.png"
