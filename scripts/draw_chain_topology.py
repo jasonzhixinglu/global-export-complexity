@@ -53,9 +53,9 @@ NODES = {
 
 ARROWS = [  # (from, to, style, label[, label xy])
     ("raw", "wafer", "solid", ""),
-    ("wafer", "fab", "solid", "consumed per unit\nof output", (0.805, 0.545)),
+    ("wafer", "fab", "solid", ""),
     ("optic", "equip", "solid", ""),
-    ("equip", "fab", "dashed", "capacity investment;\nleads output 6-12m", (0.770, 0.195)),
+    ("equip", "fab", "dashed", ""),
     ("fab", "parts", "solid", ""),
     ("fab", "board", "solid", ""),
     ("parts", "board", "solid", ""),
@@ -118,23 +118,21 @@ def main():
             ax.text(mx, my, lab, ha="center", va="center", fontsize=8.6,
                     color=MUTED, zorder=3)
 
-    ax.text(1.045, 0.045, "memory (KOR) joins logic at advanced packaging,\n"
-            "largely inside Taiwan — invisible to customs data",
-            ha="center", fontsize=8.6, color=MUTED)
     ax.text(1.04, 1.050, "The AI-compute supply chain — stylized shape, "
             "with the HS6 codes in each node",
             ha="center", va="top", fontsize=16, weight="bold", color=INK)
-    foot = ("Two parallel input branches converge on fabrication; the output side is "
-            "sequential. Circle diameters follow the log of 2024 world trade (illustrative, "
-            "so chips does not dwarf raw materials). The materials branch (pink) is "
-            "consumed per unit of output; the equipment branch (orange) is capacity "
-            "investment (solid vs dashed arrows mark the same distinction). "
-            "Design/EDA/IP value enters as "
-            "services, never as goods trade. The three AI-compute codes of the Fed basket -- the "
-            "monthly panel's focus -- are highlighted blue. Some small niche inputs sit outside the 60 codes "
-            "(laser sources, vacuum pumps and valves, ABF substrates -- see "
-            "notes/firm-level-supply-chain-data.md). Codes: OECD semiconductor mapping + Fed "
-            "AI-compute basket (docs/data.md §1).")
+    foot = ("The chain has two input branches and one output line. Materials (pink) -- "
+            "silicon, chemicals, wafers -- are used up with every chip made, so those flows "
+            "move together with chip output (solid arrows). Equipment (orange) -- lithography "
+            "and other fab tools -- is investment in future capacity: in Taiwan and Korea, "
+            "equipment imports rise six to twelve months before chip exports do (dashed arrow). "
+            "Korean memory chips meet the processors at the packaging step, mostly inside "
+            "Taiwan, so that step never appears in trade data; chip design earns money as a "
+            "service and crosses no border at all. Circle diameters grow with the log of 2024 "
+            "world trade, keeping big and small stages comparable. Blue marks the three codes "
+            "of our monthly panel (the Fed's AI-compute basket). A few niche inputs -- lasers, "
+            "vacuum pumps and valves, chip substrates -- fall outside the 60 codes. Code "
+            "lists: OECD semiconductor mapping plus the Fed basket (docs/data.md, section 1).")
     ax.text(1.04, -0.135, "\n".join(textwrap.wrap(foot, 116)), ha="center",
             va="top", fontsize=8.8, color=MUTED)
 
