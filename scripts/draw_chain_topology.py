@@ -27,15 +27,16 @@ from gec import config as cfg
 from gec.classifications import SEMICONDUCTOR_OECD as O
 
 SURFACE, INK, INK2, MUTED = "#fcfcfb", "#0b0b0b", "#52514e", "#898781"
-FILL = {"input": "#eef3fb", "fab": "#e8f5ee", "down": "#fdf1e7"}
-EDGE = {"input": "#2a78d6", "fab": "#008300", "down": "#eb6834"}
+# the three Fed AI-compute codes (the monthly-panel focus) are highlighted blue
+FILL = {"input": "#f1f1ee", "fab": "#e8f5ee", "down": "#dce8fb"}
+EDGE = {"input": "#8f8d85", "fab": "#008300", "down": "#2a78d6"}
 
 # 2024 world trade per node ($B, CHK basis; stages 1-5 Atlas, 6-8 audited panel)
 VAL = {"raw": 13, "wafer": 25, "optic": 38, "equip": 244, "fab": 823,
        "parts": 146, "board": 101, "srv": 127}
 _l = {k: np.log10(v) for k, v in VAL.items()}
 # circle AREA proportional to log10(2024 value): r = rmax * sqrt(l / lmax)
-RAD = {k: 0.210 * np.sqrt(_l[k] / max(_l.values())) for k in _l}
+RAD = {k: 0.165 * np.sqrt(_l[k] / max(_l.values())) for k in _l}
 
 NODES = {
     # key: (cx, cy, kind, title, code list)
@@ -49,11 +50,11 @@ NODES = {
     "srv":   (1.930, 0.500, "down", "AI servers", ["847150"]),
 }
 
-ARROWS = [  # (from, to, style, label)
+ARROWS = [  # (from, to, style, label[, label xy])
     ("raw", "wafer", "solid", ""),
-    ("wafer", "fab", "solid", "consumed per unit\nof output"),
+    ("wafer", "fab", "solid", "consumed per unit\nof output", (0.735, 0.630)),
     ("optic", "equip", "solid", ""),
-    ("equip", "fab", "dashed", "capacity investment;\nleads output 6-12m"),
+    ("equip", "fab", "dashed", "capacity investment;\nleads output 6-12m", (0.845, 0.245)),
     ("fab", "parts", "solid", ""),
     ("fab", "board", "solid", ""),
     ("parts", "board", "solid", ""),
@@ -74,26 +75,29 @@ def main():
         r = RAD[k]
         ax.add_patch(Circle((cx, cy), r, fc=FILL[kind], ec=EDGE[kind],
                             lw=1.8, zorder=2))
-        dense = len(cl) >= 8
-        ax.text(cx, cy + r * (0.72 if dense else 0.66), title, ha="center",
-                va="center", fontsize=11.5, weight="bold", color=INK, zorder=3)
-        ax.text(cx, cy + r * (0.52 if dense else 0.44), f"${VAL[k]}B in 2024",
-                ha="center", va="center", fontsize=9.0, color=INK2, zorder=3)
+        # title and value sit ABOVE the circle; the code block is centered on
+        # the circle and may overflow it (readable fixed-size text; the circle
+        # is purely the size glyph)
+        ax.text(cx, cy + r + 0.055, title, ha="center", va="center",
+                fontsize=11.5, weight="bold", color=INK, zorder=3)
+        ax.text(cx, cy + r + 0.018, f"${VAL[k]}B in 2024", ha="center",
+                va="center", fontsize=9.0, color=INK2, zorder=3)
         ncol = 3 if len(cl) > 8 else (2 if len(cl) >= 4 else 1)
         rows = -(-len(cl) // ncol)
-        # code text scales with the circle so the block always fits inside
-        fs = 45 * r if dense else min(7.8, 52 * r)
-        dy = (0.24 if dense else 0.33) * r
-        block_mid = cy - r * (0.24 if dense else 0.16)
+        fs = 7.2 if len(cl) >= 8 else 7.8
+        dy = 0.037 if len(cl) >= 8 else 0.05
+        xsp = 0.085 if ncol == 3 else 0.10
         for i, c in enumerate(cl):
             col, row = i // rows, i % rows
-            x = cx + (col - (ncol - 1) / 2) * (r * 0.56)
-            y = block_mid + (rows - 1) / 2 * dy - row * dy
+            x = cx + (col - (ncol - 1) / 2) * xsp
+            y = cy + (rows - 1) / 2 * dy - row * dy
             ax.text(x, y, c, ha="center", va="center", fontsize=fs,
                     family="monospace", color=MUTED, zorder=3)
 
-    for a, b, style, lab in ARROWS:
+    for a, b, style, lab, *labxy in ARROWS:
         (x1, y1), (x2, y2) = NODES[a][:2], NODES[b][:2]
+        if (a, b) == ("parts", "board"):
+            x1 -= 0.10; x2 -= 0.10   # keep the vertical arrow clear of the labels
         v = np.array([x2 - x1, y2 - y1])
         u = v / np.linalg.norm(v)
         p1 = (x1 + u[0] * (RAD[a] + 0.012), y1 + u[1] * (RAD[a] + 0.012))
@@ -104,9 +108,12 @@ def main():
                                      color=INK2, zorder=1,
                                      connectionstyle="arc3,rad=0.06"))
         if lab:
-            n = np.array([-u[1], u[0]])       # normal: offset the label off the arrow
-            mx = (p1[0] + p2[0]) / 2 + n[0] * 0.075
-            my = (p1[1] + p2[1]) / 2 + n[1] * 0.075
+            if labxy:
+                mx, my = labxy[0]
+            else:
+                n = np.array([-u[1], u[0]])
+                mx = (p1[0] + p2[0]) / 2 + n[0] * 0.075
+                my = (p1[1] + p2[1]) / 2 + n[1] * 0.075
             ax.text(mx, my, lab, ha="center", va="center", fontsize=8.6,
                     color=MUTED, zorder=3)
 
@@ -120,7 +127,8 @@ def main():
             "sequential. Circle areas follow the log of 2024 world trade (illustrative, "
             "so chips does not dwarf raw materials). Solid arrows: inputs consumed per "
             "unit of output. Dashed: capacity investment. Design/EDA/IP value enters as "
-            "services, never as goods trade. Some small niche inputs sit outside the 60 codes "
+            "services, never as goods trade. The three AI-compute codes of the Fed basket -- the "
+            "monthly panel's focus -- are highlighted blue. Some small niche inputs sit outside the 60 codes "
             "(laser sources, vacuum pumps and valves, ABF substrates -- see "
             "notes/firm-level-supply-chain-data.md). Codes: OECD semiconductor mapping + Fed "
             "AI-compute basket (docs/data.md §1).")
