@@ -62,7 +62,7 @@ Two things the linear ordering cannot show: the packaging convergence node
 sits *inside* Taiwan (why stage charts appear to show Taiwan making chips from
 nothing), and design/EDA/IP value enters the chain with no goods flow at all.
 
-![stylized chain topology](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/d14f84a6e88b9a5d894ceaf8992c395a4a12c61a/exports/chain_topology.png)
+![stylized chain topology](https://raw.githubusercontent.com/jasonzhixinglu/global-export-complexity/f4d4bf444e5162a437fca3add1ee5d1ed1ee2d97/exports/chain_topology.png)
 
 (Regenerate: `python scripts/draw_chain_topology.py`. Node heights scale with
 the log of 2024 world trade — illustrative, so chips does not dwarf raw
