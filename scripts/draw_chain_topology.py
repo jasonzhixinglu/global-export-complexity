@@ -57,6 +57,7 @@ ARROWS = [  # (from, to, style, label)
     ("optic", "equip", "solid", ""),
     ("equip", "fab", "dashed", "capacity investment;\nleads output 6-12m"),
     ("fab", "parts", "solid", ""),
+    ("fab", "board", "solid", ""),
     ("parts", "board", "solid", ""),
     ("parts", "srv", "solid", ""),
     ("board", "srv", "solid", ""),
