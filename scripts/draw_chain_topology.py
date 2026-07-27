@@ -4,7 +4,7 @@ The simplified narrative shape (docs/data.md §1 "How stages combine"):
 two parallel input branches — materials (raw -> wafers/chemicals) and tools
 (optics -> equipment) — converge on chip fabrication; chips then run
 sequentially through parts/GPU modules, baseboards, and AI servers.
-Circle areas follow the log of 2024 world trade (illustrative). Edge styles
+Circle diameters follow the log of 2024 world trade (illustrative). Edge styles
 carry the combination rule: solid = consumed per unit of output, dashed =
 capacity investment (leads output 6-12 months in fab countries).
 
@@ -36,8 +36,8 @@ EDGE = {"mat": "#e87ba4", "tool": "#eb6834", "fab": "#008300", "down": "#2a78d6"
 VAL = {"raw": 13, "wafer": 25, "optic": 38, "equip": 244, "fab": 823,
        "parts": 146, "board": 101, "srv": 127}
 _l = {k: np.log10(v) for k, v in VAL.items()}
-# circle AREA proportional to log10(2024 value): r = rmax * sqrt(l / lmax)
-RAD = {k: 0.165 * np.sqrt(_l[k] / max(_l.values())) for k in _l}
+# circle DIAMETER proportional to log10(2024 value): r = rmax * l / lmax
+RAD = {k: 0.190 * _l[k] / max(_l.values()) for k in _l}
 
 NODES = {
     # key: (cx, cy, kind, title, code list)
@@ -125,7 +125,7 @@ def main():
             "with the HS6 codes in each node",
             ha="center", va="top", fontsize=16, weight="bold", color=INK)
     foot = ("Two parallel input branches converge on fabrication; the output side is "
-            "sequential. Circle areas follow the log of 2024 world trade (illustrative, "
+            "sequential. Circle diameters follow the log of 2024 world trade (illustrative, "
             "so chips does not dwarf raw materials). The materials branch (pink) is "
             "consumed per unit of output; the equipment branch (orange) is capacity "
             "investment (solid vs dashed arrows mark the same distinction). "
