@@ -41,14 +41,14 @@ for _k, _n in {"raw": 15, "optic": 8, "equip": 14}.items():
 
 NODES = {
     # key: (cx, cy, kind, title, code list)
-    "raw":   (0.175, 0.780, "input", "Raw materials", sorted(O["Raw materials"])),
-    "wafer": (0.530, 0.780, "input", "Wafers & inputs", sorted(O["Wafer inputs"])),
-    "optic": (0.175, 0.235, "input", "Litho & optics", sorted(O["Foundry inputs"])),
-    "equip": (0.530, 0.235, "input", "Fab equipment", sorted(O["Manufacturing equipment"])),
-    "fab":   (1.000, 0.500, "fab", "CHIP FABRICATION", sorted(O["Chips"])),
-    "parts": (1.430, 0.760, "down", "Parts & GPU modules", ["847330"]),
-    "board": (1.430, 0.255, "down", "Baseboards", ["847180"]),
-    "srv":   (1.830, 0.500, "down", "AI servers", ["847150"]),
+    "raw":   (0.150, 0.780, "input", "Raw materials", sorted(O["Raw materials"])),
+    "wafer": (0.575, 0.780, "input", "Wafers & inputs", sorted(O["Wafer inputs"])),
+    "optic": (0.150, 0.235, "input", "Litho & optics", sorted(O["Foundry inputs"])),
+    "equip": (0.590, 0.235, "input", "Fab equipment", sorted(O["Manufacturing equipment"])),
+    "fab":   (1.045, 0.500, "fab", "CHIP FABRICATION", sorted(O["Chips"])),
+    "parts": (1.475, 0.760, "down", "Parts & GPU modules", ["847330"]),
+    "board": (1.475, 0.255, "down", "Baseboards", ["847180"]),
+    "srv":   (1.885, 0.500, "down", "AI servers", ["847150"]),
 }
 
 ARROWS = [  # (from, to, style, label)
@@ -67,7 +67,7 @@ ARROWS = [  # (from, to, style, label)
 def main():
     fig, ax = plt.subplots(figsize=(14.5, 7.6))
     fig.patch.set_facecolor(SURFACE)
-    ax.set_xlim(0, 2.0)
+    ax.set_xlim(0, 2.08)
     ax.set_ylim(-0.10, 1.06)
     ax.set_aspect("equal")
     ax.axis("off")
@@ -111,10 +111,10 @@ def main():
             ax.text(mx, my, lab, ha="center", va="center", fontsize=7.3,
                     color=MUTED, zorder=3)
 
-    ax.text(1.0, 0.055, "memory (KOR) joins logic at advanced packaging,\n"
+    ax.text(1.045, 0.055, "memory (KOR) joins logic at advanced packaging,\n"
             "largely inside Taiwan — invisible to customs data",
             ha="center", fontsize=7.3, color=MUTED)
-    ax.text(1.0, 1.050, "The AI-compute supply chain — stylized shape, "
+    ax.text(1.04, 1.050, "The AI-compute supply chain — stylized shape, "
             "with the HS6 codes in each node",
             ha="center", va="top", fontsize=13, weight="bold", color=INK)
     foot = ("Two parallel input branches converge on fabrication; the output side is "
@@ -123,7 +123,7 @@ def main():
             "unit of output. Dashed: capacity investment. Design/EDA/IP value enters as "
             "services, never as goods trade. Codes: OECD semiconductor mapping + Fed "
             "AI-compute basket (docs/data.md §1).")
-    ax.text(1.0, -0.040, "\n".join(textwrap.wrap(foot, 116)), ha="center",
+    ax.text(1.04, -0.040, "\n".join(textwrap.wrap(foot, 116)), ha="center",
             va="top", fontsize=7.4, color=MUTED)
 
     out = cfg.ROOT / "exports" / "chain_topology.png"
