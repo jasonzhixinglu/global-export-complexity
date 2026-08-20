@@ -148,23 +148,15 @@ for $N$ countries, $K$ export hubs indexed by $k$, and $M$ import hubs indexed b
 \chartpage{Stage 8 -- AI servers (847150)}{Mexico (25B) and Taiwan (19B) assemble and ship; the United States buys 43B, 37 percent of world imports in this code.}{hubs_nnf/supply_chain_8_servers_nnf_hubs_2024.pdf}
 
 %% -------------------------------------------------------------- 3. The factor model over time -- AI-compute codes only
-\sectionpage{3. The time-varying MFM -- AI-compute only}{This section looks at the three downstream AI-compute HS6 codes jointly (parts/GPU modules, baseboards, AI servers), and estimates a time-varying MFM on monthly trade from 2017.}
+\sectionpage{3. Time variation -- AI-compute only}{This section looks at the three downstream AI-compute HS6 codes jointly (parts/GPU modules, baseboards, AI servers), and estimates a time-varying MFM on monthly trade from 2017.}
 
-\chartpage{When the network changed shape}{The line measures how much the time-varying export groupings moved month-to-month. We see stability until Aug 2023 (AI demand), Oct 2024 (memory export controls were signaled), and Sep 2025 (Nvidia GB300).}{../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/drift.pdf}
+\chartpage{When the network changed shape}{The line plots the month-to-month change in time-varying export loadings. We see stability until Aug 2023 (AI demand rampup), Oct 2024 (memory export controls signaled), and Sep 2025 (Nvidia GB300 production).}{../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/drift.pdf}
 
-\chartpage{Who is in each export group}{At Oct 2024 the China group loses its separate identity and a Singapore-led group appears.}{../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/loadings_export.pdf}
+\chartpage{Who is in each export group}{For export hub 2, Singapore swaps for China's export share in October 2024, perhaps reflecting transshipment to subvert export controls.}{../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/loadings_export.pdf}
 
-\chartpage{Who is in each import group}{The import side is steady: a US group, a Mexico group, a Taiwan group, and the rest of the world.}{../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/loadings_import.pdf}
+\chartpage{Who is in each import group}{For import hub 2, Taiwan comes to dominate from late 2024, while import hub 3, previously China-led, becomes diffuse from late 2025.}{../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/loadings_import.pdf}
 
-\chartpage{Dollars between groups, month by month}{Three of the sixteen channels carry the AI boom: Taiwan to the US, and both legs of the US-Mexico assembly loop. The rest are flat.}{../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/factors.pdf}
-
-\chartpage{Same, with every country separate}{Without merging China and Hong Kong there is one break in the whole sample: Aug 2023. Demand changed the country-level structure; policy did not.}{../results/mfm/tvmfm/by_country/ai_compute/drift.pdf}
-
-\chartpage{Parts only (847330)}{91 months without a break -- the stable base layer of the network.}{../results/mfm/tvmfm/by_country/847330/drift.pdf}
-
-\chartpage{With both blocs merged}{Merging China+Hong Kong and US+Mexico hides churn inside each bloc and isolates what happens between them. The breaks line up with policy: the 2019 tariff war, the Oct 2022 export controls, the Apr 2025 tariffs.}{../results/mfm/tvmfm/chnhkg_usamex_blocs/ai_compute/drift.pdf}
-
-\chartpage{The tariff signature}{After Apr 2025 the two blocs move together on a single factor -- seen at no other break.}{../results/mfm/tvmfm/chnhkg_usamex_blocs/ai_compute/loadings_export.pdf}
+\chartpage{Trade between hubs, month by month}{Three of the sixteen channels carry the AI boom: Taiwan to the US (export hub 3 to import hub 1), and both legs of the US-Mexico assembly loop (export hub 1 to import hub 1, export hub 4 to import hub 4).}{../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/factors.pdf}
 
 %% -------------------------------------------------------------- 4. Concentration & fragmentation -- AI-compute codes only
 \sectionpage{4. Concentration \& fragmentation -- AI-compute codes only}{Monthly measures built on top of the model, for the three blue codes only. Dotted lines mark Jul 2023 and Apr 2025. Interpretation: results/network\_stats/findings.md.}

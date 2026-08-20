@@ -1,13 +1,9 @@
 # Fdb version 4
-["pdflatex"] 1787246274.30313 "c:/Users/Jase/global-export-complexity/exports/chart_pack.tex" "chart_pack.pdf" "chart_pack" 1787246275.75718 0
-  "../results/mfm/tvmfm/by_country/847330/drift.pdf" 1785075325.91869 14720 ab2b6d78cd779c0f594eb53244c808b3 ""
-  "../results/mfm/tvmfm/by_country/ai_compute/drift.pdf" 1785075313.80755 14835 93c33d75cb35b1c7e6cb776b34d99f5c ""
+["pdflatex"] 1787246794.9889 "c:/Users/Jase/global-export-complexity/exports/chart_pack.tex" "chart_pack.pdf" "chart_pack" 1787246796.51701 0
   "../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/drift.pdf" 1785075342.22342 14759 bb246ebbd690162bf6c833ceacd7b5f0 ""
   "../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/factors.pdf" 1785075341.87393 50835 2e2783ddc89c6fa0b851c951466a9f72 ""
   "../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/loadings_export.pdf" 1785075336.23055 42569 9d1e69eeb9a48f776ac9da114426eb97 ""
   "../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/loadings_import.pdf" 1785075337.67705 42013 d13883bc2742e5180a99a252beaaf537 ""
-  "../results/mfm/tvmfm/chnhkg_usamex_blocs/ai_compute/drift.pdf" 1785075366.57254 14789 965f2cc433dcd152d0f3c38f9733e200 ""
-  "../results/mfm/tvmfm/chnhkg_usamex_blocs/ai_compute/loadings_export.pdf" 1785075360.55129 42677 6dfd9c538842dbf8697ead399ae83ad6 ""
   "../results/network_stats/847180/fragmentation.pdf" 1785075376.7908 22566 d29272d91ce69ec6b34e28966026feb6 ""
   "../results/network_stats/847330/fragmentation.pdf" 1785075379.67051 23443 1bd5b1888c6fc7a6f78a0518a4a963ac ""
   "../results/network_stats/ai_compute/decomposition.pdf" 1785075370.47861 23944 5c868624159cc27c6709ba1fec4335dc ""
@@ -85,9 +81,9 @@
   "C:/Users/Jase/AppData/Local/Programs/MiKTeX/tex/latex/microtype/microtype.sty" 1772370317 102845 043c56602c7d94c8a716319df1af5479 ""
   "C:/Users/Jase/AppData/Local/Programs/MiKTeX/tex/latex/microtype/mt-cmr.cfg" 1772370317 22906 2122f73c0e7dc828f24240c2422dfe25 ""
   "C:/Users/Jase/AppData/Local/Programs/MiKTeX/tex/latex/xcolor/xcolor.sty" 1729265222 55384 b454dec21c2d9f45ec0b793f0995b992 ""
-  "c:/Users/Jase/global-export-complexity/exports/chart_pack.tex" 1787246273.34391 12331 ca0fb6d4b25847e1daad3b7637042299 ""
+  "c:/Users/Jase/global-export-complexity/exports/chart_pack.tex" 1787246792.45003 11428 16110604a55ae96609f4af021aa1e1c5 ""
   "chain_topology.pdf" 1787240286.69932 41714 c29b8bd4d13077f41ae543d6b203255c ""
-  "chart_pack.aux" 1787246275.48073 33 9c6d12a466ddf25e525340d0a343aadd "pdflatex"
+  "chart_pack.aux" 1787246796.17617 33 d2184818cd16c7334a2328a01fa4fb24 "pdflatex"
   "hubs_nnf/supply_chain_1_raw_materials_nnf_hubs_2024.pdf" 1787245029.30228 26922 3756ee380406213ec2c2e9a6e8dfb1ce ""
   "hubs_nnf/supply_chain_2_wafers_nnf_hubs_2024.pdf" 1787245033.96371 26983 03975329ddbede63b073a05c67ed9717 ""
   "hubs_nnf/supply_chain_3_litho_optics_nnf_hubs_2024.pdf" 1787245038.86399 26966 afc99eaed499daad66b58105f3f0b16f ""
