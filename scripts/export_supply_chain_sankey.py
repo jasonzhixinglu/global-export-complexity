@@ -80,6 +80,20 @@ STAGES = [
 ]
 
 
+# country-network settings: named nodes and the minimum bilateral stage-flow
+# drawn as an edge. Thailand is dropped rather than lowering the cutoff to reach
+# it: its largest single flow is 4.1B, and a 3B cutoff drew 82 edges against 50
+# here, crowding the Asian cluster with sub-5B lines. Its trade folds into Other,
+# as the Philippines' (38B) already did.
+NET_EDGE_MIN = 5.0
+NET_DROP = {"THA"}        # empty set + a lower cutoff is the alternative
+NET_POS = {"USA": (0.13, 0.56), "MEX": (0.10, 0.28), "DEU": (0.27, 0.86),
+           "NLD": (0.41, 0.92), "JPN": (0.88, 0.84), "KOR": (0.79, 0.71),
+           "TWN": (0.86, 0.50), "CHK": (0.64, 0.62), "VNM": (0.57, 0.40),
+           "MYS": (0.73, 0.30), "SGP": (0.60, 0.20), "THA": (0.76, 0.14),
+           "Other": (0.33, 0.12)}
+
+
 def apply_bloc(flows):
     out = {}
     for (o, t), v in flows.items():
@@ -608,12 +622,8 @@ def draw_network(stage_groups):
     width ~ sqrt(dollars); node area ~ total involvement. Complements the staged
     flow charts, which cannot show in-country transformation."""
     from matplotlib.patches import FancyArrowPatch, Circle
-    EDGE_MIN = 3.0   # low enough that every named node has at least one edge
-    POS = {"USA": (0.13, 0.56), "MEX": (0.10, 0.28), "DEU": (0.27, 0.86),
-           "NLD": (0.41, 0.92), "JPN": (0.88, 0.84), "KOR": (0.79, 0.71),
-           "TWN": (0.86, 0.50), "CHK": (0.64, 0.62), "VNM": (0.57, 0.40),
-           "MYS": (0.73, 0.30), "SGP": (0.60, 0.20), "THA": (0.76, 0.14),
-           "Other": (0.33, 0.12)}
+    EDGE_MIN = NET_EDGE_MIN
+    POS = {k: v for k, v in NET_POS.items() if k not in NET_DROP}
     # shared stage palette (src/gec/palette.py) so a colour means the same
     # thing here as in the topology map
     SCOL = {"materials": PAL["materials"], "equipment": PAL["equipment"],
