@@ -84,7 +84,7 @@ def main():
     for k, (cx, cy, kind, title, cl) in NODES.items():
         r = RAD[k]
         ax.add_patch(Circle((cx, cy), r, fc=FILL[k], ec=EDGE[k],
-                            lw=1.8, zorder=2))
+                            lw=2.6, zorder=2))
         # name and value sit in the CENTER of the circle (may overflow small
         # circles); the HS6 codes list sits just BELOW the circle
         ax.text(cx, cy + 0.020, title, ha="center", va="center",
