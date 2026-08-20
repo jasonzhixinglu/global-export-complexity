@@ -113,15 +113,15 @@
 \sectionpage{2. The chain in stages}{2024 annual trade flows from the Trade Atlas. We estimate a matrix factor model to summarize trade flows by exporting and importing hubs.}
 
 \textpage{The matrix factor model}{%
-Per stage, the bilateral export matrix, $X$, has one row per exporter and one column per importer, such that cell $X_{ij}$ is the export value from $i$ to $j$ in 2024. The Matrix Factor Model (MFM) is given by
+Per stage, the bilateral export matrix, $X$, has $i$-$j$th entry giving the export value from country $i$ to country $j$ in 2024. The Matrix Factor Model (MFM) for $X$ is given by
 \[
   X = R\,F\,C' + e,
 \]
-for $N$ countries, $k$ export hubs and $r$ import hubs, with three pieces that the stage charts draw as one column each:
+for $N$ countries, $K$ export hubs indexed by $k$, and $M$ import hubs indexed by $m$:
 \begin{itemize}\itemsep2pt
-  \item $R$ ($N \times k$) are the \textbf{export loadings}: the weight of each country in each export hub.
-  \item $C$ ($N \times r$) are the \textbf{import loadings}: the weight of each country in each import hub.
-  \item $F$ ($k \times r$) are the \textbf{matrix factors}: $F_{ab}$ is the dollar flow from export hub $a$ to import hub $b$.
+  \item $R$ ($N \times K$) are the \textbf{export loadings}: the weight of each country in each export hub.
+  \item $C$ ($N \times M$) are the \textbf{import loadings}: the weight of each country in each import hub.
+  \item $F$ ($K \times M$) are the \textbf{matrix factors}: $F_{km}$ is the dollar flow from export hub $k$ to import hub $m$.
   \item $e$ ($N \times N$) are the idiosyncratic errors.
 \end{itemize}
 Similar to a PCA factor model, which summarizes co-movement in a vector of series as loadings times a low-dimensional vector of factors, the MFM does the same for a matrix: a low-dimensional matrix of factors with two sets of loadings, one for the rows and one for the columns.}
