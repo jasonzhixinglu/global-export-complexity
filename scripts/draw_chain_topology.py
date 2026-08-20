@@ -32,9 +32,10 @@ SURFACE, INK, INK2, MUTED = "#fcfcfb", "#0b0b0b", "#52514e", "#898781"
 FILL = {"mat": "#fbe9f0", "tool": "#fdf1e7", "fab": "#e8f5ee", "down": "#dce8fb"}
 EDGE = {"mat": "#e87ba4", "tool": "#eb6834", "fab": "#008300", "down": "#2a78d6"}
 
-# 2024 world trade per node ($B, CHK basis; stages 1-5 Atlas, 6-8 audited panel)
+# 2024 world trade per node ($B, CHK basis, Atlas HS2012 annual for every stage
+# -- see scripts/extract_atlas_stage_flows.py)
 VAL = {"raw": 13, "wafer": 25, "optic": 38, "equip": 244, "fab": 823,
-       "parts": 146, "board": 101, "srv": 127}
+       "parts": 129, "board": 79, "srv": 115}
 _l = {k: np.log10(v) for k, v in VAL.items()}
 # circle DIAMETER proportional to log10(2024 value): r = rmax * l / lmax
 RAD = {k: 0.190 * _l[k] / max(_l.values()) for k in _l}

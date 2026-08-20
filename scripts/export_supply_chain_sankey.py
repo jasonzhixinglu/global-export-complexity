@@ -7,9 +7,18 @@ proportional to dollars, country colours consistent across all charts. Within a
 chart widths share one scale; ACROSS charts scales differ (totals differ 10x) --
 each title carries the stage total.
 
-Stage/code definitions per docs/data.md (OECD value chain + Fed
-basket). Data: dashboard techai_bilateral.json (equipment, chips; HS2012
-bilateral) and the monthly panel (compute codes). Output: exports/supply_chain_*.png
+Stage/code definitions per docs/data.md (OECD value chain + Fed basket).
+
+Data: ONE source for every stage -- Atlas HS2012 annual bilateral, all
+countries (data/derived/atlas_stage_flows.parquet, written by
+scripts/extract_atlas_stage_flows.py). Earlier versions drew stages 1-5 from
+Atlas and 6-8 from the monthly panel, which put the compute columns ~10% above
+the upstream ones (the panel-vs-Atlas level offset measured in
+results/panel_monthly/atlas_discrepancy_audit.md) and mixed two country
+coverages in one picture. The monthly panel remains the source for everything
+time-varying; these annual snapshots are Atlas throughout.
+
+Output: exports/supply_chain_*.png
 """
 from __future__ import annotations
 import json
@@ -26,7 +35,9 @@ from matplotlib.patches import PathPatch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from gec import config as cfg
+from gec.classifications import SEMICONDUCTOR_OECD as _OECD
 
+ATLAS = cfg.DATA_DIR / "derived" / "atlas_stage_flows.parquet"
 YEAR = "2024"
 TOP_N = 9               # countries per side; rest folds into "Other"
 OUT_DIR = cfg.ROOT / "exports"
@@ -47,20 +58,24 @@ SURFACE, INK, INK2, MUTED = "#fcfcfb", "#0b0b0b", "#52514e", "#898781"
 
 # The OECD 'photo' basket (photosensitive devices, $66B) is excluded: it is
 # dominated by solar PV cells -- a fab OUTPUT, not an input to the AI chain.
+def _codes(group):
+    return sorted(_OECD[group])
+
+
 STAGES = [
     ("1_raw_materials", "Stage 1 — Raw materials", "silicon 280461, rare gases, Ga/Ge, chemicals",
-     ("json", ["raw"])),
+     _codes("Raw materials")),
     ("2_wafers", "Stage 2 — Wafers & wafer inputs", "381800, 3701xx/370790",
-     ("json", ["wafer"])),
+     _codes("Wafer inputs")),
     ("3_litho_optics", "Stage 3 — Lithography & optics inputs", "9001xx/9002xx, 901210/90, 903141",
-     ("json", ["foundry"])),
+     _codes("Foundry inputs")),
     ("4_equipment", "Stage 4 — Fab equipment", "8486xx, metrology, fab plant",
-     ("json", ["equip"])),
+     _codes("Manufacturing equipment")),
     ("5_chips", "Stage 5 — Chips (logic, memory, discretes)", "8542xx, 8541xx, media",
-     ("json", ["chips"])),
-    ("6_parts", "Stage 6 — Parts & GPU modules", "HS 847330", ("panel", "847330")),
-    ("7_baseboards", "Stage 7 — Baseboards / other units", "HS 847180", ("panel", "847180")),
-    ("8_servers", "Stage 8 — Finished AI servers", "HS 847150", ("panel", "847150")),
+     _codes("Chips")),
+    ("6_parts", "Stage 6 — Parts & GPU modules", "HS 847330", ["847330"]),
+    ("7_baseboards", "Stage 7 — Baseboards / other units", "HS 847180", ["847180"]),
+    ("8_servers", "Stage 8 — Finished AI servers", "HS 847150", ["847150"]),
 ]
 
 
@@ -73,22 +88,20 @@ def apply_bloc(flows):
     return out
 
 
-def flows_json(baskets):
-    d = json.load(open(cfg.ROOT / "dashboard" / "public" / "data" / "techai_bilateral.json"))
-    agg = {}
-    for b in baskets:
-        for o, dests in d["value"].get(b, {}).items():
-            for t, yrs in dests.items():
-                v = yrs.get(YEAR)
-                if v and o != t:
-                    agg[(o, t)] = agg.get((o, t), 0.0) + v
-    return apply_bloc(agg)
+_ATLAS_CACHE = {}
 
 
-def flows_panel(code, year=YEAR):
-    p = pd.read_parquet(cfg.DATA_DIR / "derived" / "panel_semi_monthly.parquet")
-    p = p[(p.code == code) & (p.period.str[:4] == year)]
-    g = p.groupby(["exporter", "importer"]).value.sum() / 1e9
+def atlas_df():
+    if "df" not in _ATLAS_CACHE:
+        _ATLAS_CACHE["df"] = pd.read_parquet(ATLAS)
+    return _ATLAS_CACHE["df"]
+
+
+def flows_atlas(codes, year=YEAR):
+    """One year of Atlas bilateral flows ($B) for a stage's HS6 codes."""
+    d = atlas_df()
+    d = d[d.code.isin(codes) & (d.year == int(year))]
+    g = d.groupby(["exporter", "importer"]).value.sum() / 1e9
     return apply_bloc({k: float(v) for k, v in g.items()})
 
 
@@ -139,17 +152,6 @@ def varimax(L, iters=200, tol=1e-8):
     return O
 
 
-def hubs_from_panel(code, year=YEAR):
-    """Hub inputs from the era-anchored TV-MFM (China+HKG bloc variant): 2024 means
-    of monthly loadings/F."""
-    s = json.load(open(cfg.RESULTS_DIR / "mfm" / "tvmfm" / "chn_hkg_bloc" / code / "stats.json"))
-    months = [p for p in s["periods"] if p.startswith(year)]
-    countries = s["countries"]
-    R = np.mean([np.array(s["R_by_period"][m]) for m in months], axis=0).clip(min=0)
-    C = np.mean([np.array(s["C_by_period"][m]) for m in months], axis=0).clip(min=0)
-    F = np.mean([np.array(s["F_by_period"][m]) for m in months], axis=0)
-    return countries, R, C, F, f"era-anchored TV-MFM, {year} monthly means"
-
 
 def nnf_rotate(L, restarts=6, rng=np.random.default_rng(11)):
     """Rotate to the nonnegativity-identified basis: minimize negative-mass share
@@ -186,19 +188,17 @@ def nnf_rotate(L, restarts=6, rng=np.random.default_rng(11)):
     return sign_fix(L1 @ best[1])
 
 
-def hubs_from_json(baskets, k=4, rotate=True):
-    """Hub inputs for upstream stages: constant-loading MFM (k=r=4, $B levels,
-    varimax) on the ANNUAL bilateral matrices 2020-2024 from the dashboard data --
-    same estimator as results/mfm/annual, no monthly panel exists upstream."""
-    d = json.load(open(cfg.ROOT / "dashboard" / "public" / "data" / "techai_bilateral.json"))
+def hubs_from_atlas(codes, k=4, rotate=True):
+    """Hub inputs for every stage: constant-loading MFM (k=r=4, $B levels) on the
+    ANNUAL Atlas bilateral matrices 2020-2024 -- same estimator as
+    results/mfm/annual, now applied to all eight stages from one source."""
+    d = atlas_df()
+    d = d[d.code.isin(codes)]
     flows = {}
-    for b in baskets:
-        for o, dests in d["value"].get(b, {}).items():
-            for t, yrs in dests.items():
-                for y, v in yrs.items():
-                    o2, t2 = BLOC.get(o, o), BLOC.get(t, t)
-                    if 2020 <= int(y) <= 2024 and o2 != t2 and v:
-                        flows[(int(y), o2, t2)] = flows.get((int(y), o2, t2), 0.0) + v
+    for (y, o, t), v in d.groupby(["year", "exporter", "importer"]).value.sum().items():
+        o2, t2 = BLOC.get(o, o), BLOC.get(t, t)
+        if o2 != t2 and v:
+            flows[(int(y), o2, t2)] = flows.get((int(y), o2, t2), 0.0) + float(v) / 1e9
     countries = sorted({o for (_, o, _) in flows} | {t for (_, _, t) in flows})
     idx = {c: i for i, c in enumerate(countries)}
     years = sorted({y for (y, _, _) in flows})
@@ -212,7 +212,7 @@ def hubs_from_json(baskets, k=4, rotate=True):
     _, vc = np.linalg.eigh(M_C)
     R = vr[:, -k:][:, ::-1] * np.sqrt(p)
     C = vc[:, -k:][:, ::-1] * np.sqrt(q)
-    note = "constant-loading annual MFM 2020-24 (no monthly panel upstream)"
+    note = "constant-loading annual MFM 2020-24 on Atlas bilateral data"
     if rotate == "nnf":
         R, C = nnf_rotate(R), nnf_rotate(C)
         note = "NONNEGATIVITY-IDENTIFIED basis (unique admissible bundle basis); " + note
@@ -228,73 +228,15 @@ def hubs_from_json(baskets, k=4, rotate=True):
     return countries, R.clip(min=0), C.clip(min=0), F, note
 
 
-def hubs_from_panel_pooled(code, year=YEAR, rotate=True, k=4):
-    """Constant-loading MFM pooled over the year's monthly matrices (panel codes),
-    optionally without varimax -- the unrotated spectral basis."""
-    pdf = pd.read_parquet(cfg.DATA_DIR / "derived" / "panel_semi_monthly.parquet")
-    pdf = pdf[(pdf.code == code) & (pdf.period.str[:4] == year)]
-    flows = {}
-    for (per, o, t), v in pdf.groupby(["period", "exporter", "importer"]).value.sum().items():
-        o2, t2 = BLOC.get(o, o), BLOC.get(t, t)
-        if o2 != t2:
-            flows[(per, o2, t2)] = flows.get((per, o2, t2), 0.0) + float(v) / 1e9
-    countries = sorted({o for (_, o, _) in flows} | {t for (_, _, t) in flows})
-    idx = {c: i for i, c in enumerate(countries)}
-    periods = sorted({per for (per, _, _) in flows})
-    Y = np.zeros((len(periods), len(countries), len(countries)))
-    for (per, o, t), v in flows.items():
-        Y[periods.index(per), idx[o], idx[t]] = v
-    p_ = q_ = len(countries)
-    M_R = np.einsum("sij,skj->ik", Y, Y)
-    M_C = np.einsum("sji,sjk->ik", Y, Y)
-    _, vr = np.linalg.eigh(M_R)
-    _, vc = np.linalg.eigh(M_C)
-    R = vr[:, -k:][:, ::-1] * np.sqrt(p_)
-    C = vc[:, -k:][:, ::-1] * np.sqrt(q_)
-    note = f"pooled {year} monthly MFM"
-    if rotate == "nnf":
-        R, C = nnf_rotate(R), nnf_rotate(C)
-        note = "NONNEGATIVITY-IDENTIFIED basis (unique admissible bundle basis); " + note
-    elif rotate:
-        R, C = R @ varimax(R), C @ varimax(C)
-    else:
-        note = "UNROTATED spectral basis, hubs in descending eigenvalue order; " + note
-    for L in (R, C):
-        for j in range(k):
-            if L[np.abs(L[:, j]).argmax(), j] < 0:
-                L[:, j] *= -1
-    F = np.mean([R.T @ Y[t] @ C / (p_ * q_) for t in range(len(periods))], axis=0)
-    return countries, R.clip(min=0), C.clip(min=0), F, note
-
 
 def draw_hub_chart(fname, title, codes_txt, code_or_baskets, kind, year=YEAR):
     """Four-column chart: exporters -> export hubs -> import hubs -> importers.
     Hub-pair dollars are the model-implied decomposition renormalized to the
     year's actual total -- an interpretation layer, not raw data."""
-    if kind == "panel":
-        countries, R, C, F, src = hubs_from_panel(code_or_baskets, year)
-        total_actual = sum(flows_panel(code_or_baskets, year).values())
-        data_src = "Comtrade+TDM monthly panel"
-    elif kind == "panel_norot":
-        countries, R, C, F, src = hubs_from_panel_pooled(code_or_baskets, year, rotate=False)
-        total_actual = sum(flows_panel(code_or_baskets, year).values())
-        data_src = "Comtrade+TDM monthly panel"
-    elif kind == "panel_nnf":
-        countries, R, C, F, src = hubs_from_panel_pooled(code_or_baskets, year, rotate="nnf")
-        total_actual = sum(flows_panel(code_or_baskets, year).values())
-        data_src = "Comtrade+TDM monthly panel"
-    elif kind == "json_nnf":
-        countries, R, C, F, src = hubs_from_json(code_or_baskets, rotate="nnf")
-        total_actual = sum(flows_json(code_or_baskets).values())
-        data_src = "Atlas HS2012 annual bilateral"
-    elif kind == "json_norot":
-        countries, R, C, F, src = hubs_from_json(code_or_baskets, rotate=False)
-        total_actual = sum(flows_json(code_or_baskets).values())
-        data_src = "Atlas HS2012 annual bilateral"
-    else:
-        countries, R, C, F, src = hubs_from_json(code_or_baskets)
-        total_actual = sum(flows_json(code_or_baskets).values())
-        data_src = "Atlas HS2012 annual bilateral"
+    rotate = {"nnf": "nnf", "norot": False}.get(kind, True)
+    countries, R, C, F, src = hubs_from_atlas(code_or_baskets, rotate=rotate)
+    total_actual = sum(flows_atlas(code_or_baskets, year).values())
+    data_src = "Atlas HS2012 annual bilateral, all countries"
     K = R.shape[1]
     hubR = [f"{countries[int(R[:, a].argmax())]}-led" for a in range(K)]
     hubC = [f"{countries[int(C[:, b].argmax())]}-led" for b in range(K)]
@@ -309,7 +251,7 @@ def draw_hub_chart(fname, title, codes_txt, code_or_baskets, kind, year=YEAR):
     I = (C / np.where(Csum > 0, Csum, 1)) [:, :] * V.sum(0)   # imp hub -> importer
     # rescale outer columns to ACTUAL country totals (model attribution can misstate
     # e.g. Mexico by 2x); hub columns keep model proportions, nodes absorb the gap
-    fl = flows_panel(code_or_baskets, year) if kind.startswith("panel") else flows_json(code_or_baskets)
+    fl = flows_atlas(code_or_baskets, year)
     act_ex, act_im = {}, {}
     for (o, t), v in fl.items():
         act_ex[o] = act_ex.get(o, 0.0) + v
@@ -741,14 +683,11 @@ def main():
     all_flows = []
     # Plain (2-column) per-stage charts retired: the rank-4 hub decomposition fits
     # at R^2 0.95-0.99, so the hub-routed versions carry the flows faithfully.
-    for fname, title, codes_txt, (kind, arg) in STAGES:
-        flows = flows_json(arg) if kind == "json" else flows_panel(arg)
-        all_flows.append(flows)
-        draw_hub_chart(fname, title, codes_txt, arg, kind)
-        draw_hub_chart(fname + "_norot", title + " [unrotated]", codes_txt, arg,
-                       "panel_norot" if kind == "panel" else "json_norot")
-        draw_hub_chart(fname + "_nnf", title, codes_txt, arg,
-                       "panel_nnf" if kind == "panel" else "json_nnf")
+    for fname, title, codes_txt, codes in STAGES:
+        all_flows.append(flows_atlas(codes))
+        draw_hub_chart(fname, title, codes_txt, codes, "varimax")
+        draw_hub_chart(fname + "_norot", title + " [unrotated]", codes_txt, codes, "norot")
+        draw_hub_chart(fname + "_nnf", title, codes_txt, codes, "nnf")
     input_stages = [("raw materials", all_flows[0]), ("wafers", all_flows[1]),
                     ("litho & optics", all_flows[2]), ("fab equipment", all_flows[3])]
     inter = {}
