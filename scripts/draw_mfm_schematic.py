@@ -47,10 +47,10 @@ def block_labels(ax, cx, title, sub, color, title_y, sub_y):
 
 
 def main():
-    fig, ax = plt.subplots(figsize=(13.5, 6.4))
+    fig, ax = plt.subplots(figsize=(13.5, 5.4))
     fig.patch.set_facecolor(SURFACE)
     ax.set_xlim(0, 13.5)
-    ax.set_ylim(0, 6.4)
+    ax.set_ylim(0.95, 6.25)
     ax.set_aspect("equal")
     ax.axis("off")
 
@@ -89,12 +89,7 @@ def main():
 
     ax.text(6.75, 5.9, "How the factor model summarizes the trade data",
             ha="center", va="top", fontsize=15, weight="bold", color=INK)
-    ax.text(6.75, 0.55,
-            "One period of country-to-country flows is compressed into: hubs of exporters that move together,\n"
-            "hubs of importers, and a small table of dollars between the hubs. Estimated on a single year the hub\n"
-            "memberships are fixed (Section 2); estimated on a rolling window they can move, and a shift in them\n"
-            "is what the model reports as a structural break (Section 3).",
-            ha="center", va="top", fontsize=9.2, color=MUTED)
+    # no footnote inside the figure: the slide caption carries the explanation
 
     out = cfg.ROOT / "exports" / "mfm_schematic.png"
     fig.savefig(out, dpi=200, bbox_inches="tight", pad_inches=0.2, facecolor=SURFACE)

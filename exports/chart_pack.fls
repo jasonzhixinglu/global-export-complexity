@@ -103,6 +103,7 @@ INPUT C:\Users\Jase\AppData\Local\Programs\MiKTeX\fonts\tfm\public\lm\lmex10.tfm
 OUTPUT chart_pack.pdf
 INPUT C:\Users\Jase\AppData\Local\MiKTeX\fonts\map\pdftex\pdftex.map
 INPUT C:\Users\Jase\AppData\Local\Programs\MiKTeX\fonts\enc\dvips\lm\lm-ec.enc
+INPUT C:\Users\Jase\AppData\Local\Programs\MiKTeX\fonts\tfm\public\lm\ec-lmr8.tfm
 INPUT .\chain_topology.pdf
 INPUT .\chain_topology.pdf
 INPUT .\chain_topology.pdf
@@ -141,6 +142,12 @@ INPUT C:\Users\Jase\AppData\Local\Programs\MiKTeX\fonts\enc\dvips\lm\lm-mathit.e
 INPUT C:\Users\Jase\AppData\Local\Programs\MiKTeX\fonts\enc\dvips\lm\lm-rm.enc
 INPUT C:\Users\Jase\AppData\Local\Programs\MiKTeX\fonts\enc\dvips\lm\lm-mathsy.enc
 INPUT C:\Users\Jase\AppData\Local\Programs\MiKTeX\fonts\enc\dvips\lm\lm-ts1.enc
+INPUT .\mfm_schematic.pdf
+INPUT .\mfm_schematic.pdf
+INPUT .\mfm_schematic.pdf
+INPUT .\mfm_schematic.pdf
+INPUT .\mfm_schematic.pdf
+INPUT .\mfm_schematic.pdf
 INPUT .\hubs_nnf\supply_chain_1_raw_materials_nnf_hubs_2024.pdf
 INPUT .\hubs_nnf\supply_chain_1_raw_materials_nnf_hubs_2024.pdf
 INPUT .\hubs_nnf\supply_chain_1_raw_materials_nnf_hubs_2024.pdf
@@ -189,12 +196,6 @@ INPUT .\hubs_nnf\supply_chain_8_servers_nnf_hubs_2024.pdf
 INPUT .\hubs_nnf\supply_chain_8_servers_nnf_hubs_2024.pdf
 INPUT .\hubs_nnf\supply_chain_8_servers_nnf_hubs_2024.pdf
 INPUT .\hubs_nnf\supply_chain_8_servers_nnf_hubs_2024.pdf
-INPUT .\mfm_schematic.pdf
-INPUT .\mfm_schematic.pdf
-INPUT .\mfm_schematic.pdf
-INPUT .\mfm_schematic.pdf
-INPUT .\mfm_schematic.pdf
-INPUT .\mfm_schematic.pdf
 INPUT ..\results\mfm\tvmfm\chn_hkg_bloc\ai_compute\drift.pdf
 INPUT ..\results\mfm\tvmfm\chn_hkg_bloc\ai_compute\drift.pdf
 INPUT ..\results\mfm\tvmfm\chn_hkg_bloc\ai_compute\drift.pdf
@@ -284,6 +285,8 @@ INPUT C:\Users\Jase\AppData\Local\Programs\MiKTeX\fonts\type1\public\lm\lmmi7.pf
 INPUT C:\Users\Jase\AppData\Local\Programs\MiKTeX\fonts\type1\public\lm\lmmi7.pfb
 INPUT C:\Users\Jase\AppData\Local\Programs\MiKTeX\fonts\type1\public\lm\lmr10.pfb
 INPUT C:\Users\Jase\AppData\Local\Programs\MiKTeX\fonts\type1\public\lm\lmr10.pfb
+INPUT C:\Users\Jase\AppData\Local\Programs\MiKTeX\fonts\type1\public\lm\lmr8.pfb
+INPUT C:\Users\Jase\AppData\Local\Programs\MiKTeX\fonts\type1\public\lm\lmr8.pfb
 INPUT C:\Users\Jase\AppData\Local\Programs\MiKTeX\fonts\type1\public\lm\lmsy10.pfb
 INPUT C:\Users\Jase\AppData\Local\Programs\MiKTeX\fonts\type1\public\lm\lmsy10.pfb
 INPUT C:\Users\Jase\AppData\Local\Programs\MiKTeX\fonts\type1\public\lm\lmsy7.pfb
