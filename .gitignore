@@ -225,3 +225,10 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# LaTeX build artefacts
+exports/*.aux
+exports/*.log
+exports/*.fdb_latexmk
+exports/*.fls
+exports/*.synctex.gz
