@@ -26,7 +26,8 @@ in [docs/data.md](../docs/data.md).
   output (docs/concentration-fragmentation-nnf-mfm-trade.md → results/network_stats)
 - `export_supply_chain_sankey.py` — all supply-chain charts (hub charts, overviews, network)
 - `draw_chain_topology.py` / `draw_mfm_schematic.py` — stylized chain map; factor-model explainer
-- `build_chart_pack.py` — assemble chart_pack_mobile.pdf (phone layout); seeds the .tex below
+- `build_chart_pack.py` — page/caption list that seeds the .tex below (no longer
+  builds a PDF while chart_pack.tex exists)
 - `build_chart_pack_tex.py` — write/compile `exports/chart_pack.tex`, the editable
   LaTeX source of the desktop pack (`--compile` runs pdflatex; edit the .tex directly)
 
