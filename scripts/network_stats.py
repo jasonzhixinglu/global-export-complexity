@@ -183,13 +183,13 @@ def figs(df, label, out):
     fig.savefig(out / "decomposition.pdf", bbox_inches="tight")
     plt.close(fig)
 
-    # 2. fragmentation: agnostic (hub overlap) vs bloc (channel shares)
+    # 2. fragmentation: statistical (hub overlap) vs bloc (channel shares)
     fig, axes = plt.subplots(1, 2, figsize=(11, 3.8), sharex=True)
     ax = axes[0]
     _mark(ax, df)
     ax.plot(df.index, _ma(df.frag_exp), lw=2, color=SERIES[0], label="export side")
     ax.plot(df.index, _ma(df.frag_imp), lw=2, color=SERIES[1], label="import side")
-    ax.set_title("hub-overlap fragmentation (agnostic)", fontsize=10, color=INK)
+    ax.set_title("hub-overlap fragmentation (statistical)", fontsize=10, color=INK)
     ax.legend(fontsize=8, frameon=False)
     ax = axes[1]
     _mark(ax, df)
