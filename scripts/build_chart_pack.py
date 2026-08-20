@@ -272,7 +272,7 @@ def main(mobile=False):
         sys.exit("missing figures (regenerate first):\n" + "\n".join(missing))
     import datetime
     out = EX / ("chart_pack_mobile.pdf" if mobile else "chart_pack.pdf")
-    if not mobile and (EX / "chart_pack.tex").exists() and "--force" not in sys.argv:
+    if (EX / "chart_pack.tex").exists() and "--force" not in sys.argv:
         sys.exit("exports/chart_pack.tex is the editable source of the desktop "
                  "pack. Compile it instead: "
                  "python scripts/build_chart_pack_tex.py --compile "

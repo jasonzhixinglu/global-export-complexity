@@ -19,8 +19,8 @@ as CHK throughout (see docs/data.md).
   captions are plain LaTeX text, one `\chartpage{title}{caption}{figure}`
   per page. Compile with `cd exports && pdflatex chart_pack.tex`, or
   `python scripts/build_chart_pack_tex.py --compile`.
-- `chart_pack.pdf` — compiled from the .tex.
-- `chart_pack_mobile.pdf` — phone layout, built by
-  `python scripts/build_chart_pack.py mobile`.
+- `chart_pack.pdf` — compiled from the .tex. Default layout is phone-friendly:
+  narrow pages, each sized to its own chart. Comment out `\mobiletrue` near the
+  top of the .tex for wide landscape pages instead.
 - Figures come from their generator scripts; rerun a generator to refresh a
   chart, then recompile. Charts embed as vector PDFs, so zoom stays sharp.

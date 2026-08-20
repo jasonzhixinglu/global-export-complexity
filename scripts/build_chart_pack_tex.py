@@ -7,7 +7,9 @@ per page, grouped by \\sectionpage. After that the .tex is the source of truth
 for the desktop pack -- edit it directly and recompile.
 
 Figures are included as the VECTOR .pdf sibling wherever one exists, so the
-compiled pack stays sharp at any zoom.
+compiled pack stays sharp at any zoom. Default layout is phone-friendly:
+6-inch-wide pages, each page's height measured to fit its own chart. Comment
+out \mobiletrue in the .tex for wide landscape pages.
 
 Usage:
   python scripts/build_chart_pack_tex.py          # write the .tex (refuses to
@@ -36,7 +38,21 @@ PREAMBLE = r"""% Chart pack -- editable source.
 % Figures are the vector PDFs written by the generator scripts; rerun those to
 % refresh a chart, then recompile. Text below is yours to edit freely.
 \documentclass[11pt]{article}
-\usepackage[a4paper,landscape,top=1.1cm,bottom=1.0cm,left=1.4cm,right=1.4cm]{geometry}
+
+% ---- layout switch -------------------------------------------------------
+% Mobile (default): narrow pages, each page sized to its own chart, so every
+% figure fills a phone screen with no pinching. Comment out \mobiletrue for
+% wide landscape pages meant for a desktop screen or printing.
+\newif\ifmobile
+\mobiletrue
+% --------------------------------------------------------------------------
+
+\ifmobile
+  \usepackage[paperwidth=6in,paperheight=9in,
+              top=0.30in,bottom=0.30in,left=0.30in,right=0.30in]{geometry}
+\else
+  \usepackage[a4paper,landscape,top=1.1cm,bottom=1.0cm,left=1.4cm,right=1.4cm]{geometry}
+\fi
 \usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage[T1]{fontenc}
@@ -44,42 +60,61 @@ PREAMBLE = r"""% Chart pack -- editable source.
 \usepackage{microtype}
 \setlength{\parindent}{0pt}
 \pagestyle{empty}
+% pages never break by themselves: each macro below ships exactly one page
+\ifmobile\setlength{\textheight}{200in}\fi
 
 \definecolor{captiongrey}{HTML}{444444}
 \definecolor{sectiongrey}{HTML}{888888}
 
+\newsavebox{\gecfig}
+\newsavebox{\gechdr}
+\newlength{\gecpad}\setlength{\gecpad}{0.30in}
+\newlength{\gecgap}\setlength{\gecgap}{11pt}
+
 % \chartpage{title}{caption}{figure path}  -- one chart per page
 \newcommand{\chartpage}[3]{%
   \clearpage
-  {\large\bfseries #1\par}%
-  \ifx\relax#2\relax\vspace{2pt}\else
-    \vspace{3pt}{\small\color{captiongrey}#2\par}\fi
-  \vfill
-  \begin{center}%
-    \includegraphics[width=\linewidth,height=0.80\textheight,keepaspectratio]{#3}%
-  \end{center}%
-  \vfill
+  \sbox{\gecfig}{\includegraphics[width=\linewidth]{#3}}%
+  \sbox{\gechdr}{\begin{minipage}{\linewidth}\raggedright
+      {\large\bfseries #1\par}%
+      \ifx\relax#2\relax\else\vspace{4pt}{\small\color{captiongrey}#2\par}\fi
+    \end{minipage}}%
+  \ifmobile
+    % page height = padding + header + gap + figure + padding
+    \pdfpageheight=\dimexpr\gecpad+\ht\gechdr+\dp\gechdr+\gecgap
+                          +\ht\gecfig+\dp\gecfig+\gecpad\relax
+    \noindent\usebox{\gechdr}\par\vspace{\gecgap}\noindent\usebox{\gecfig}%
+  \else
+    \noindent\usebox{\gechdr}\vfill
+    \begin{center}%
+      \includegraphics[width=\linewidth,height=0.80\textheight,keepaspectratio]{#3}%
+    \end{center}\vfill
+  \fi
 }
 
 % \sectionpage{title}{blurb}
 \newcommand{\sectionpage}[2]{%
   \clearpage
-  \vspace*{0.30\textheight}
+  \ifmobile\pdfpageheight=4in\fi
+  \vspace*{\ifmobile 0.9in\else 0.30\textheight\fi}%
   \begin{center}%
-    {\Huge\bfseries #1\par}%
+    {\ifmobile\LARGE\else\Huge\fi\bfseries #1\par}%
     \vspace{14pt}%
-    {\large\color{captiongrey}\begin{minipage}{0.78\linewidth}\centering #2\end{minipage}\par}%
+    {\ifmobile\normalsize\else\large\fi\color{captiongrey}%
+     \begin{minipage}{\ifmobile 0.92\else 0.78\fi\linewidth}\centering #2\end{minipage}\par}%
   \end{center}%
 }
 
 \begin{document}
 
 % ---------------------------------------------------------------- title page
-\vspace*{0.28\textheight}
+\ifmobile\pdfpageheight=5in\fi
+\vspace*{\ifmobile 1.1in\else 0.28\textheight\fi}
 \begin{center}
-  {\Huge\bfseries AI-compute supply chain: chart pack\par}
+  {\ifmobile\LARGE\else\Huge\fi\bfseries AI-compute supply chain: chart pack\par}
   \vspace{18pt}
-  \begin{minipage}{0.80\linewidth}\centering\large\color{captiongrey}
+  \begin{minipage}{\ifmobile 0.92\else 0.80\fi\linewidth}\centering
+    \ifmobile\small\else\large\fi\color{captiongrey}
     TITLEBLURB
   \end{minipage}
   \vspace{22pt}
