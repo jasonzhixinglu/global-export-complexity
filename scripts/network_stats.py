@@ -213,9 +213,6 @@ def figs(df, label, out):
     ax.set_title(f"{title} -- concentration of exporters and importers", fontsize=10,
                  color=INK)
     ax.legend(fontsize=8, frameon=False)
-    sec = ax.secondary_yaxis("right", functions=(lambda h: 1 / np.maximum(h, 1e-9),
-                                                 lambda n: 1 / np.maximum(n, 1e-9)))
-    sec.set_ylabel("effective number of countries")
     fig.tight_layout()
     fig.savefig(out / "concentration.png", dpi=150, bbox_inches="tight")
     fig.savefig(out / "concentration.pdf", bbox_inches="tight")
