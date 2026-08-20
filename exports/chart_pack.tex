@@ -1,0 +1,119 @@
+% Chart pack -- editable source.
+% Compile:  cd exports && pdflatex chart_pack.tex
+% Figures are the vector PDFs written by the generator scripts; rerun those to
+% refresh a chart, then recompile. Text below is yours to edit freely.
+\documentclass[11pt]{article}
+\usepackage[a4paper,landscape,top=1.1cm,bottom=1.0cm,left=1.4cm,right=1.4cm]{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\setlength{\parindent}{0pt}
+\pagestyle{empty}
+
+\definecolor{captiongrey}{HTML}{444444}
+\definecolor{sectiongrey}{HTML}{888888}
+
+% \chartpage{title}{caption}{figure path}  -- one chart per page
+\newcommand{\chartpage}[3]{%
+  \clearpage
+  {\large\bfseries #1\par}%
+  \ifx\relax#2\relax\vspace{2pt}\else
+    \vspace{3pt}{\small\color{captiongrey}#2\par}\fi
+  \vfill
+  \begin{center}%
+    \includegraphics[width=\linewidth,height=0.80\textheight,keepaspectratio]{#3}%
+  \end{center}%
+  \vfill
+}
+
+% \sectionpage{title}{blurb}
+\newcommand{\sectionpage}[2]{%
+  \clearpage
+  \vspace*{0.30\textheight}
+  \begin{center}%
+    {\Huge\bfseries #1\par}%
+    \vspace{14pt}%
+    {\large\color{captiongrey}\begin{minipage}{0.78\linewidth}\centering #2\end{minipage}\par}%
+  \end{center}%
+}
+
+\begin{document}
+
+% ---------------------------------------------------------------- title page
+\vspace*{0.28\textheight}
+\begin{center}
+  {\Huge\bfseries AI-compute supply chain: chart pack\par}
+  \vspace{18pt}
+  \begin{minipage}{0.80\linewidth}\centering\large\color{captiongrey}
+    Current state of the analysis. Data: UN Comtrade + TDM monthly panel (60 HS6 codes, 2017-01 to 2026-04, checked against Atlas) and Atlas annual data. Sections 3 and 4 use the AI-compute codes only. Details: docs/data.md, docs/supply-chain-narrative.md, results/.
+  \end{minipage}
+  \vspace{22pt}
+
+  {\color{sectiongrey}2026-08-20}
+\end{center}
+
+%% -------------------------------------------------------------- 1. The chain as flows
+\sectionpage{1. The chain as flows}{2024 trade flows. China and Hong Kong are counted as one (CHK) throughout. Stages 1-5 use annual Atlas data; stages 6-8 our monthly panel.}
+
+\chartpage{The shape of the chain}{Two input branches feed chip making; finished hardware flows out to the right. Pink inputs are used up per chip; orange equipment builds capacity. Blue: the three codes of our monthly panel. Circle size grows with the log of 2024 trade.}{chain_topology.pdf}
+
+\chartpage{The whole chain on one dollar scale}{Band width = 2024 dollars. The chips stage dominates; small input flows are drawn but too thin to see.}{overviews/supply_chain_overview_dollar_coarse_2024.pdf}
+
+\chartpage{The same flows as a country map}{Countries as nodes, flows as edges colored by stage. Shows combined roles: Mexico takes in chips and parts and ships out servers.}{network/supply_chain_network_2024.pdf}
+
+%% -------------------------------------------------------------- 2. The chain in stages
+\sectionpage{2. The chain in stages}{One page per stage: exporters on the left, importers on the right, with the model's groupings in between. Groupings fit the 2024 flows closely (R-squared 0.95-0.99).}
+
+\chartpage{Stage 1 -- raw materials}{Reading guide for all stage pages: left = exporters, right = importers, middle = the model's export and import groups. Much raw-materials trade is not chip-related (the codes also cover welding gas, abrasives, fertilizer inputs), so flows scatter widely.}{hubs_nnf/supply_chain_1_raw_materials_nnf_hubs_2024.pdf}
+
+\chartpage{Stage 2 -- wafers and wafer inputs}{Japan dominates the export side.}{hubs_nnf/supply_chain_2_wafers_nnf_hubs_2024.pdf}
+
+\chartpage{Stage 3 -- lithography and optics inputs}{}{hubs_nnf/supply_chain_3_litho_optics_nnf_hubs_2024.pdf}
+
+\chartpage{Stage 4 -- fab equipment}{Machines, not materials: countries buy these to build capacity, and their imports rise 6-12 months before chip exports.}{hubs_nnf/supply_chain_4_equipment_nnf_hubs_2024.pdf}
+
+\chartpage{Stage 5 -- chips}{The biggest stage, and the whole electronics industry -- phones, cars and PCs, not just AI. Most chips flow to Asian assembly; the China sphere absorbs about 43\%.}{hubs_nnf/supply_chain_5_chips_nnf_hubs_2024.pdf}
+
+\chartpage{Stage 6 -- parts and GPU modules (847330)}{}{hubs_nnf/supply_chain_6_parts_nnf_hubs_2024.pdf}
+
+\chartpage{Stage 7 -- baseboards (847180)}{}{hubs_nnf/supply_chain_7_baseboards_nnf_hubs_2024.pdf}
+
+\chartpage{Stage 8 -- AI servers (847150)}{}{hubs_nnf/supply_chain_8_servers_nnf_hubs_2024.pdf}
+
+%% -------------------------------------------------------------- 3. The factor model over time -- AI-compute codes only
+\sectionpage{3. The factor model over time -- AI-compute codes only}{This section uses only the three blue codes (parts/GPU modules, baseboards, AI servers), monthly from 2017. Unless the page says otherwise, China and Hong Kong are counted as one. Shaded bands mark the periods between structural breaks.}
+
+\chartpage{How the model works}{The one idea behind every page that follows.}{mfm_schematic.pdf}
+
+\chartpage{When the network changed shape}{The line measures how much the export groupings moved from one month to the next. Flat for six years, then: Aug 2023 (AI demand), Oct 2024 (the quarter memory export controls were signaled), Sep 2025.}{../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/drift.pdf}
+
+\chartpage{Who is in each export group}{At Oct 2024 the China group loses its separate identity and a Singapore-led group appears.}{../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/loadings_export.pdf}
+
+\chartpage{Who is in each import group}{The import side is steady: a US group, a Mexico group, a Taiwan group, and the rest of the world.}{../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/loadings_import.pdf}
+
+\chartpage{Dollars between groups, month by month}{Three of the sixteen channels carry the AI boom: Taiwan to the US, and both legs of the US-Mexico assembly loop. The rest are flat.}{../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/factors.pdf}
+
+\chartpage{Same, with every country separate}{Without merging China and Hong Kong there is one break in nine years: Aug 2023. Demand changed the country-level structure; policy did not.}{../results/mfm/tvmfm/by_country/ai_compute/drift.pdf}
+
+\chartpage{Parts only (847330)}{91 months without a break -- the stable base layer of the network.}{../results/mfm/tvmfm/by_country/847330/drift.pdf}
+
+\chartpage{With both blocs merged}{Merging China+Hong Kong and US+Mexico hides churn inside each bloc and isolates what happens between them. The breaks line up with policy: the 2019 tariff war, the Oct 2022 export controls, the Apr 2025 tariffs.}{../results/mfm/tvmfm/chnhkg_usamex_blocs/ai_compute/drift.pdf}
+
+\chartpage{The tariff signature}{After Apr 2025 the two blocs move together on a single factor -- seen at no other break.}{../results/mfm/tvmfm/chnhkg_usamex_blocs/ai_compute/loadings_export.pdf}
+
+%% -------------------------------------------------------------- 4. Concentration & fragmentation -- AI-compute codes only
+\sectionpage{4. Concentration \& fragmentation -- AI-compute codes only}{Monthly measures built on top of the model, for the three blue codes only. Dotted lines mark Jul 2023 and Apr 2025. Interpretation: results/network\_stats/findings.md.}
+
+\chartpage{Two meanings of fragmentation}{Left: do the model's groups overlap (a technical check, little economic signal). Right: the share of trade crossing between the China and US blocs -- down about 70\% since 2017, in two steps (2019, then 2023 on), with no recovery between.}{../results/network_stats/ai_compute/fragmentation.pdf}
+
+\chartpage{Concentration, taken apart}{Overall concentration splits exactly into three parts. The interesting one asks: do concentrated sellers ship to concentrated buyers? Mildly yes, peaking around 2019, fading through the AI era.}{../results/network_stats/ai_compute/decomposition.pdf}
+
+\chartpage{One buyer or many?}{Left: does each export group sell into one import group or several. Right: a data-quality check, elevated during the 2023-24 transition.}{../results/network_stats/ai_compute/linkage.pdf}
+
+\chartpage{Baseboards: the sharpest split}{The cross-bloc share collapses about 20x from its 2021 peak -- the code most exposed to export controls.}{../results/network_stats/847180/fragmentation.pdf}
+
+\chartpage{Parts: still shared}{The cross-bloc share halves but stays the highest of the three codes: the parts trade remains the layer both blocs still share.}{../results/network_stats/847330/fragmentation.pdf}
+
+\end{document}

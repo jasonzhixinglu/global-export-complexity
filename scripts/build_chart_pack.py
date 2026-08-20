@@ -272,6 +272,11 @@ def main(mobile=False):
         sys.exit("missing figures (regenerate first):\n" + "\n".join(missing))
     import datetime
     out = EX / ("chart_pack_mobile.pdf" if mobile else "chart_pack.pdf")
+    if not mobile and (EX / "chart_pack.tex").exists() and "--force" not in sys.argv:
+        sys.exit("exports/chart_pack.tex is the editable source of the desktop "
+                 "pack. Compile it instead: "
+                 "python scripts/build_chart_pack_tex.py --compile "
+                 "(or pass --force here to overwrite chart_pack.pdf from Python).")
     intro = ("Current state of the analysis. Data: UN Comtrade + TDM monthly "
              "panel (60 HS6 codes, 2017-01..2026-04, checked against Atlas) and "
              "Atlas annual data. Sections: 1 the chain as flows (2024) -- "

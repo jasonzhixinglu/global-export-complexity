@@ -12,3 +12,15 @@ as CHK throughout (see docs/data.md).
 - `overviews/` — 8-stage chain overviews (dollar/normalized × fine/coarse)
 - `network/` — country-node network graph
 - `pci/` — PCI-workstream exports (older)
+
+## Chart packs
+
+- `chart_pack.tex` — **editable source** of the desktop pack: titles and
+  captions are plain LaTeX text, one `\chartpage{title}{caption}{figure}`
+  per page. Compile with `cd exports && pdflatex chart_pack.tex`, or
+  `python scripts/build_chart_pack_tex.py --compile`.
+- `chart_pack.pdf` — compiled from the .tex.
+- `chart_pack_mobile.pdf` — phone layout, built by
+  `python scripts/build_chart_pack.py mobile`.
+- Figures come from their generator scripts; rerun a generator to refresh a
+  chart, then recompile. Charts embed as vector PDFs, so zoom stays sharp.
