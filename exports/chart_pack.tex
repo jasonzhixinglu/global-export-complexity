@@ -57,6 +57,18 @@
   \fi
 }
 
+% \textpage{title}{body}  -- a slide with no figure (equations, explanation)
+\newcommand{\textpage}[2]{%
+  \clearpage
+  \sbox{\gechdr}{\begin{minipage}{\linewidth}\raggedright
+      {\large\bfseries #1\par}\vspace{7pt}{\small\color{captiongrey}#2\par}
+    \end{minipage}}%
+  \ifmobile
+    \pdfpageheight=\dimexpr\gecpad+\ht\gechdr+\dp\gechdr+\gecpad\relax
+  \fi
+  \noindent\usebox{\gechdr}%
+}
+
 % \sectionpage{title}{blurb}
 \newcommand{\sectionpage}[2]{%
   \clearpage
@@ -98,7 +110,31 @@
 
 
 %% -------------------------------------------------------------- 2. The chain in stages
-\sectionpage{2. The chain in stages}{One page per stage: exporters on the left, importers on the right, with the factor model's country groupings in between. The groupings fit the 2024 flows closely (R-squared 0.95 to 0.99). All eight stages are Trade Atlas annual data.}
+\sectionpage{2. The chain in stages}{2024 annual trade flows from the Trade Atlas. We estimate a matrix factor model to summarize trade flows by exporting and importing hubs.}
+
+\textpage{The matrix factor model}{%
+Each stage is one square matrix of trade: $X$ has a row per exporting country
+and a column per importing country, and cell $X_{ij}$ is the dollars shipped
+from $i$ to $j$ in 2024. The model summarizes that matrix as
+\[
+  X \;\approx\; R\,F\,C' ,
+\]
+with three pieces, each of which the stage charts draw as one column:
+\begin{itemize}\itemsep2pt
+  \item $R$ (countries $\times$ 4) are the \textbf{export loadings}: how much
+        each exporting country belongs to each of four export hubs. A hub is a
+        group of exporters whose trade moves together across destinations.
+  \item $C$ (countries $\times$ 4) are the \textbf{import loadings}, the same
+        idea on the buying side.
+  \item $F$ (4 $\times$ 4) are the \textbf{factors}: the dollars flowing from
+        each export hub to each import hub. This is the compressed picture of
+        the whole stage -- 900 country pairs summarized by 16 hub pairs.
+\end{itemize}
+Loadings are estimated by eigendecomposition of the pooled cross-products and
+then rotated to the basis that makes them non-negative, so a loading reads as a
+share rather than an arbitrary weight. Four hubs per side is the working rank;
+the fit is close, with an R-squared of 0.95 to 0.99 across stages. Section 3
+applies the same model month by month, letting the hubs move over time.}
 
 \chartpage{Stage 1 -- raw materials}{Reading guide for all stage pages: left = exporters, right = importers, middle = the model's export and import groups. Much raw-materials trade is not chip-related (the codes also cover welding gas, abrasives, fertilizer inputs), so flows scatter widely.}{hubs_nnf/supply_chain_1_raw_materials_nnf_hubs_2024.pdf}
 

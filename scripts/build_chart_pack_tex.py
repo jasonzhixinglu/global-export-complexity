@@ -92,6 +92,18 @@ PREAMBLE = r"""% Chart pack -- editable source.
   \fi
 }
 
+% \textpage{title}{body}  -- a slide with no figure (equations, explanation)
+\newcommand{\textpage}[2]{%
+  \clearpage
+  \sbox{\gechdr}{\begin{minipage}{\linewidth}\raggedright
+      {\large\bfseries #1\par}\vspace{7pt}{\small\color{captiongrey}#2\par}
+    \end{minipage}}%
+  \ifmobile
+    \pdfpageheight=\dimexpr\gecpad+\ht\gechdr+\dp\gechdr+\gecpad\relax
+  \fi
+  \noindent\usebox{\gechdr}%
+}
+
 % \sectionpage{title}{blurb}
 \newcommand{\sectionpage}[2]{%
   \clearpage
