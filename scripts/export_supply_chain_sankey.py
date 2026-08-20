@@ -608,7 +608,7 @@ def draw_network(stage_groups):
     width ~ sqrt(dollars); node area ~ total involvement. Complements the staged
     flow charts, which cannot show in-country transformation."""
     from matplotlib.patches import FancyArrowPatch, Circle
-    EDGE_MIN = 5.0
+    EDGE_MIN = 3.0   # low enough that every named node has at least one edge
     POS = {"USA": (0.13, 0.56), "MEX": (0.10, 0.28), "DEU": (0.27, 0.86),
            "NLD": (0.41, 0.92), "JPN": (0.88, 0.84), "KOR": (0.79, 0.71),
            "TWN": (0.86, 0.50), "CHK": (0.64, 0.62), "VNM": (0.57, 0.40),
