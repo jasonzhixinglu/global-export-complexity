@@ -35,6 +35,7 @@ import matplotlib.pyplot as plt
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from gec import config as cfg
+from gec.palette import COUNTRY as CCOL, COUNTRY_FALLBACK as CFALL
 
 K = 4
 WINDOW = 12
@@ -325,10 +326,11 @@ def fig_paths(Ls, countries, labels, eras, side):
         _shade(ax, labels, eras)
         lead = np.argsort(-np.abs(L[:, :, j]).mean(0))[:6]
         for ci, i in enumerate(lead):
-            ax.plot(d, L[:, i, j], lw=2, color=SERIES[ci % len(SERIES)])
+            col = CCOL.get(countries[i], CFALL)
+            ax.plot(d, L[:, i, j], lw=2, color=col)
             ax.annotate(countries[i], (d[-1], L[-1, i, j]), xytext=(4, 0),
                         textcoords="offset points", fontsize=8,
-                        color=SERIES[ci % len(SERIES)])
+                        color=col)
         ax.set_title(f"{side} hub {j+1}", fontsize=10, color=INK)
         ax.axhline(0, color="#c3c2b7", lw=1)
     fig.suptitle(f"{TITLE} — {side} loadings, era-anchored "

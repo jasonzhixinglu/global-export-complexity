@@ -36,7 +36,7 @@ from matplotlib.patches import PathPatch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from gec import config as cfg
 from gec.classifications import SEMICONDUCTOR_OECD as _OECD
-from gec.palette import STAGE as PAL
+from gec.palette import STAGE as PAL, COUNTRY as CCOL, COUNTRY_FALLBACK as CFALL
 
 ATLAS = cfg.DATA_DIR / "derived" / "atlas_stage_flows.parquet"
 YEAR = "2024"
@@ -47,14 +47,10 @@ OUT_DIR = cfg.ROOT / "exports"
 # flows excluded); USA and Mexico stay separate.
 BLOC = {"CHN": "CHK", "HKG": "CHK"}
 
-# consistent country colours -- one hue family per major country so none collide
-# (CHK red, USA blue, TWN green, KOR amber, JPN violet, MEX orange,
-#  NLD brown, DEU olive, SGP cyan, MYS crimson, VNM lime, THA blue-gray)
-COLOR = {"CHK": "#d7191c", "USA": "#2a78d6", "TWN": "#00a878", "KOR": "#eda100",
-         "JPN": "#7b3fbf", "HKG": "#f06ba8", "CHN": "#d7191c", "MEX": "#f4692e",
-         "NLD": "#8c510a", "DEU": "#708238", "SGP": "#17becf", "MYS": "#c2185b",
-         "VNM": "#84bd00", "THA": "#607d8b", "IRL": "#bdb76b", "Other": "#b5b3ac"}
-FALLBACK = "#898781"
+# country colours come from the shared palette (src/gec/palette.py) so a
+# country keeps its colour in every figure of the pack
+COLOR = dict(CCOL)
+FALLBACK = CFALL
 SURFACE, INK, INK2, MUTED = "#fcfcfb", "#0b0b0b", "#52514e", "#898781"
 
 # The OECD 'photo' basket (photosensitive devices, $66B) is excluded: it is
