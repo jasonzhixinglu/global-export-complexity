@@ -105,7 +105,7 @@
 %% -------------------------------------------------------------- 1. The chain as flows
 \sectionpage{1. The supply chain in 2024}{2024 annual trade flows from the Trade Atlas. We record all relevant HS6 codes, so its coverage extends beyond solely AI compute. China and Hong Kong are counted as one trade bloc (CHK) throughout.}
 
-\chartpage{Topography of the supply chain}{Two upstream inputs feed chip fabrication: capital equipment in orange is used to build manufacturing facilities, raw materials and wafers are consumed per chip. Green represents the actual chip fabrication, which feeds downstream assembly toward AI servers in blue. Circle size in proportion with the log of 2024 USD total trade value.}{chain_topology.pdf}
+\chartpage{Topography of the supply chain}{Two upstream inputs feed chip fabrication: capital equipment in orange is used to build manufacturing facilities, while raw materials and wafers in pink are consumed per chip. Green represents the actual chip fabrication, which feeds downstream assembly toward AI servers in blue. Circle size in proportion with the log of 2024 USD total trade value.}{chain_topology.pdf}
 
 \chartpage{The chain in bilateral trade flows}{Width of band = 2024 USD trade. Small flows are grouped into other (grey).}{overviews/supply_chain_overview_dollar_coarse_2024.pdf}
 
@@ -124,14 +124,14 @@ for $N$ countries, $K$ export hubs indexed by $k$, and $M$ import hubs indexed b
 \begin{itemize}\itemsep2pt
   \item $R$ ($N \times K$) are the \textbf{export loadings}: the weight of each country in each export hub.
   \item $C$ ($N \times M$) are the \textbf{import loadings}: the weight of each country in each import hub.
-  \item $F$ ($K \times M$) are the \textbf{matrix factors}: $F_{km}$ is the dollar flow from export hub $k$ to import hub $m$.
+  \item $F$ ($K \times M$) are the \textbf{matrix factors}: $F_{km}$ is the flow from hub $k$ to hub $m$.
   \item $e$ ($N \times N$) are the idiosyncratic errors.
 \end{itemize}
 }
 
 \chartpage{The same model as a picture}{Similar to a PCA model, which summarizes co-movement in a vector as loadings times a low-dimensional vector of factors, the MFM does the same for a matrix: it summarizes $X$ by a low-dimensional matrix of factors with two sets of loadings.}{mfm_schematic.pdf}
 
-\chartpage{Stage 1 -- raw materials}{Left to right: exporters to export hubs to import hubs to importers. Raw materials trade is relatively small (13B) and diffused across countries. }{hubs_nnf/supply_chain_1_raw_materials_nnf_hubs_2024.pdf}
+\chartpage{Stage 1 -- raw materials}{Left to right: exporters to export hubs to import hubs to importers. Raw materials trade is relatively small (13B) and diffused across countries.}{hubs_nnf/supply_chain_1_raw_materials_nnf_hubs_2024.pdf}
 
 \chartpage{Stage 2 -- wafers and wafer inputs}{Japan is the largest exporter, about a third of the 25B world total.}{hubs_nnf/supply_chain_2_wafers_nnf_hubs_2024.pdf}
 
@@ -139,7 +139,7 @@ for $N$ countries, $K$ export hubs indexed by $k$, and $M$ import hubs indexed b
 
 \chartpage{Stage 4 -- fab equipment}{Machines, not materials: countries buy these to build capacity, and their imports rise 6-12 months before chip exports.}{hubs_nnf/supply_chain_4_equipment_nnf_hubs_2024.pdf}
 
-\chartpage{Stage 5 -- chips}{The biggest stage, and the whole electronics industry -- phones, cars and PCs, not just AI. Most chips flow to Asian assembly; the China sphere absorbs about 43\%.}{hubs_nnf/supply_chain_5_chips_nnf_hubs_2024.pdf}
+\chartpage{Stage 5 -- chips}{The biggest stage, and the whole electronics industry -- phones, cars and PCs, not just AI. Most chips flow to Asian assembly; the China bloc alone absorbs 36 percent of world chip imports.}{hubs_nnf/supply_chain_5_chips_nnf_hubs_2024.pdf}
 
 \chartpage{Stage 6 -- parts and GPU modules (847330)}{The China bloc exports the most by value (28B in 2024), ahead of the United States and Vietnam; the United States is the largest buyer (31B), then the China bloc and Mexico.}{hubs_nnf/supply_chain_6_parts_nnf_hubs_2024.pdf}
 
@@ -152,18 +152,18 @@ for $N$ countries, $K$ export hubs indexed by $k$, and $M$ import hubs indexed b
 
 \chartpage{When the network changed shape}{The line plots the month-to-month change in time-varying export loadings. We see stability until Aug 2023 (AI demand rampup), Oct 2024 (memory export controls signaled), and Sep 2025 (Nvidia GB300 production).}{../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/drift.pdf}
 
-\chartpage{Who is in each export group}{For export hub 2, Singapore swaps for China's export share in October 2024, perhaps reflecting transshipment to circumvent tariffs or export controls.}{../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/loadings_export.pdf}
+\chartpage{Who is in each export hub}{For export hub 2, Singapore swaps for China's export share in October 2024, perhaps reflecting transshipment to circumvent tariffs or export controls.}{../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/loadings_export.pdf}
 
-\chartpage{Who is in each import group}{For import hub 2, Taiwan comes to dominate from late 2024, while import hub 3, previously China-led, becomes diffuse from late 2025.}{../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/loadings_import.pdf}
+\chartpage{Who is in each import hub}{For import hub 2, Taiwan comes to dominate from late 2024, while import hub 3, previously China-led, becomes diffuse from late 2025.}{../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/loadings_import.pdf}
 
 \chartpage{Trade between hubs, month by month}{Three of the sixteen channels carry the AI boom: Taiwan to the US (export hub 3 to import hub 1), and both legs of the US-Mexico assembly loop (export hub 1 to import hub 1, export hub 4 to import hub 4).}{../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/factors.pdf}
 
 %% -------------------------------------------------------------- 4. Concentration & fragmentation -- AI-compute codes only
 \sectionpage{4. Concentration \& fragmentation -- AI-compute only}{Monthly proxies for concentration and fragmentation calculated on the monthly time-varying MFM.}
 
-\chartpage{Export and import concentration -- all AI-compute}{Concentration is proxied by HHI: for exporters/importers, the HHI is computed within each hub and then averaged across hubs, weighted by trade.}{../results/network_stats/ai_compute/concentration.pdf}
+\chartpage{Export and import concentration -- AI-compute}{Concentration is proxied by HHI: for exporters/importers, the HHI is computed within each hub and then averaged across hubs, weighted by trade.}{../results/network_stats/ai_compute/concentration.pdf}
 
-\chartpage{Two proxies for fragmentation -- all AI-compute}{Left: do the export/import hubs overlap with one another (based on the tvMFM estimation); right: the share of trade within and across the China-HK vs the US (US, Mexico, Canada) blocs.}{../results/network_stats/ai_compute/fragmentation.pdf}
+\chartpage{Two proxies for fragmentation -- AI-compute}{Left: do the export and import hubs overlap with one another (based on the tvMFM estimation); right: the share of trade within and across the China-HK vs the US (US, Mexico, Canada) blocs.}{../results/network_stats/ai_compute/fragmentation.pdf}
 
 \chartpage{Baseboards: the clearest fragmentation}{The cross-bloc share collapses about 20x from its 2021 peak -- this is the HS6 code most exposed to export controls.}{../results/network_stats/847180/fragmentation.pdf}
 
