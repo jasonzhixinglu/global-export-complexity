@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1787245877.86511 "c:/Users/Jase/global-export-complexity/exports/chart_pack.tex" "chart_pack.pdf" "chart_pack" 1787245879.385 0
+["pdflatex"] 1787246011.08694 "c:/Users/Jase/global-export-complexity/exports/chart_pack.tex" "chart_pack.pdf" "chart_pack" 1787246012.46296 0
   "../results/mfm/tvmfm/by_country/847330/drift.pdf" 1785075325.91869 14720 ab2b6d78cd779c0f594eb53244c808b3 ""
   "../results/mfm/tvmfm/by_country/ai_compute/drift.pdf" 1785075313.80755 14835 93c33d75cb35b1c7e6cb776b34d99f5c ""
   "../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/drift.pdf" 1785075342.22342 14759 bb246ebbd690162bf6c833ceacd7b5f0 ""
@@ -85,9 +85,9 @@
   "C:/Users/Jase/AppData/Local/Programs/MiKTeX/tex/latex/microtype/microtype.sty" 1772370317 102845 043c56602c7d94c8a716319df1af5479 ""
   "C:/Users/Jase/AppData/Local/Programs/MiKTeX/tex/latex/microtype/mt-cmr.cfg" 1772370317 22906 2122f73c0e7dc828f24240c2422dfe25 ""
   "C:/Users/Jase/AppData/Local/Programs/MiKTeX/tex/latex/xcolor/xcolor.sty" 1729265222 55384 b454dec21c2d9f45ec0b793f0995b992 ""
-  "c:/Users/Jase/global-export-complexity/exports/chart_pack.tex" 1787245876.99592 12316 6e614519c96623df455d6b025bb732f0 ""
+  "c:/Users/Jase/global-export-complexity/exports/chart_pack.tex" 1787246008.79663 12383 b3bb3ae40cfacd2240bb2f9bdb9fb538 ""
   "chain_topology.pdf" 1787240286.69932 41714 c29b8bd4d13077f41ae543d6b203255c ""
-  "chart_pack.aux" 1787245879.1015 33 9c6d12a466ddf25e525340d0a343aadd "pdflatex"
+  "chart_pack.aux" 1787246012.17659 33 9c6d12a466ddf25e525340d0a343aadd "pdflatex"
   "hubs_nnf/supply_chain_1_raw_materials_nnf_hubs_2024.pdf" 1787245029.30228 26922 3756ee380406213ec2c2e9a6e8dfb1ce ""
   "hubs_nnf/supply_chain_2_wafers_nnf_hubs_2024.pdf" 1787245033.96371 26983 03975329ddbede63b073a05c67ed9717 ""
   "hubs_nnf/supply_chain_3_litho_optics_nnf_hubs_2024.pdf" 1787245038.86399 26966 afc99eaed499daad66b58105f3f0b16f ""
