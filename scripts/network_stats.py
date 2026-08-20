@@ -204,6 +204,23 @@ def figs(df, label, out):
     fig.savefig(out / "fragmentation.pdf", bbox_inches="tight")
     plt.close(fig)
 
+    # 3. concentration: plain HHI on each side
+    fig, ax = plt.subplots(figsize=(9, 3.6))
+    _mark(ax, df)
+    ax.plot(df.index, _ma(df.hhi_exp), lw=2, color=SERIES[0], label="export side")
+    ax.plot(df.index, _ma(df.hhi_imp), lw=2, color=SERIES[5], label="import side")
+    ax.set_ylabel("HHI (sum of squared shares)")
+    ax.set_title(f"{title} -- concentration of exporters and importers", fontsize=10,
+                 color=INK)
+    ax.legend(fontsize=8, frameon=False)
+    sec = ax.secondary_yaxis("right", functions=(lambda h: 1 / np.maximum(h, 1e-9),
+                                                 lambda n: 1 / np.maximum(n, 1e-9)))
+    sec.set_ylabel("effective number of countries")
+    fig.tight_layout()
+    fig.savefig(out / "concentration.png", dpi=150, bbox_inches="tight")
+    fig.savefig(out / "concentration.pdf", bbox_inches="tight")
+    plt.close(fig)
+
     # 3. per-hub linkage concentration + basis diagnostic
     fig, axes = plt.subplots(1, 2, figsize=(11, 3.8), sharex=True)
     ax = axes[0]

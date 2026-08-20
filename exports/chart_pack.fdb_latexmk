@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1787247104.44028 "c:/Users/Jase/global-export-complexity/exports/chart_pack.tex" "chart_pack.pdf" "chart_pack" 1787247105.93664 0
+["pdflatex"] 1787248397.82547 "c:/Users/Jase/global-export-complexity/exports/chart_pack.tex" "chart_pack.pdf" "chart_pack" 1787248399.17093 0
   "../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/drift.pdf" 1787247060.3718 14759 808229cdd080449f53278ae244f90bc2 ""
   "../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/factors.pdf" 1787247060.04691 50835 4cec72d8be379cb89897ccdf923b6b04 ""
   "../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/loadings_export.pdf" 1787247054.51413 42846 2670626d4fa78e622c83c2c7f16a07a4 ""
@@ -81,9 +81,9 @@
   "C:/Users/Jase/AppData/Local/Programs/MiKTeX/tex/latex/microtype/microtype.sty" 1772370317 102845 043c56602c7d94c8a716319df1af5479 ""
   "C:/Users/Jase/AppData/Local/Programs/MiKTeX/tex/latex/microtype/mt-cmr.cfg" 1772370317 22906 2122f73c0e7dc828f24240c2422dfe25 ""
   "C:/Users/Jase/AppData/Local/Programs/MiKTeX/tex/latex/xcolor/xcolor.sty" 1729265222 55384 b454dec21c2d9f45ec0b793f0995b992 ""
-  "c:/Users/Jase/global-export-complexity/exports/chart_pack.tex" 1787247104.19622 11528 ef009c411c7ab74278d198207e90e315 ""
+  "c:/Users/Jase/global-export-complexity/exports/chart_pack.tex" 1787248396.99322 11579 b68b145a5072321d4619962c64337b31 ""
   "chain_topology.pdf" 1787240286.69932 41714 c29b8bd4d13077f41ae543d6b203255c ""
-  "chart_pack.aux" 1787247105.57145 33 d2184818cd16c7334a2328a01fa4fb24 "pdflatex"
+  "chart_pack.aux" 1787248398.88647 33 d2184818cd16c7334a2328a01fa4fb24 "pdflatex"
   "hubs_nnf/supply_chain_1_raw_materials_nnf_hubs_2024.pdf" 1787247068.39039 26962 0ee66b1223486f33fe93ba240743af2e ""
   "hubs_nnf/supply_chain_2_wafers_nnf_hubs_2024.pdf" 1787247072.83655 27023 a76aa93d086539ba14a49aa974f45ea6 ""
   "hubs_nnf/supply_chain_3_litho_optics_nnf_hubs_2024.pdf" 1787247077.86773 26978 6f7eb7e6fe96d2b7034210121d4b7337 ""
@@ -93,8 +93,8 @@
   "hubs_nnf/supply_chain_7_baseboards_nnf_hubs_2024.pdf" 1787247096.99414 26162 fc0476ecf8499f549a8a4cdd81736e3c ""
   "hubs_nnf/supply_chain_8_servers_nnf_hubs_2024.pdf" 1787247101.50257 26860 910305b2097a0e0bc81fc5ec76e90b60 ""
   "mfm_schematic.pdf" 1787245667.81582 21050 089e5c4e3bcb60d0108b2297100ed8f6 ""
-  "network/supply_chain_network_2024.pdf" 1787245082.70069 34827 1e0ffb4e2bc5e68861bcabac1b735a76 ""
-  "overviews/supply_chain_overview_dollar_coarse_2024.pdf" 1787245073.44127 37393 64e1c117563012864bbe6084ea6e537c ""
+  "network/supply_chain_network_2024.pdf" 1787247117.87588 34827 6e8b63211638986c375ce4968f0b70fa ""
+  "overviews/supply_chain_overview_dollar_coarse_2024.pdf" 1787247109.79667 37393 1b518b3b760ca28dfb82ee75993635e0 ""
   (generated)
   "chart_pack.aux"
   "chart_pack.log"

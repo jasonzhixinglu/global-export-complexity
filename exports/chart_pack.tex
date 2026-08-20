@@ -152,22 +152,24 @@ for $N$ countries, $K$ export hubs indexed by $k$, and $M$ import hubs indexed b
 
 \chartpage{When the network changed shape}{The line plots the month-to-month change in time-varying export loadings. We see stability until Aug 2023 (AI demand rampup), Oct 2024 (memory export controls signaled), and Sep 2025 (Nvidia GB300 production).}{../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/drift.pdf}
 
-\chartpage{Who is in each export group}{For export hub 2, Singapore swaps for China's export share in October 2024, perhaps reflecting transshipment to subvert export controls.}{../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/loadings_export.pdf}
+\chartpage{Who is in each export group}{For export hub 2, Singapore swaps for China's export share in October 2024, perhaps reflecting transshipment to circumvent tariffs or export controls.}{../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/loadings_export.pdf}
 
 \chartpage{Who is in each import group}{For import hub 2, Taiwan comes to dominate from late 2024, while import hub 3, previously China-led, becomes diffuse from late 2025.}{../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/loadings_import.pdf}
 
 \chartpage{Trade between hubs, month by month}{Three of the sixteen channels carry the AI boom: Taiwan to the US (export hub 3 to import hub 1), and both legs of the US-Mexico assembly loop (export hub 1 to import hub 1, export hub 4 to import hub 4).}{../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/factors.pdf}
 
 %% -------------------------------------------------------------- 4. Concentration & fragmentation -- AI-compute codes only
-\sectionpage{4. Concentration \& fragmentation -- AI-compute codes only}{Monthly measures built on top of the model, for the three blue codes only. Dotted lines mark Jul 2023 and Apr 2025. Interpretation: results/network\_stats/findings.md.}
+\sectionpage{4. Concentration \& fragmentation -- AI-compute only}{Monthly proxies for concentration and fragmentation calculated on the monthly time-varying MFM.}
 
-\chartpage{Two meanings of fragmentation}{Left: do the model's groups overlap (a technical check, little economic signal). Right: the share of trade crossing between the China and US blocs -- down about 70\% since 2017, in two steps (2019, then 2023 on), with no recovery between.}{../results/network_stats/ai_compute/fragmentation.pdf}
+\chartpage{Two proxies for fragmentation}{Left: do the export/import groups overlap (based on the tvMFM estimation). Right: the share of trade crossing between the China bloc (China and Hong Kong) and the US bloc (United States, Mexico, Canada) -- down about 70\% since 2017, in two steps (2019, then 2023 on).}{../results/network_stats/ai_compute/fragmentation.pdf}
 
-\chartpage{Concentration, taken apart}{Overall concentration splits exactly into three parts. The interesting one asks: do concentrated sellers ship to concentrated buyers? Mildly yes, peaking around 2019, fading through the AI era.}{../results/network_stats/ai_compute/decomposition.pdf}
+\chartpage{How concentrated is each side}{Concentration is a Herfindahl index: the sum of squared country shares, so 1 means a single country holds everything and 1/N means all countries are equal. It is computed within each hub and averaged across hubs, weighted by trade. The right axis reads it as an effective number of countries: both sides sit near two by 2026.}{../results/network_stats/ai_compute/concentration.pdf}
 
 \chartpage{One buyer or many?}{Left: does each export group sell into one import group or several. Right: a data-quality check, elevated during the 2023-24 transition.}{../results/network_stats/ai_compute/linkage.pdf}
 
 \chartpage{Baseboards: the sharpest split}{The cross-bloc share collapses about 20x from its 2021 peak -- the code most exposed to export controls.}{../results/network_stats/847180/fragmentation.pdf}
+
+\chartpage{Servers: the US bloc closes in}{Cross-bloc share falls from 0.09 to 0.02 while trade within the US bloc doubles to 0.40 -- server assembly is consolidating inside one bloc.}{../results/network_stats/847150/fragmentation.pdf}
 
 \chartpage{Parts: still shared}{The cross-bloc share halves but stays the highest of the three codes: the parts trade remains the layer both blocs still share.}{../results/network_stats/847330/fragmentation.pdf}
 
