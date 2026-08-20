@@ -113,28 +113,28 @@
 \sectionpage{2. The chain in stages}{2024 annual trade flows from the Trade Atlas. We estimate a matrix factor model to summarize trade flows by exporting and importing hubs.}
 
 \textpage{The matrix factor model}{%
-Each stage is one square matrix of trade: $X$ has a row per exporting country
-and a column per importing country, and cell $X_{ij}$ is the dollars shipped
-from $i$ to $j$ in 2024. The model summarizes that matrix as
+Per stage, the bilateral export matrix, $X$, has one row per exporter and one column per importer, such that cell $X_{ij}$ is the export value from $i$ to $j$ in 2024. The Matrix Factor Model (MFM) is given by
 \[
-  X \;\approx\; R\,F\,C' ,
+  X = R\,F\,C' + e,
 \]
-with three pieces, each of which the stage charts draw as one column:
+for $N$ countries, $k$ export hubs and $r$ import hubs, with three pieces that
+the stage charts draw as one column each:
 \begin{itemize}\itemsep2pt
-  \item $R$ (countries $\times$ 4) are the \textbf{export loadings}: how much
-        each exporting country belongs to each of four export hubs. A hub is a
-        group of exporters whose trade moves together across destinations.
-  \item $C$ (countries $\times$ 4) are the \textbf{import loadings}, the same
-        idea on the buying side.
-  \item $F$ (4 $\times$ 4) are the \textbf{factors}: the dollars flowing from
-        each export hub to each import hub. This is the compressed picture of
-        the whole stage -- 900 country pairs summarized by 16 hub pairs.
+  \item $R$ ($N \times k$) are the \textbf{export loadings}: how much
+        each exporting country participates in each export hub.
+  \item $C$ ($N \times r$) are the \textbf{import loadings}, how much each importing country participates in each import hub.
+  \item $F$ ($k \times r$) are the \textbf{matrix factors}: $F_{ab}$ is the dollar flow from export hub $a$ to import hub $b$.
+  \item $e$ ($N \times N$) are the idiosyncratic errors.
 \end{itemize}
-Loadings are estimated by eigendecomposition of the pooled cross-products and
-then rotated to the basis that makes them non-negative, so a loading reads as a
-share rather than an arbitrary weight. Four hubs per side is the working rank;
-the fit is close, with an R-squared of 0.95 to 0.99 across stages. Section 3
-applies the same model month by month, letting the hubs move over time.}
+A vector factor model summarizes co-movement in a vector of series as loadings
+times a lower-dimensional vector of factors. The matrix factor model does the
+same for a matrix, but needs two sets of loadings -- one for rows, one for
+columns -- and the factors themselves form a lower-dimensional matrix. Setting
+$k = r = 4$, each stage's whole trade matrix is summarized by 16 hub-to-hub
+flows. Loadings are rotated to the basis that makes them non-negative, so a
+loading reads as a share; the fit is close, with an R-squared of 0.95 to 0.99
+across stages. Section 3 estimates the same model month by month, letting the
+hubs move over time.}
 
 \chartpage{Stage 1 -- raw materials}{Reading guide for all stage pages: left = exporters, right = importers, middle = the model's export and import groups. Much raw-materials trade is not chip-related (the codes also cover welding gas, abrasives, fertilizer inputs), so flows scatter widely.}{hubs_nnf/supply_chain_1_raw_materials_nnf_hubs_2024.pdf}
 
