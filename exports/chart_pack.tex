@@ -80,7 +80,7 @@
   \vspace{18pt}
   \begin{minipage}{\ifmobile 0.92\else 0.80\fi\linewidth}\centering
     \ifmobile\small\else\large\fi\color{captiongrey}
-    Current state of the analysis. Data: UN Comtrade + TDM monthly panel (60 HS6 codes, 2017-01 to 2026-04, checked against Atlas) and Atlas annual data. Sections 3 and 4 use the AI-compute codes only. Details: docs/data.md, docs/supply-chain-narrative.md, results/.
+    Using data from UN Comtrade + TDM + Trade Atlas, construct a bilateral monthly panel of HS6 trade flows relevant for the AI-compute supply chain (60 HS6 codes, 2017-01 to 2026-04). 
   \end{minipage}
   \vspace{22pt}
 
@@ -88,32 +88,32 @@
 \end{center}
 
 %% -------------------------------------------------------------- 1. The chain as flows
-\sectionpage{1. The chain as flows}{2024 trade flows. China and Hong Kong are counted as one (CHK) throughout. Stages 1-5 use annual Atlas data; stages 6-8 our monthly panel.}
+\sectionpage{1. The chain as HS6 trade flows}{2024 annual trade flows. Upstream stages come from Trade Atlas, the compute stages from our own monthly panel. China and Hong Kong are counted as one trade bloc (CHK) throughout}
 
-\chartpage{The shape of the chain}{Two input branches feed chip making; finished hardware flows out to the right. Pink inputs are used up per chip; orange equipment builds capacity. Blue: the three codes of our monthly panel. Circle size grows with the log of 2024 trade.}{chain_topology.pdf}
+\chartpage{Topography of the supply chain}{Two upstream inputs feed chip fabrication: capital equipment fixed costs in orange are used to build chip fabs, raw materials and wafer variable costs are used per chip. Green represents the chip fabrication. Chips feed downstream assembly into AI servers. Circle size in proportion with the log of 2024 USD trade value.}{chain_topology.pdf}
 
 \chartpage{The whole chain on one dollar scale}{Band width = 2024 dollars. The chips stage dominates; small input flows are drawn but too thin to see.}{overviews/supply_chain_overview_dollar_coarse_2024.pdf}
 
 \chartpage{The same flows as a country map}{Countries as nodes, flows as edges colored by stage. Shows combined roles: Mexico takes in chips and parts and ships out servers.}{network/supply_chain_network_2024.pdf}
 
 %% -------------------------------------------------------------- 2. The chain in stages
-\sectionpage{2. The chain in stages}{One page per stage: exporters on the left, importers on the right, with the model's groupings in between. Groupings fit the 2024 flows closely (R-squared 0.95-0.99).}
+\sectionpage{2. The chain in stages}{One page per stage: exporters on the left, importers on the right, with the factor model's country groupings in between. The groupings fit the 2024 flows closely (R-squared 0.95 to 0.99). Stages 1 to 5 are Trade Atlas annual data, stages 6 to 8 our monthly panel.}
 
 \chartpage{Stage 1 -- raw materials}{Reading guide for all stage pages: left = exporters, right = importers, middle = the model's export and import groups. Much raw-materials trade is not chip-related (the codes also cover welding gas, abrasives, fertilizer inputs), so flows scatter widely.}{hubs_nnf/supply_chain_1_raw_materials_nnf_hubs_2024.pdf}
 
 \chartpage{Stage 2 -- wafers and wafer inputs}{Japan dominates the export side.}{hubs_nnf/supply_chain_2_wafers_nnf_hubs_2024.pdf}
 
-\chartpage{Stage 3 -- lithography and optics inputs}{}{hubs_nnf/supply_chain_3_litho_optics_nnf_hubs_2024.pdf}
+\chartpage{Stage 3 -- lithography and optics inputs}{Lenses, optical elements, electron microscopes and wafer inspection tools. Japan, the China bloc, Germany and the United States lead the export side.}{hubs_nnf/supply_chain_3_litho_optics_nnf_hubs_2024.pdf}
 
 \chartpage{Stage 4 -- fab equipment}{Machines, not materials: countries buy these to build capacity, and their imports rise 6-12 months before chip exports.}{hubs_nnf/supply_chain_4_equipment_nnf_hubs_2024.pdf}
 
 \chartpage{Stage 5 -- chips}{The biggest stage, and the whole electronics industry -- phones, cars and PCs, not just AI. Most chips flow to Asian assembly; the China sphere absorbs about 43\%.}{hubs_nnf/supply_chain_5_chips_nnf_hubs_2024.pdf}
 
-\chartpage{Stage 6 -- parts and GPU modules (847330)}{}{hubs_nnf/supply_chain_6_parts_nnf_hubs_2024.pdf}
+\chartpage{Stage 6 -- parts and GPU modules (847330)}{The China bloc exports the most by value (30B in 2024), ahead of the United States and Korea; the United States is the largest buyer (31B), then the China bloc and Mexico.}{hubs_nnf/supply_chain_6_parts_nnf_hubs_2024.pdf}
 
-\chartpage{Stage 7 -- baseboards (847180)}{}{hubs_nnf/supply_chain_7_baseboards_nnf_hubs_2024.pdf}
+\chartpage{Stage 7 -- baseboards (847180)}{The most concentrated stage: Taiwan exports 58B of the total in 2024, five times the next exporter, and the United States takes 39B of it.}{hubs_nnf/supply_chain_7_baseboards_nnf_hubs_2024.pdf}
 
-\chartpage{Stage 8 -- AI servers (847150)}{}{hubs_nnf/supply_chain_8_servers_nnf_hubs_2024.pdf}
+\chartpage{Stage 8 -- AI servers (847150)}{Mexico (26B) and Taiwan (23B) assemble and ship; the United States buys 46B, about a third of world imports in this code.}{hubs_nnf/supply_chain_8_servers_nnf_hubs_2024.pdf}
 
 %% -------------------------------------------------------------- 3. The factor model over time -- AI-compute codes only
 \sectionpage{3. The factor model over time -- AI-compute codes only}{This section uses only the three blue codes (parts/GPU modules, baseboards, AI servers), monthly from 2017. Unless the page says otherwise, China and Hong Kong are counted as one. Shaded bands mark the periods between structural breaks.}
