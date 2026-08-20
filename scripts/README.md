@@ -25,6 +25,8 @@ in [docs/data.md](../docs/data.md).
 - `network_stats.py` — concentration/fragmentation measure system on the TV-MFM
   output (docs/concentration-fragmentation-nnf-mfm-trade.md → results/network_stats)
 - `export_supply_chain_sankey.py` — all supply-chain charts (hub charts, overviews, network)
+- `draw_chain_topology.py` / `draw_mfm_schematic.py` — stylized chain map; factor-model explainer
+- `build_chart_pack.py` — assemble chart_pack.pdf / chart_pack_mobile.pdf from current figures
 
 ## PCI workstream (dashboard; see docs/pci-analysis.md)
 
