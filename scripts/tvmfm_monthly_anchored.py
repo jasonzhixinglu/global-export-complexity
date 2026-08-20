@@ -345,7 +345,8 @@ def fig_factors(F, F_ma, labels, eras):
     d = _dates(labels)
     lo, hi = F.min(), F.max()
     pad = 0.06 * (hi - lo)
-    fig, axes = plt.subplots(K, K, figsize=(2.6 * K, 1.9 * K), sharex=True, sharey=True)
+    import matplotlib.dates as mdates
+    fig, axes = plt.subplots(K, K, figsize=(3.0 * K, 1.9 * K), sharex=True, sharey=True)
     for i in range(K):
         for j in range(K):
             ax = axes[i, j]
@@ -355,6 +356,11 @@ def fig_factors(F, F_ma, labels, eras):
             ax.set_ylim(lo - pad, hi + pad)
             ax.set_title(f"exp {i+1} → imp {j+1}", fontsize=8, color=INK2)
             ax.tick_params(labelsize=7)
+            # every other year, two-digit, upright: 16 small panels cannot carry
+            # a label per year without overlapping
+            ax.xaxis.set_major_locator(mdates.YearLocator(2))
+            ax.xaxis.set_minor_locator(mdates.YearLocator(1))
+            ax.xaxis.set_major_formatter(mdates.DateFormatter("'%y"))
     fig.suptitle(f"{TITLE} — hub-to-hub F_t, era-anchored (3m MA thick)", color=INK)
     fig.tight_layout()
     fig.savefig(OUT_DIR / "factors.png", dpi=150, bbox_inches="tight")
