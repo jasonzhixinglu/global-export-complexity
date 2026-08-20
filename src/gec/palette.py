@@ -23,11 +23,13 @@ STAGE = {
     "servers":   "#0b3d91",     # navy
 }
 
+# fills are each stage colour blended 28% over white: saturated enough to match
+# the boldness of the network graph, light enough for black labels inside
 FILL = {
-    "materials": "#fbe4ef",
-    "equipment": "#fdeade",
-    "chips":     "#e6f5ea",
-    "parts":     "#e4f1fd",
-    "baseboards": "#dbe9f8",
-    "servers":   "#d9e2f2",
+    "materials": "#f4c6db",
+    "equipment": "#f9d0bb",
+    "chips":     "#c5e4cb",
+    "parts":     "#cde7fd",
+    "baseboards": "#bfd8ee",
+    "servers":   "#bbc9e0",
 }
