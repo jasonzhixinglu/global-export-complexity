@@ -1,9 +1,10 @@
 """One-page schematic of the matrix factor model, in plain terms.
 
 Shows the basic structure: each month's country-to-country trade table is
-summarized by three smaller pieces -- which countries export alike (groups),
-how many dollars flow between export and import groups (a small table that
-changes every month), and which countries import alike.
+summarized by three smaller pieces -- which countries export alike, how many
+dollars flow between export and import hubs (a small table), and which countries
+import alike. Written generically: it applies to the static per-year model of
+Section 2 and to the rolling-window version of Section 3 alike.
 
 Output: exports/mfm_schematic.png (+ .pdf, vector) -- used by the chart pack.
 """
@@ -53,29 +54,29 @@ def main():
     ax.set_aspect("equal")
     ax.axis("off")
 
-    # the full monthly trade table
+    # the full trade table for one period
     grid(ax, 0.5, 1.4, 3.0, 3.0, 10, 10, INK2, "#f1f1ee", shade=7)
-    block_labels(ax, 2.0, "one month of trade",
-                 "30 exporters x 30 importers", INK, 4.95, 4.55)
-    ax.text(2.0, 1.12, "900 numbers", ha="center", fontsize=8.5, color=MUTED)
+    block_labels(ax, 2.0, "one period of trade",
+                 "N exporters x N importers", INK, 4.95, 4.55)
+    ax.text(2.0, 1.12, "N x N numbers", ha="center", fontsize=8.5, color=MUTED)
 
     ax.text(4.05, 2.9, "$\\approx$", fontsize=26, ha="center", va="center", color=INK)
 
     # exporter groups (tall thin)
     grid(ax, 4.6, 1.4, 1.15, 3.0, 4, 10, BLUE, "#eef3fb", shade=3)
     block_labels(ax, 5.17, "who exports alike",
-                 "30 countries, 4 export groups", BLUE, 4.95, 4.55)
-    ax.text(5.17, 1.12, "changes slowly", ha="center", fontsize=8.5, color=MUTED)
+                 "N countries, K export hubs", BLUE, 4.95, 4.55)
+    ax.text(5.17, 1.12, "who belongs where", ha="center", fontsize=8.5, color=MUTED)
 
     ax.text(6.15, 2.9, "$\\times$", fontsize=20, ha="center", va="center", color=INK)
 
     # group-to-group dollars (small square) -- labels BELOW to avoid collisions
     grid(ax, 6.6, 2.32, 1.15, 1.15, 4, 4, GREEN, "#e8f5ee", shade=5)
-    ax.text(7.17, 2.02, "dollars between groups", ha="center", va="top",
+    ax.text(7.17, 2.02, "dollars between hubs", ha="center", va="top",
             fontsize=10.5, weight="bold", color=GREEN)
-    ax.text(7.17, 1.68, "4 x 4: export group to import group",
+    ax.text(7.17, 1.68, "K x M: export hub to import hub",
             ha="center", va="top", fontsize=8.2, color=INK2)
-    ax.text(7.17, 1.34, "changes every month", ha="center", va="top",
+    ax.text(7.17, 1.34, "the compressed picture", ha="center", va="top",
             fontsize=8.5, color=MUTED)
 
     ax.text(8.2, 2.9, "$\\times$", fontsize=20, ha="center", va="center", color=INK)
@@ -83,16 +84,16 @@ def main():
     # importer groups (short wide)
     grid(ax, 8.65, 2.9, 3.0, 1.15, 10, 4, ORANGE, "#fdf1e7", shade=9)
     block_labels(ax, 10.15, "who imports alike",
-                 "4 import groups over 30 countries", ORANGE, 4.95, 4.55)
-    ax.text(10.15, 2.6, "changes slowly", ha="center", fontsize=8.5, color=MUTED)
+                 "M import hubs over N countries", ORANGE, 4.95, 4.55)
+    ax.text(10.15, 2.6, "who belongs where", ha="center", fontsize=8.5, color=MUTED)
 
     ax.text(6.75, 5.9, "How the factor model summarizes the trade data",
             ha="center", va="top", fontsize=15, weight="bold", color=INK)
     ax.text(6.75, 0.55,
-            "Every month, 900 country-to-country flows are compressed into: groups of exporters that move together,\n"
-            "groups of importers, and a small table of dollars between the groups. The groups are the slow structure of\n"
-            "the network -- when they shift, the model marks a break. The small table is the fast part: its cells are the\n"
-            "trade channels, and three of them carry the AI boom.",
+            "One period of country-to-country flows is compressed into: hubs of exporters that move together,\n"
+            "hubs of importers, and a small table of dollars between the hubs. Estimated on a single year the hub\n"
+            "memberships are fixed (Section 2); estimated on a rolling window they can move, and a shift in them\n"
+            "is what the model reports as a structural break (Section 3).",
             ha="center", va="top", fontsize=9.2, color=MUTED)
 
     out = cfg.ROOT / "exports" / "mfm_schematic.png"

@@ -31,6 +31,9 @@
 \definecolor{captiongrey}{HTML}{444444}
 \definecolor{sectiongrey}{HTML}{888888}
 
+% slide number, bottom-right of each page's content
+\newcommand{\slidenum}{\par\vspace{5pt}\noindent\hfill{\scriptsize\color{sectiongrey}\thepage}}
+
 \newsavebox{\gecfig}
 \newsavebox{\gechdr}
 \newlength{\gecpad}\setlength{\gecpad}{0.30in}
@@ -47,13 +50,13 @@
   \ifmobile
     % page height = padding + header + gap + figure + padding
     \pdfpageheight=\dimexpr\gecpad+\ht\gechdr+\dp\gechdr+\gecgap
-                          +\ht\gecfig+\dp\gecfig+\gecpad\relax
-    \noindent\usebox{\gechdr}\par\vspace{\gecgap}\noindent\usebox{\gecfig}%
+                          +\ht\gecfig+\dp\gecfig+\gecpad+14pt\relax
+    \noindent\usebox{\gechdr}\par\vspace{\gecgap}\noindent\usebox{\gecfig}\slidenum%
   \else
     \noindent\usebox{\gechdr}\vfill
     \begin{center}%
       \includegraphics[width=\linewidth,height=0.80\textheight,keepaspectratio]{#3}%
-    \end{center}\vfill
+    \end{center}\vfill\slidenum
   \fi
 }
 
@@ -64,9 +67,9 @@
       {\large\bfseries #1\par}\vspace{7pt}{\small\color{captiongrey}#2\par}
     \end{minipage}}%
   \ifmobile
-    \pdfpageheight=\dimexpr\gecpad+\ht\gechdr+\dp\gechdr+\gecpad\relax
+    \pdfpageheight=\dimexpr\gecpad+\ht\gechdr+\dp\gechdr+\gecpad+14pt\relax
   \fi
-  \noindent\usebox{\gechdr}%
+  \noindent\usebox{\gechdr}\slidenum%
 }
 
 % \sectionpage{title}{blurb}
@@ -79,7 +82,7 @@
     \vspace{14pt}%
     {\ifmobile\normalsize\else\large\fi\color{captiongrey}%
      \begin{minipage}{\ifmobile 0.92\else 0.78\fi\linewidth}\centering #2\end{minipage}\par}%
-  \end{center}%
+  \end{center}\vfill\slidenum%
 }
 
 \begin{document}
@@ -124,9 +127,11 @@ for $N$ countries, $K$ export hubs indexed by $k$, and $M$ import hubs indexed b
   \item $F$ ($K \times M$) are the \textbf{matrix factors}: $F_{km}$ is the dollar flow from export hub $k$ to import hub $m$.
   \item $e$ ($N \times N$) are the idiosyncratic errors.
 \end{itemize}
-Similar to a PCA factor model, which summarizes co-movement in a vector of series as loadings times a low-dimensional vector of factors, the MFM does the same for a matrix: a low-dimensional matrix of factors with two sets of loadings, one for the rows and one for the columns.}
+Similar to a PCA model, which summarizes co-movement in a vector as loadings times a low-dimensional vector of factors, the MFM does the same for a matrix: it summarizes $X$ by a low-dimensional matrix of factors with two sets of loadings.}
 
-\chartpage{Stage 1 -- raw materials}{Reading guide for all stage pages: left = exporters, right = importers, middle = the model's export and import groups. Much raw-materials trade is not chip-related (the codes also cover welding gas, abrasives, fertilizer inputs), so flows scatter widely.}{hubs_nnf/supply_chain_1_raw_materials_nnf_hubs_2024.pdf}
+\chartpage{The same model as a picture}{Each period's trade matrix is summarized by which countries export alike, which import alike, and a small table of dollars between those hubs. Hub membership is the slow-moving structure; the small table is the fast part.}{mfm_schematic.pdf}
+
+\chartpage{Stage 1 -- raw materials}{Left to right: exporters to export hubs to import hubs to importers. Raw materials trade is relatively small (13B) and diffused across countries. }{hubs_nnf/supply_chain_1_raw_materials_nnf_hubs_2024.pdf}
 
 \chartpage{Stage 2 -- wafers and wafer inputs}{Japan is the largest exporter, about a third of the 25B world total.}{hubs_nnf/supply_chain_2_wafers_nnf_hubs_2024.pdf}
 
@@ -144,8 +149,6 @@ Similar to a PCA factor model, which summarizes co-movement in a vector of serie
 
 %% -------------------------------------------------------------- 3. The factor model over time -- AI-compute codes only
 \sectionpage{3. The factor model over time -- AI-compute codes only}{This section uses only the three blue codes (parts/GPU modules, baseboards, AI servers), monthly from 2017. Unless the page says otherwise, China and Hong Kong are counted as one. Shaded bands mark the periods between structural breaks.}
-
-\chartpage{How the model works}{The one idea behind every page that follows.}{mfm_schematic.pdf}
 
 \chartpage{When the network changed shape}{The line measures how much the export groupings moved from one month to the next. Flat for six years, then: Aug 2023 (AI demand), Oct 2024 (the quarter memory export controls were signaled), Sep 2025.}{../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/drift.pdf}
 

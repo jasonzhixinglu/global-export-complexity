@@ -367,9 +367,13 @@ def draw_hub_chart(fname, title, codes_txt, code_or_baskets, kind, year=YEAR):
                  f"through the factor model's hubs: country -> hub from loadings; "
                  f"hub-to-hub = F; total ${total_actual:.0f}B",
                  fontsize=11, color=INK, pad=16)
-    ax.text(0.5, -0.055, f"Hub decomposition from the factor model ({src}); "
-            f"outer columns rescaled to actual totals. CHK = China+HK. Data: {data_src}.",
-            ha="center", fontsize=7.5, color=MUTED)
+    # wrapped: an unwrapped one-liner is wider than the axes, and bbox_inches
+    # "tight" would stretch the whole canvas to fit it
+    import textwrap
+    note = (f"Hub decomposition from the factor model ({src}); outer columns "
+            f"rescaled to actual totals. CHK = China+HK. Data: {data_src}.")
+    ax.text(0.5, -0.055, "\n".join(textwrap.wrap(note, 118)),
+            ha="center", va="top", fontsize=7.5, color=MUTED)
     sub = ("hubs_nnf" if fname.endswith("_nnf") else
            "hubs_spectral" if fname.endswith("_norot") else "hubs_varimax")
     (OUT_DIR / sub).mkdir(parents=True, exist_ok=True)
