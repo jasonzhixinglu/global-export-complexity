@@ -25,12 +25,20 @@ from matplotlib.patches import Circle, FancyArrowPatch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from gec import config as cfg
 from gec.classifications import SEMICONDUCTOR_OECD as O
+from gec.palette import STAGE as PAL, FILL as PAL_FILL
 
 SURFACE, INK, INK2, MUTED = "#fcfcfb", "#0b0b0b", "#52514e", "#898781"
-# color coding: materials branch pink, equipment branch orange, fabrication
-# green, the three Fed AI-compute codes (the monthly-panel focus) blue
-FILL = {"mat": "#fbe9f0", "tool": "#fdf1e7", "fab": "#e8f5ee", "down": "#dce8fb"}
-EDGE = {"mat": "#e87ba4", "tool": "#eb6834", "fab": "#008300", "down": "#2a78d6"}
+# one shared stage palette for every chart (src/gec/palette.py): pink =
+# consumed per chip, orange = capacity investment, green = fabrication,
+# blues = the AI-compute codes, darkening along the chain
+FILL = {k: PAL_FILL[v] for k, v in {
+    "raw": "materials", "wafer": "materials", "optic": "equipment",
+    "equip": "equipment", "fab": "chips", "parts": "parts",
+    "board": "baseboards", "srv": "servers"}.items()}
+EDGE = {k: PAL[v] for k, v in {
+    "raw": "materials", "wafer": "materials", "optic": "equipment",
+    "equip": "equipment", "fab": "chips", "parts": "parts",
+    "board": "baseboards", "srv": "servers"}.items()}
 
 # 2024 world trade per node ($B, CHK basis, Atlas HS2012 annual for every stage
 # -- see scripts/extract_atlas_stage_flows.py)
@@ -75,7 +83,7 @@ def main():
 
     for k, (cx, cy, kind, title, cl) in NODES.items():
         r = RAD[k]
-        ax.add_patch(Circle((cx, cy), r, fc=FILL[kind], ec=EDGE[kind],
+        ax.add_patch(Circle((cx, cy), r, fc=FILL[k], ec=EDGE[k],
                             lw=1.8, zorder=2))
         # name and value sit in the CENTER of the circle (may overflow small
         # circles); the HS6 codes list sits just BELOW the circle

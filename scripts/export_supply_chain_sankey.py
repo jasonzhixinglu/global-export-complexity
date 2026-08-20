@@ -36,6 +36,7 @@ from matplotlib.patches import PathPatch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from gec import config as cfg
 from gec.classifications import SEMICONDUCTOR_OECD as _OECD
+from gec.palette import STAGE as PAL
 
 ATLAS = cfg.DATA_DIR / "derived" / "atlas_stage_flows.parquet"
 YEAR = "2024"
@@ -613,8 +614,11 @@ def draw_network(stage_groups):
            "TWN": (0.86, 0.50), "CHK": (0.64, 0.62), "VNM": (0.57, 0.40),
            "MYS": (0.73, 0.30), "SGP": (0.60, 0.20), "THA": (0.76, 0.14),
            "Other": (0.33, 0.12)}
-    SCOL = {"fab inputs": "#898781", "chips": "#7b3fbf", "parts": "#2a78d6",
-            "baseboards": "#00a878", "servers": "#eb6834"}
+    # shared stage palette (src/gec/palette.py) so a colour means the same
+    # thing here as in the topology map
+    SCOL = {"materials": PAL["materials"], "equipment": PAL["equipment"],
+            "chips": PAL["chips"], "parts": PAL["parts"],
+            "baseboards": PAL["baseboards"], "servers": PAL["servers"]}
 
     def fold(fl):
         out = {}
@@ -640,36 +644,36 @@ def draw_network(stage_groups):
 
     # edges: big first so small stay visible on top; slight per-stage curvature so
     # parallel stage-flows between the same pair do not cover each other
-    rads = {lab: r for lab, r in zip(groups, (-0.28, -0.14, 0.0, 0.14, 0.28))}
+    rads = {lab: r for lab, r in zip(groups, (-0.30, -0.18, -0.06, 0.06, 0.18, 0.30))}
     edges = [(lab, o, t, v) for lab, fl in groups.items() for (o, t), v in fl.items()
              if v >= EDGE_MIN]
     for lab, o, t, v in sorted(edges, key=lambda e: -e[3]):
         (x0, y0), (x1, y1) = POS[o], POS[t]
         ax.add_patch(FancyArrowPatch((x0, y0), (x1, y1),
                      connectionstyle=f"arc3,rad={rads[lab]}",
-                     arrowstyle="-|>", mutation_scale=9 + 1.1 * np.sqrt(v),
-                     lw=0.55 * np.sqrt(v), color=SCOL[lab], alpha=0.5,
+                     arrowstyle="-|>", mutation_scale=10 + 1.2 * np.sqrt(v),
+                     lw=0.70 * np.sqrt(v), color=SCOL[lab], alpha=0.82,
                      shrinkA=16, shrinkB=17, zorder=2))
 
     for n, (x, y) in POS.items():
         r = 0.012 + 0.0022 * np.sqrt(inv[n])
-        ax.add_patch(Circle((x, y), r, facecolor="#3a3936", edgecolor=SURFACE,
-                            lw=1.2, zorder=5))
-        ax.text(x, y, n, ha="center", va="center", fontsize=8.5, color="#ffffff",
-                zorder=6, weight="bold")
-        ax.text(x, y - r - 0.016, f"{inv[n]:.0f}B", ha="center", fontsize=7,
-                color=MUTED, zorder=6)
+        ax.add_patch(Circle((x, y), r, facecolor="#23221f", edgecolor=SURFACE,
+                            lw=2.0, zorder=5))
+        ax.text(x, y + 0.011, n, ha="center", va="center", fontsize=8.5,
+                color="#ffffff", zorder=6, weight="bold")
+        ax.text(x, y - 0.013, f"{inv[n]:.0f}B", ha="center", va="center",
+                fontsize=6.8, color="#c9c7c1", zorder=6)
 
     lx = 0.03
     for lab, c in SCOL.items():
-        ax.plot([lx, lx + 0.03], [0.995, 0.995], color=c, lw=4, alpha=0.7)
+        ax.plot([lx, lx + 0.03], [0.995, 0.995], color=c, lw=5, alpha=0.95, solid_capstyle="butt")
         ax.text(lx + 0.036, 0.995, lab, fontsize=8.5, color=INK2, va="center")
         lx += 0.045 + 0.0085 * len(lab)
     ax.set_title("The AI-compute supply chain as a country network, 2024 — "
                  "edges by product stage, width ~ $", fontsize=12.5, color=INK,
                  pad=18, loc="left")
-    ax.text(0.99, 0.995, f"flows >= {EDGE_MIN:.0f}B; node label = total involvement; "
-            "CHK = China+HK", ha="right", fontsize=7.5, color=MUTED)
+    ax.text(0.99, 0.955, f"flows >= {EDGE_MIN:.0f}B; node label = country and total "
+            "involvement; CHK = China+HK", ha="right", fontsize=7.5, color=MUTED)
     (OUT_DIR / "network").mkdir(exist_ok=True)
     out = OUT_DIR / "network" / f"supply_chain_network_{YEAR}.png"
     fig.savefig(out, dpi=150, bbox_inches="tight", facecolor=SURFACE)
@@ -701,13 +705,16 @@ def main():
         draw_chain_overview(input_stages, seq_stages, mode)
         draw_chain_overview(input_stages, seq_stages, mode,
                             fold_min=30.0, draw_min=8.0, suffix="_coarse")
-    fab_inputs = {}
-    for f in all_flows[:4]:
-        for k, v in f.items():
-            fab_inputs[k] = fab_inputs.get(k, 0.0) + v
-    draw_network({"fab inputs": fab_inputs, "chips": all_flows[4],
-                  "parts": all_flows[5], "baseboards": all_flows[6],
-                  "servers": all_flows[7]})
+    def merge(fs):
+        out = {}
+        for f in fs:
+            for k, v in f.items():
+                out[k] = out.get(k, 0.0) + v
+        return out
+    draw_network({"materials": merge(all_flows[:2]),      # raw + wafers
+                  "equipment": merge(all_flows[2:4]),     # optics + fab tools
+                  "chips": all_flows[4], "parts": all_flows[5],
+                  "baseboards": all_flows[6], "servers": all_flows[7]})
 
 
 if __name__ == "__main__":
