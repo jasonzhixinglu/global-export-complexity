@@ -19,6 +19,7 @@
   \usepackage[a4paper,landscape,top=1.1cm,bottom=1.0cm,left=1.4cm,right=1.4cm]{geometry}
 \fi
 \usepackage{graphicx}
+\usepackage{array}
 \usepackage{xcolor}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
@@ -99,8 +100,46 @@
   \end{minipage}
   \vspace{22pt}
 
-  {\color{sectiongrey}2026-08-20}
+  {\color{captiongrey}Jason Lu}
+
+  {\color{sectiongrey}2026-08-21}
 \end{center}
+
+\textpage{Categorizing the supply chain}{%
+Two sources identify the relevant HS6 codes:
+\begin{itemize}\itemsep3pt
+  \item \textbf{Fed (2026)} -- FEDS Note, \emph{The Global Trade Effects of the AI Infrastructure Boom} (13 Feb 2026). A narrow definition of three HS6 codes as AI-compute: \textbf{847150} AI servers, \textbf{847180} baseboards and other units, \textbf{847330} parts and GPU modules.
+  \item \textbf{OECD (2025)} -- \emph{Mapping the semiconductor value chain}, HS 2017. \textbf{59} codes covering everything upstream of AI-compute: raw materials, wafer inputs, lithography and optics, fab equipment, and chips.
+\end{itemize}
+\vspace{3pt}
+We drop the OECD's photosensitive-devices group (two codes, dominated by solar cells) to leave 60 codes in total.}
+
+\textpage{The bilateral monthly panel}{%
+\vspace{15pt}
+
+{\centering\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}ccccccccc@{}}
+  {\LARGE\bfseries 60} & {\large$\times$} & {\LARGE\bfseries 112} & {\large$\times$} &
+  {\LARGE\bfseries 30} & {\large$\times$} & {\LARGE\bfseries 30} & {\large$\rightarrow$} &
+  {\LARGE\bfseries 3.5m} \tabularnewline[3pt]
+  {\footnotesize\color{captiongrey}codes} & & {\footnotesize\color{captiongrey}months} & &
+  {\footnotesize\color{captiongrey}exporters} & & {\footnotesize\color{captiongrey}importers} & &
+  {\footnotesize\color{captiongrey}flows covering \$15tn of trade} \tabularnewline
+\end{tabular}\par}
+
+\vspace{11pt}
+{\color{sectiongrey}\rule{\linewidth}{0.4pt}}
+\vspace{7pt}
+
+Assembled from three sources:
+\begin{description}\itemsep4pt
+  \item[UN Comtrade] is the backbone of the sample, covering validated national submissions.
+  \item[Trade Data Monitor] fills in data where Comtrade lacks coverage: Taiwan is absent from Comtrade entirely, China missing from 2025 and Vietnam from 2024.
+  \item[Atlas of Economic Complexity] supplies annual bilateral flows up to 2024.
+\end{description}
+}
+
+
 
 %% -------------------------------------------------------------- 1. The chain as flows
 \sectionpage{1. The supply chain in 2024}{2024 annual trade flows from the Trade Atlas. We record all relevant HS6 codes, so its coverage extends beyond solely AI compute. China and Hong Kong are counted as one trade bloc (CHK) throughout.}
@@ -113,7 +152,7 @@
 
 
 %% -------------------------------------------------------------- 2. The chain in stages
-\sectionpage{2. The chain in stages}{2024 annual trade flows from the Trade Atlas. We estimate a matrix factor model to summarize trade flows by exporting and importing hubs.}
+\sectionpage{2. The 2024 supply chain in stages}{We estimate a matrix factor model on annual trade flows from the Trade Atlas, to summarize the full supply chain in 2024.}
 
 \textpage{The matrix factor model}{%
 Per stage, the bilateral export matrix, $X$, has $i$-$j$th entry giving the export value from country $i$ to country $j$ in 2024. The Matrix Factor Model (MFM) for $X$ is given by
@@ -122,14 +161,14 @@ Per stage, the bilateral export matrix, $X$, has $i$-$j$th entry giving the expo
 \]
 for $N$ countries, $K$ export hubs indexed by $k$, and $M$ import hubs indexed by $m$:
 \begin{itemize}\itemsep2pt
-  \item $R$ ($N \times K$) are the \textbf{export loadings}: the weight of each country in each export hub.
-  \item $C$ ($N \times M$) are the \textbf{import loadings}: the weight of each country in each import hub.
-  \item $F$ ($K \times M$) are the \textbf{matrix factors}: $F_{km}$ is the flow from hub $k$ to hub $m$.
+  \item $R$ ($N \times K$) are the \textbf{export loadings}: weights of each country per export hub.
+  \item $C$ ($N \times M$) are the \textbf{import loadings}: weights of each country per import hub.
+  \item $F$ ($K \times M$) are the \textbf{matrix factors}: $F_{km}$ is the trade from hub $k$ to hub $m$.
   \item $e$ ($N \times N$) are the idiosyncratic errors.
 \end{itemize}
 }
 
-\chartpage{The same model as a picture}{Similar to a PCA model, which summarizes co-movement in a vector as loadings times a low-dimensional vector of factors, the MFM does the same for a matrix: it summarizes $X$ by a low-dimensional matrix of factors with two sets of loadings.}{mfm_schematic.pdf}
+\chartpage{The MFM as a picture}{Similar to a PCA model, which summarizes co-movement in a vector as loadings times a low-dimensional vector of factors, the MFM does the same for a matrix: it summarizes $X$ by a low-dimensional matrix of factors with two sets of loadings.}{mfm_schematic.pdf}
 
 \chartpage{Stage 1 -- raw materials}{Left to right: exporters to export hubs to import hubs to importers. Raw materials trade is relatively small (13B) and diffused across countries.}{hubs_nnf/supply_chain_1_raw_materials_nnf_hubs_2024.pdf}
 
@@ -148,7 +187,7 @@ for $N$ countries, $K$ export hubs indexed by $k$, and $M$ import hubs indexed b
 \chartpage{Stage 8 -- AI servers (847150)}{Mexico (25B) and Taiwan (19B) assemble and ship; the United States buys 43B, 37 percent of world imports in this code.}{hubs_nnf/supply_chain_8_servers_nnf_hubs_2024.pdf}
 
 %% -------------------------------------------------------------- 3. Changes over time -- without a model
-\sectionpage{3. General trends by country}{Across all 60 HS6 categories, what are general trends by country?}
+\sectionpage{3. General trends by country}{Across all 60 HS6 categories, what are the general trends by country?}
 
 \chartpage{Net exports}{Taiwan and Korea take off after 2024; the US declines from trade balance to a deep deficit due to AI investment; the China bloc is a major net importer throughout the sample, although mostly due to electronic assembly whose exports we exclude.}{../results/figures/prices/net_exports_12m.pdf}
 
@@ -158,9 +197,9 @@ for $N$ countries, $K$ export hubs indexed by $k$, and $M$ import hubs indexed b
 
 
 %% -------------------------------------------------------------- 4. The factor model over time -- AI-compute codes only
-\sectionpage{4. The factor model over time -- AI-compute only}{This section looks at the three downstream AI-compute HS6 codes jointly (parts/GPU modules, baseboards, AI servers), and estimates a time-varying MFM on monthly trade from 2017.}
+\sectionpage{4. The time-varying MFM -- AI-compute}{This section looks at the three downstream AI-compute HS6 codes jointly (parts/GPU modules, baseboards, AI servers), and estimates a time-varying MFM on monthly trade from 2017.}
 
-\chartpage{When the network changed shape}{The line plots the month-to-month change in time-varying export loadings. We see stability until Aug 2023 (AI demand rampup), Oct 2024 (memory export controls signaled), and Sep 2025 (Nvidia GB300 production).}{../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/drift.pdf}
+\chartpage{When the network changed shape}{This line plots the month-to-month change in time-varying export loadings. We see stability until Aug 2023 (AI demand rampup), Oct 2024 (memory export controls signaled), and Sep 2025 (Nvidia GB300 production).}{../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/drift.pdf}
 
 \chartpage{Who is in each export hub}{For export hub 2, Singapore swaps for China's export share in October 2024, perhaps reflecting transshipment to circumvent tariffs or export controls.}{../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/loadings_export.pdf}
 
@@ -169,16 +208,16 @@ for $N$ countries, $K$ export hubs indexed by $k$, and $M$ import hubs indexed b
 \chartpage{Trade between hubs, month by month}{Three of the sixteen channels carry the AI boom: Taiwan to the US (export hub 3 to import hub 1), and both legs of the US-Mexico assembly loop (export hub 1 to import hub 1, export hub 4 to import hub 4).}{../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/factors.pdf}
 
 %% -------------------------------------------------------------- 5. Concentration & fragmentation -- AI-compute codes only
-\sectionpage{5. Concentration \& fragmentation -- AI-compute only}{Monthly proxies for concentration and fragmentation calculated on the monthly time-varying MFM.}
+\sectionpage{5. Concentration \& fragmentation -- AI-compute}{Monthly proxies for concentration and fragmentation calculated on the monthly time-varying MFM, looking only at AI-compute categories.}
 
-\chartpage{Export and import concentration -- AI-compute}{Concentration is proxied by HHI: for exporters/importers, the HHI is computed within each hub and then averaged across hubs, weighted by trade.}{../results/network_stats/ai_compute/concentration.pdf}
+\chartpage{Export and import concentration -- all AI-compute}{Concentration is proxied by HHI: for exporters/importers, the HHI is computed within each hub and then averaged across hubs, weighted by trade.}{../results/network_stats/ai_compute/concentration.pdf}
 
-\chartpage{Two proxies for fragmentation -- AI-compute}{Left: do the export and import hubs overlap with one another (based on the tvMFM estimation); right: the share of trade within and across the China-HK vs the US (US, Mexico, Canada) blocs.}{../results/network_stats/ai_compute/fragmentation.pdf}
+\chartpage{Two proxies for fragmentation -- all AI-compute}{Left: do the export and import hubs overlap with one another (based on the tvMFM estimation); right: the share of trade within and across the China-HK vs the US (US, Mexico, Canada) blocs.}{../results/network_stats/ai_compute/fragmentation.pdf}
 
 \chartpage{Baseboards: the clearest fragmentation}{The cross-bloc share collapses about 20x from its 2021 peak -- this is the HS6 code most exposed to export controls.}{../results/network_stats/847180/fragmentation.pdf}
 
 \chartpage{Servers: the US bloc picks up}{Cross-bloc share falls from 0.09 to 0.02 while trade within the US bloc doubles to 0.40 -- server assembly is consolidating inside one bloc.}{../results/network_stats/847150/fragmentation.pdf}
 
-\chartpage{Parts: still diffused}{The cross-bloc share halves but stays the highest of the three codes.}{../results/network_stats/847330/fragmentation.pdf}
+\chartpage{Parts/GPUs: still diffused}{The cross-bloc share halves but stays the highest of the three codes.}{../results/network_stats/847330/fragmentation.pdf}
 
 \end{document}
