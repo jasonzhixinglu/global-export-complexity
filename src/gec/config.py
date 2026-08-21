@@ -68,6 +68,15 @@ LEGACY_COUNTRIES = ["CHN", "DEU", "JPN", "KOR"]  # the four from legacy/ noteboo
 REPRO_YEARS = [2000, 2012, 2024]                 # snapshot years for line-chart reproductions
 STACK_COUNTRIES = ["CHN", "JPN", "DEU"]          # stacked cumulative-share chart (bottom->top)
 
+# Supply-chain workstream: the countries carried on every time-series chart, so a
+# reader sees the same cast (and the same colours) from page to page. Chosen by
+# 2026 net position on the 60-code basket plus the two upstream sellers.
+# CHN and Hong Kong are the CHK bloc (built from extra-bloc flows, not by summing
+# the two countries). Price-based charts
+# can only show the subset whose customs data carry usable net weights -- filter on
+# results/tables/price_coverage.csv rather than editing this list.
+CHAIN_MAJORS = ["TWN", "KOR", "CHK", "JPN", "USA", "DEU", "NLD", "MYS", "SGP", "VNM"]
+
 # Estimator settings
 BANDWIDTH = 0.10                  # canonical bandwidth for figures / coverage / diagnostics
 H_DIST = 0.10                     # canonical bandwidth for the dollar-distribution density
