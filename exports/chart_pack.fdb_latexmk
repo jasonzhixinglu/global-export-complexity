@@ -1,5 +1,8 @@
 # Fdb version 4
-["pdflatex"] 1787250667.0245 "c:/Users/Jase/global-export-complexity/exports/chart_pack.tex" "chart_pack.pdf" "chart_pack" 1787250668.59205 0
+["pdflatex"] 1787275575.06257 "c:/Users/Jase/global-export-complexity/exports/chart_pack.tex" "chart_pack.pdf" "chart_pack" 1787275576.51462 0
+  "../results/figures/prices/net_exports_12m.pdf" 1787274022.10821 32774 ca71779ee6f4767a1c8493e499ba13d4 ""
+  "../results/figures/prices/price_indices_12m.pdf" 1787274023.64516 38802 2f114c4055f2650ef2a688267a5f0991 ""
+  "../results/figures/prices/terms_of_trade_12m.pdf" 1787274022.63133 31294 1d35807713c098147e68dab38c7609dc ""
   "../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/drift.pdf" 1787249474.58642 14759 ced20a1ae7923888fc0296a59eacfe4f ""
   "../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/factors.pdf" 1787249474.25973 49630 d0ca62de046ba1955c2399664b671910 ""
   "../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/loadings_export.pdf" 1787249468.80213 42846 d4daa2d60f4fdea0fc93b53a59226b8a ""
@@ -81,9 +84,9 @@
   "C:/Users/Jase/AppData/Local/Programs/MiKTeX/tex/latex/microtype/microtype.sty" 1772370317 102845 043c56602c7d94c8a716319df1af5479 ""
   "C:/Users/Jase/AppData/Local/Programs/MiKTeX/tex/latex/microtype/mt-cmr.cfg" 1772370317 22906 2122f73c0e7dc828f24240c2422dfe25 ""
   "C:/Users/Jase/AppData/Local/Programs/MiKTeX/tex/latex/xcolor/xcolor.sty" 1729265222 55384 b454dec21c2d9f45ec0b793f0995b992 ""
-  "c:/Users/Jase/global-export-complexity/exports/chart_pack.tex" 1787250666.1398 11361 08156b5681a5a22992f5a90d7bb4ffaa ""
+  "c:/Users/Jase/global-export-complexity/exports/chart_pack.tex" 1787275574.1887 12600 11976963f9ff68676398d2dc855df443 ""
   "chain_topology.pdf" 1787240286.69932 41714 c29b8bd4d13077f41ae543d6b203255c ""
-  "chart_pack.aux" 1787250668.28918 33 d2184818cd16c7334a2328a01fa4fb24 "pdflatex"
+  "chart_pack.aux" 1787275576.23675 33 9c6d12a466ddf25e525340d0a343aadd "pdflatex"
   "hubs_nnf/supply_chain_1_raw_materials_nnf_hubs_2024.pdf" 1787247068.39039 26962 0ee66b1223486f33fe93ba240743af2e ""
   "hubs_nnf/supply_chain_2_wafers_nnf_hubs_2024.pdf" 1787247072.83655 27023 a76aa93d086539ba14a49aa974f45ea6 ""
   "hubs_nnf/supply_chain_3_litho_optics_nnf_hubs_2024.pdf" 1787247077.86773 26978 6f7eb7e6fe96d2b7034210121d4b7337 ""

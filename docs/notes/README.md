@@ -10,3 +10,4 @@ In-progress results and sketches; graduate into the proposal/narrative when stab
 - [firm-level-supply-chain-data.md](firm-level-supply-chain-data.md) — the H200-Sankey ecosystem (firm-level flows, their data sources) and the edge-by-edge mapping to our country x HS6 corridors
 - [edge-type-tests.md](edge-type-tests.md) — consumable vs capacity vs kit edges between stages: cross-correlation tests and what they support
 - [chart-reading-flags.md](chart-reading-flags.md) — running log of chart-review questions, their resolutions, and candidate presentation fixes
+- [prices-net-exports.md](prices-net-exports.md) — unit-value export/import price indices (country x stage), terms of trade and net exports (country aggregate), with the weight-coverage caveat that disqualifies several countries

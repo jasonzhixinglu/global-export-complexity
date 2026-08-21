@@ -4,6 +4,7 @@ One page per chart: title, a short factual caption (claims match the docs --
 measured statements only), and the figure. Sections:
   1  The chain as flows            (topology, dollar overview, country network)
   2  The chain in stages           (one hub chart per stage)
+  3  Changes over time, no model  (net exports, terms of trade, price legs)
   3  The factor model over time    (AI-compute codes only; schematic first)
   4  Concentration & fragmentation (AI-compute codes only)
 
@@ -35,6 +36,7 @@ from gec import config as cfg
 EX = cfg.ROOT / "exports"
 TV = cfg.RESULTS_DIR / "mfm" / "tvmfm"
 NS = cfg.RESULTS_DIR / "network_stats"
+FIG = cfg.RESULTS_DIR / "figures" / "prices"
 OUT = EX / "chart_pack.pdf"
 
 SECTIONS = [
@@ -89,7 +91,26 @@ SECTIONS = [
    (EX/"hubs_nnf/supply_chain_8_servers_nnf_hubs_2024.png",
     "Stage 8 -- AI servers (847150)", ""),
   ]),
- ("3. The factor model over time -- AI-compute codes only",
+ ("3. Changes over time -- without a model",
+  "Before the factor model: what the monthly panel says on its own. All 60 codes, "
+  "12-month rolling totals. Prices here are unit values (dollars per kilo), so "
+  "they mix price with what is inside the code.",
+  [
+   (FIG/"net_exports_12m.png",
+    "Who runs a surplus on the chain",
+    "Exports minus imports across the whole basket. Taiwan 64B -> 272B, Korea "
+    "50B -> 161B; the US +13B -> -264B."),
+   (FIG/"terms_of_trade_12m.png",
+    "Terms of trade",
+    "Export unit values over import unit values, each country's 2021 average = "
+    "100. Countries whose customs data carry no usable weights (US, Singapore, "
+    "Malaysia, Vietnam, and Japan on its import side) cannot be shown."),
+   (FIG/"price_indices_12m.png",
+    "The two sides of that ratio",
+    "The same indices, unstacked: whose export unit values rise faster than "
+    "their imports'."),
+  ]),
+ ("4. The factor model over time -- AI-compute codes only",
   "This section uses only the three blue codes (parts/GPU modules, baseboards, "
   "AI servers), monthly from 2017. Unless the page says otherwise, China and "
   "Hong Kong are counted as one. Shaded bands mark the periods between "
@@ -132,7 +153,7 @@ SECTIONS = [
     "After Apr 2025 the two blocs move together on a single factor -- seen at "
     "no other break."),
   ]),
- ("4. Concentration & fragmentation -- AI-compute codes only",
+ ("5. Concentration & fragmentation -- AI-compute codes only",
   "Monthly measures built on top of the model, for the three blue codes only. "
   "Dotted lines mark Jul 2023 and Apr 2025. Interpretation: "
   "results/network_stats/findings.md.",

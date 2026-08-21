@@ -147,8 +147,18 @@ for $N$ countries, $K$ export hubs indexed by $k$, and $M$ import hubs indexed b
 
 \chartpage{Stage 8 -- AI servers (847150)}{Mexico (25B) and Taiwan (19B) assemble and ship; the United States buys 43B, 37 percent of world imports in this code.}{hubs_nnf/supply_chain_8_servers_nnf_hubs_2024.pdf}
 
-%% -------------------------------------------------------------- 3. The factor model over time -- AI-compute codes only
-\sectionpage{3. Changes over time -- AI-compute only}{This section looks at the three downstream AI-compute HS6 codes jointly (parts/GPU modules, baseboards, AI servers), and estimates a time-varying MFM on monthly trade from 2017.}
+%% -------------------------------------------------------------- 3. Changes over time -- without a model
+\sectionpage{3. General trends by country}{Across all 60 HS6 categories, what are general trends by country?}
+
+\chartpage{Net exports}{Taiwan and Korea take off after 2024; the US declines from trade balance to a deep deficit due to AI investment; the China bloc is a major net importer throughout the sample, although mostly due to electronic assembly whose exports we exclude.}{../results/figures/prices/net_exports_12m.pdf}
+
+\chartpage{Terms of trade}{Each country's ToT indexed to 100 at its 2021 average. The US declines sharply due to high import prices for AI hardware, and similarly for the China bloc albeit to a smaller extent. The Netherlands, Korea and Taiwan see favorable ToT since 2023.}{../results/figures/prices/terms_of_trade_12m.pdf}
+
+\chartpage{Export vs import prices}{The US stands out for seeing the largest import price increase, followed by the China bloc. Taiwan, the Netherlands and Korea see the largest export price increases, but in the case of Taiwan, some of this is offset by rising import prices.}{../results/figures/prices/price_indices_12m.pdf}
+
+
+%% -------------------------------------------------------------- 4. The factor model over time -- AI-compute codes only
+\sectionpage{4. The factor model over time -- AI-compute only}{This section looks at the three downstream AI-compute HS6 codes jointly (parts/GPU modules, baseboards, AI servers), and estimates a time-varying MFM on monthly trade from 2017.}
 
 \chartpage{When the network changed shape}{The line plots the month-to-month change in time-varying export loadings. We see stability until Aug 2023 (AI demand rampup), Oct 2024 (memory export controls signaled), and Sep 2025 (Nvidia GB300 production).}{../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/drift.pdf}
 
@@ -158,8 +168,8 @@ for $N$ countries, $K$ export hubs indexed by $k$, and $M$ import hubs indexed b
 
 \chartpage{Trade between hubs, month by month}{Three of the sixteen channels carry the AI boom: Taiwan to the US (export hub 3 to import hub 1), and both legs of the US-Mexico assembly loop (export hub 1 to import hub 1, export hub 4 to import hub 4).}{../results/mfm/tvmfm/chn_hkg_bloc/ai_compute/factors.pdf}
 
-%% -------------------------------------------------------------- 4. Concentration & fragmentation -- AI-compute codes only
-\sectionpage{4. Concentration \& fragmentation -- AI-compute only}{Monthly proxies for concentration and fragmentation calculated on the monthly time-varying MFM.}
+%% -------------------------------------------------------------- 5. Concentration & fragmentation -- AI-compute codes only
+\sectionpage{5. Concentration \& fragmentation -- AI-compute only}{Monthly proxies for concentration and fragmentation calculated on the monthly time-varying MFM.}
 
 \chartpage{Export and import concentration -- AI-compute}{Concentration is proxied by HHI: for exporters/importers, the HHI is computed within each hub and then averaged across hubs, weighted by trade.}{../results/network_stats/ai_compute/concentration.pdf}
 

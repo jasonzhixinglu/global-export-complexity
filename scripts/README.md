@@ -22,6 +22,11 @@ in [docs/data.md](../docs/data.md).
 - `prototype_nonneg_rotation.py` — nonnegativity-rotation identification experiment
 
 **Outputs**
+- `build_unit_values.py` — reporter-level unit-value base (value, net weight, imputed-weight flag)
+- `compute_prices_net_exports.py` — Tornqvist price indices (country x stage), terms
+  of trade and net exports (country aggregate) -> results/tables, docs/notes/prices-net-exports.md
+- `plot_prices_net_exports.py` — the three non-model time-series charts (chart pack section 3)
+- `check_price_filters.py` — rerun the price chain with each filter disabled; reports what each one actually moves
 - `network_stats.py` — concentration/fragmentation measure system on the TV-MFM
   output (docs/concentration-fragmentation-nnf-mfm-trade.md → results/network_stats)
 - `export_supply_chain_sankey.py` — all supply-chain charts (hub charts, overviews, network)
