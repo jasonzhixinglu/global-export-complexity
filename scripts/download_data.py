@@ -2,10 +2,8 @@
 
 Usage:
   python scripts/download_data.py [--force]                # the HS4 origin file (default)
-  python scripts/download_data.py --hs12                   # HS2012 HS6 file (~463 MB; tech/AI baskets)
   python scripts/download_data.py --bilateral 2020_2024    # one HS92 bilateral HS6 file (~2.9 GB)
   python scripts/download_data.py --bilateral all          # all HS92 bilateral files (~15 GB)
-  python scripts/download_data.py --hs12-bilateral all     # HS2012 bilateral HS6 (~7.2 GB; tech corridors)
 """
 from __future__ import annotations
 
@@ -33,10 +31,6 @@ def main(argv) -> None:
     cfg.ensure_dirs()
     force = "--force" in argv
 
-    if "--hs12" in argv:
-        _fetch(cfg.datafile_url(cfg.HS12_HS6_FILE_ID), cfg.HS12_HS6_CSV, force)
-        return
-
     if "--bilateral" in argv:
         i = argv.index("--bilateral")
         spec = argv[i + 1] if i + 1 < len(argv) else "2020_2024"
@@ -46,17 +40,6 @@ def main(argv) -> None:
                 print(f"unknown range '{yr}'. options: {', '.join(cfg.BILATERAL_FILE_IDS)} | all")
                 continue
             _fetch(cfg.datafile_url(cfg.BILATERAL_FILE_IDS[yr]), cfg.bilateral_path(yr), force)
-        return
-
-    if "--hs12-bilateral" in argv:
-        i = argv.index("--hs12-bilateral")
-        spec = argv[i + 1] if i + 1 < len(argv) else "all"
-        ranges = list(cfg.HS12_BILATERAL_FILE_IDS) if spec == "all" else [spec]
-        for yr in ranges:
-            if yr not in cfg.HS12_BILATERAL_FILE_IDS:
-                print(f"unknown range '{yr}'. options: {', '.join(cfg.HS12_BILATERAL_FILE_IDS)} | all")
-                continue
-            _fetch(cfg.datafile_url(cfg.HS12_BILATERAL_FILE_IDS[yr]), cfg.hs12_bilateral_path(yr), force)
         return
 
     _fetch(cfg.DOWNLOAD_URL, cfg.RAW_CSV, force)

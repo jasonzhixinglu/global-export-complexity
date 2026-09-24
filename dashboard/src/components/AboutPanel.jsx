@@ -10,9 +10,6 @@ import { useDarkMode } from '../lib/useDarkMode.jsx'
 const REFS = [
   ['Atlas of Economic Complexity — Harvard Growth Lab (trade data & PCI)', 'https://atlas.hks.harvard.edu/'],
   ['HS92 trade data · Harvard Dataverse (doi:10.7910/DVN/T4CHWJ)', 'https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/T4CHWJ'],
-  ['HS2012 trade data · Harvard Dataverse (doi:10.7910/DVN/YAVJDF)', 'https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/YAVJDF'],
-  ['Fed — “The Global Trade Effects of the AI Infrastructure Boom” (FEDS Note, 2026-02-13)', 'https://www.federalreserve.gov/econres/notes/feds-notes/the-global-trade-effects-of-the-ai-infrastructure-boom-20260213.html'],
-  ['OECD (2025) — “Mapping the semiconductor value chain” / HS code list (doi:10.1787/4154cdbf-en)', 'https://www.oecd.org/en/publications/promoting-the-development-of-the-semiconductor-ecosystem-in-mexico_02c81dec-en/full-report/list-of-harmonized-system-hs-codes-for-semiconductor-related-products_1369575a.html'],
   ['Hidalgo & Hausmann (2009) — “The building blocks of economic complexity”, PNAS', 'https://www.pnas.org/doi/10.1073/pnas.0900943106'],
   ['Methods & code (this project)', 'https://github.com/jasonzhixinglu/global-export-complexity'],
 ]
@@ -93,9 +90,7 @@ export default function AboutPanel({ data, year, setYear, flow, setFlow }) {
             (or drag the slider) to see the largest products near a chosen PCI. The
             <strong> Corridors</strong> tab opens up bilateral <strong>origin → destination</strong>
             flows: pick an exporter and see how its trade across complexity splits among partner
-            countries or region blocs. The <strong>Tech &amp; AI</strong> tab tracks AI-compute
-            hardware and the semiconductor value chain — by country and as bilateral trade networks
-            (where the chips and AI hardware actually flow).
+            countries or region blocs.
           </p>
         </div>
 
@@ -122,17 +117,6 @@ export default function AboutPanel({ data, year, setYear, flow, setFlow }) {
             PCI is standardised within each year's cross-section, so compare value-weighted
             <em> shifts</em> across years, not absolute levels. Low PCI ≈ raw materials and
             commodities; high PCI ≈ machinery, electronics, chemicals and instruments.
-          </p>
-        </Acc>
-
-        <Acc title="Tech & AI baskets" {...sec('Tech & AI baskets')}>
-          <p>
-            <strong>AI compute</strong> follows the Fed FEDS Note (HS 8471.50 / 8471.80 / 8473.30 —
-            AI servers and accelerator/GPU cards). The <strong>semiconductor</strong> categories
-            follow the OECD value-chain mapping (chips, photosensitive devices, raw materials,
-            manufacturing equipment, foundry and wafer inputs). These use the Atlas
-            <strong> HS 2012</strong> vintage (2012–2024), since the relevant HS6 codes do not exist
-            in HS92. The two sets are disjoint, so <em>All</em> = their sum with no double-counting.
           </p>
         </Acc>
 

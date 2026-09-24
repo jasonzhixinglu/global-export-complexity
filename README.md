@@ -2,7 +2,7 @@
 
 Non-parametric analysis of global trade (exports and imports) by **product complexity (PCI)**,
 built on the Harvard Growth Lab *Atlas of Economic Complexity*. Documented in
-[`docs/pci-analysis.md`](docs/pci-analysis.md); data sources and the Tech & AI baskets in
+[`docs/pci-analysis.md`](docs/pci-analysis.md); data sources in
 [`docs/data.md`](docs/data.md).
 
 The AI/semiconductor tech-trade research that used to share this repo has moved to a separate private repo.
@@ -29,16 +29,11 @@ toggle drives the country views; the tabs are:
   exporter (or flip to "Imports to" for an importer) and compare its corridors as **partner share**,
   **value ($B)**, or **distribution** across PCI — counterparties individually or grouped into
   **region blocs**. The drill-down lists the anchor country's own top categories near the clicked PCI.
-- **Tech & AI** — **AI-compute hardware** (Fed definition) and the **semiconductor value chain**
-  (OECD), by country and year, as world share / value / share of the country's own trade — exports
-  or imports (e.g. who *ships* chips vs who *buys* them). A **Corridors** sub-view shows the
-  bilateral *trade network* for the same HS6 baskets (HS2012 bilateral, 2012–2024): where an
-  exporter's chips / AI hardware go, by partner country, over time.
 - **About** — top-N coverage by complexity (top exporters or importers), plus methodology, caveats,
   and references.
 
 The Corridors tab is gated behind an `ENABLE_CORRIDORS` flag in `dashboard/src/App.jsx`
-(set it to `false` to revert to the three country/sector tabs).
+(set it to `false` to revert to the two country tabs).
 
 ## Methodology (one paragraph)
 
@@ -65,12 +60,9 @@ identities — in [`docs/pci-analysis.md`](docs/pci-analysis.md).
 ## Data
 
 - **Atlas of Economic Complexity** (Harvard Growth Lab), HS92 HS4 `country × product × year`,
-  2000–2024 — the core dataset. Tech/AI uses the **HS2012** vintage (codes like 8486/8542 don't
-  exist in HS92). Provenance in [`data/README.md`](data/README.md).
+  2000–2024 — the core dataset. Provenance in [`data/README.md`](data/README.md).
 - **Atlas bilateral** (HS92 HS6 `origin × destination × product × year`) — reconciled flows for the
   **Corridors** tab; aggregated to HS4, top 50 + ROW. Imports are the same matrix read by destination.
-- **Tech & AI baskets** — AI compute from the Fed FEDS Note (2026); semiconductor value chain from
-  OECD (2025). See [`docs/data.md`](docs/data.md).
 
 ## Repository layout
 
@@ -79,14 +71,13 @@ src/gec/               importable package
   config.py            paths + constants (YEARS, N_TOP, bandwidths, dataset IDs)
   data.py              load / clean / rank exporters / product & bilateral aggregation
   estimators.py        local-linear shares, KDE, mass-conserving bins, calibration
-  classifications.py   AI / semiconductor HS code sets (Fed, OECD)
   comtrade.py          UN Comtrade client (direct + mirror); no script uses it at present
   plotting.py          headless matplotlib helpers
 scripts/               see scripts/README.md for the full index
   PCI pipeline:        download_data -> compute_surfaces -> make_figures -> run_diagnostics
-  dashboard exports:   export_dashboard_data, export_gmm_*, export_tech_*, ...
+  dashboard exports:   export_dashboard_data, export_gmm_*, export_*_products, ...
 dashboard/             React/Vite/Recharts app (deployed to GitHub Pages)
-docs/                  pci-analysis.md (methodology) · data.md (sources, baskets, licensing)
+docs/                  pci-analysis.md (methodology) · data.md (sources, licensing)
 results/               figures & tables (PCI)
 exports/               committed charts (pci/)
 data/                  git-ignored raw + derived (download / regenerate)
@@ -106,8 +97,6 @@ python scripts/export_dashboard_data.py
 python scripts/export_gmm_data.py           # distribution curves as Gaussian mixtures (gmm.json)
 python scripts/export_pci_products.py
 python scripts/export_country_products.py   # per-country top categories (corridor drill-down)
-python scripts/export_tech_data.py          # needs the HS12 file: python scripts/download_data.py --hs12
-python scripts/export_tech_bilateral.py     # needs HS2012 bilateral: python scripts/download_data.py --hs12-bilateral all
 cd dashboard && npm install && npm run dev    # local; `npm run build` for production
 ```
 
@@ -122,6 +111,4 @@ Tune the analysis in [`src/gec/config.py`](src/gec/config.py) (`N_TOP`, `BANDWID
 - The **top-20 exporters cover ~72%** of world trade on average but only ~45–50% at low complexity
   (commodities are fragmented across many economies); **top-50 reaches ~93%** (imports analogous,
   ranked by top importers).
-- China's export distribution marches up and right across the complexity spectrum over 2000–2024;
-  in AI compute and chips a handful of East-Asian economies dominate exports, while imports of those
-  same chips concentrate heavily in China — visible by flipping the Exports / Imports toggle.
+- China's export distribution marches up and right across the complexity spectrum over 2000–2024.

@@ -2,17 +2,15 @@ import { useDataset } from './lib/data.js'
 import { useSessionState } from './lib/sessionState.js'
 import { useDarkMode } from './lib/useDarkMode.jsx'
 import ExplorerPanel from './components/ExplorerPanel.jsx'
-import TechPanel from './components/TechPanel.jsx'
 import AboutPanel from './components/AboutPanel.jsx'
 import BilateralPanel from './components/BilateralPanel.jsx'
 
-// Flip to false to instantly return to the original 3-tab dashboard (Corridors hidden, code intact).
+// Flip to false to instantly return to the original 2-tab dashboard (Corridors hidden, code intact).
 const ENABLE_CORRIDORS = true
 
 const TABS = [
   { id: 'explorer', label: 'Explorer', sub: 'Distribution by PCI' },
   ...(ENABLE_CORRIDORS ? [{ id: 'corridors', label: 'Corridors', sub: 'Origin → destination' }] : []),
-  { id: 'tech', label: 'Tech & AI', sub: 'AI & semiconductors' },
   { id: 'about', label: 'About', sub: 'Coverage · methodology' },
 ]
 
@@ -27,7 +25,9 @@ export default function App() {
   const { data, error } = useDataset()
   const { isDark, toggle } = useDarkMode()
   const qp = new URLSearchParams(window.location.search)  // deep-link seeds: ?tab=&flow=&measure=
-  const [tab, setTab] = useSessionState('gec-tab', qp.get('tab') || 'explorer')
+  const [storedTab, setTab] = useSessionState('gec-tab', qp.get('tab') || 'explorer')
+  // a stale session value or deep link to a removed tab (e.g. 'tech') falls back to the Explorer
+  const tab = TABS.some(t => t.id === storedTab) ? storedTab : 'explorer'
   const [selected, setSelected] = useSessionState('gec-selected', ['CHN', 'DEU', 'JPN'])
   const [year, setYear] = useSessionState('gec-year', 2024)
   const [measure, setMeasure] = useSessionState('gec-measure', qp.get('measure') || 'share')
@@ -71,10 +71,6 @@ export default function App() {
           )}
           {data && ENABLE_CORRIDORS && tab === 'corridors' && (
             <BilateralPanel data={data} year={year} setYear={setYear} />
-          )}
-          {data && tab === 'tech' && (
-            <TechPanel data={data} year={year} setYear={setYear} measure={measure} setMeasure={setMeasure}
-              flow={flow} setFlow={setFlow} />
           )}
           {data && tab === 'about' && (
             <AboutPanel data={data} year={year} setYear={setYear} flow={flow} setFlow={setFlow} />
