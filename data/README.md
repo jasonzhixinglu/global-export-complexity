@@ -1,7 +1,7 @@
 # Data
 
-> **See [docs/data.md](../docs/data.md)** — the master reference for all
-> sources, panels, taxonomy, and licensing. This file documents only the Atlas
+> **See [docs/data.md](../docs/data.md)** — the reference for the
+> data sources, the Tech & AI baskets, and licensing. This file documents only the Atlas
 > raw download below.
 
 This directory is **git-ignored** (see `.gitignore`). Nothing here is committed; regenerate it

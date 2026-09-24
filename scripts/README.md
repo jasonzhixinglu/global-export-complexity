@@ -1,42 +1,10 @@
 # Scripts index
 
-Two workstreams share this folder. Regeneration commands and data prerequisites
-in [docs/data.md](../docs/data.md).
+Data sources and downloads in [docs/data.md](../docs/data.md); methodology in
+[docs/pci-analysis.md](../docs/pci-analysis.md).
 
-## Supply-chain workstream (active research)
+## PCI workstream and dashboard
 
-**Data acquisition & panel** (methodology & audit: docs/data.md §3)
-- `fetch_comtrade_monthly.py` — Comtrade monthly bilateral pulls (backbone, 60 codes)
-- `fetch_tdm.py` — TDM API pulls (TWN/CHN/VN2)
-- `fetch_comtrade_totals.py` — annual all-product totals with cif/fob (BY Steps 2-3 inputs)
-- `fetch_comtrade.py` — annual HS4 pulls with PCI proxy (early-warning years)
-- `extract_ai_compute.py` — slice the 3 compute codes from the Atlas bilateral file
-- `build_monthly_panel.py` — assemble the reconciled balanced monthly panel (GL mirroring)
-- `audit_atlas_discrepancy.py` — attribute panel-vs-Atlas discrepancies to tested causes
-
-**Estimation**
-- `prototype_mfm.py` — constant-loading annual MFMs (results/mfm/annual)
-- `tvmfm_monthly_anchored.py` — era-anchored time-varying MFMs (the main model)
-- `tvmfm_monthly.py` — superseded chained version (kept: produces the archive run)
-- `prototype_tvmfm_bandwidth.py` — window-length OOS experiment (chose 12m)
-- `prototype_nonneg_rotation.py` — nonnegativity-rotation identification experiment
-
-**Outputs**
-- `build_unit_values.py` — reporter-level unit-value base (value, net weight, imputed-weight flag)
-- `compute_prices_net_exports.py` — Tornqvist price indices (country x stage), terms
-  of trade and net exports (country aggregate) -> results/tables, docs/notes/prices-net-exports.md
-- `plot_prices_net_exports.py` — the three non-model time-series charts (chart pack section 3)
-- `check_price_filters.py` — rerun the price chain with each filter disabled; reports what each one actually moves
-- `network_stats.py` — concentration/fragmentation measure system on the TV-MFM
-  output (docs/concentration-fragmentation-nnf-mfm-trade.md → results/network_stats)
-- `export_supply_chain_sankey.py` — all supply-chain charts (hub charts, overviews, network)
-- `draw_chain_topology.py` / `draw_mfm_schematic.py` — stylized chain map; factor-model explainer
-- `build_chart_pack.py` — page/caption list that seeds the .tex below (no longer
-  builds a PDF while chart_pack.tex exists)
-- `build_chart_pack_tex.py` — write/compile `exports/chart_pack.tex`, the editable
-  LaTeX source of the desktop pack (`--compile` runs pdflatex; edit the .tex directly)
-
-## PCI workstream (dashboard; see docs/pci-analysis.md)
 
 - pipeline: `download_data.py` → `compute_surfaces.py` → `make_figures.py` →
   `run_diagnostics.py` (`run_all.py` chains them)

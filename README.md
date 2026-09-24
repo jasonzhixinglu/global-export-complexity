@@ -1,20 +1,11 @@
 # Global Trade Complexity
 
-Two related workstreams share this repo and its data infrastructure:
+Non-parametric analysis of global trade (exports and imports) by **product complexity (PCI)**,
+built on the Harvard Growth Lab *Atlas of Economic Complexity*. Documented in
+[`docs/pci-analysis.md`](docs/pci-analysis.md); data sources and the Tech & AI baskets in
+[`docs/data.md`](docs/data.md).
 
-1. **PCI / complexity** (the original project, and the dashboard): non-parametric analysis of global
-   trade — exports and imports — by **product complexity (PCI)**, built on the Harvard Growth Lab
-   *Atlas of Economic Complexity*. Documented in [`docs/pci-analysis.md`](docs/pci-analysis.md).
-2. **The AI semiconductor supply chain** (active research): a monthly bilateral panel, time-varying
-   matrix factor models, and network measures for the AI-era trade network. Reading order:
-   [`docs/research-proposal.md`](docs/research-proposal.md) (the program: claims, model sketch,
-   measures, rough answers) → [`docs/supply-chain-narrative.md`](docs/supply-chain-narrative.md)
-   (the empirical story 2021–26, with the flow charts) → [`docs/data.md`](docs/data.md) (sources,
-   taxonomy, panel construction) → [`docs/modeling-brainstorm.md`](docs/modeling-brainstorm.md)
-   (methodology decisions and interpretation, incl. hubs-as-varieties) →
-   [`docs/notes/`](docs/notes/) (working notes: computed measure results, proposal sketch).
-   Estimation outputs live in [`results/mfm/`](results/mfm/); reference papers in
-   [`docs/references/`](docs/references/).
+The AI/semiconductor tech-trade research that used to share this repo has moved to a separate private repo.
 
 ### → Live dashboard: **https://jasonzhixinglu.github.io/global-export-complexity/**
 
@@ -79,10 +70,7 @@ identities — in [`docs/pci-analysis.md`](docs/pci-analysis.md).
 - **Atlas bilateral** (HS92 HS6 `origin × destination × product × year`) — reconciled flows for the
   **Corridors** tab; aggregated to HS4, top 50 + ROW. Imports are the same matrix read by destination.
 - **Tech & AI baskets** — AI compute from the Fed FEDS Note (2026); semiconductor value chain from
-  OECD (2025). See [`docs/data.md`](docs/data.md) (basket tiers, national
-  monthly sources, and the Haver cross-check).
-- **UN Comtrade** — optional puller for more recent years (raw, mirror-reconstructable for late
-  filers); see [`docs/data.md`](docs/data.md).
+  OECD (2025). See [`docs/data.md`](docs/data.md).
 
 ## Repository layout
 
@@ -92,20 +80,15 @@ src/gec/               importable package
   data.py              load / clean / rank exporters / product & bilateral aggregation
   estimators.py        local-linear shares, KDE, mass-conserving bins, calibration
   classifications.py   AI / semiconductor HS code sets (Fed, OECD)
-  comtrade.py          UN Comtrade pulls (direct + mirror) + availability checks
+  comtrade.py          UN Comtrade client (direct + mirror); no script uses it at present
   plotting.py          headless matplotlib helpers
-scripts/               two workstreams -- see scripts/README.md for the full index
+scripts/               see scripts/README.md for the full index
   PCI pipeline:        download_data -> compute_surfaces -> make_figures -> run_diagnostics
   dashboard exports:   export_dashboard_data, export_gmm_*, export_tech_*, ...
-  supply-chain data:   fetch_comtrade_monthly, fetch_tdm, build_monthly_panel
-  estimation:          prototype_mfm (annual), tvmfm_monthly_anchored (time-varying)
-  charts:              export_supply_chain_sankey
 dashboard/             React/Vite/Recharts app (deployed to GitHub Pages)
-docs/                  data.md (master data reference) · research-proposal.md ·
-                       supply-chain-narrative.md · modeling-brainstorm.md ·
-                       pci-analysis.md · notes/ · references/ · tdm/
-results/               figures & tables (PCI) · mfm/ (factor models) · panel_monthly/
-exports/               committed charts (supply-chain set + PCI-era)
+docs/                  pci-analysis.md (methodology) · data.md (sources, baskets, licensing)
+results/               figures & tables (PCI)
+exports/               committed charts (pci/)
 data/                  git-ignored raw + derived (download / regenerate)
 legacy/                original exploratory notebook (superseded)
 ```

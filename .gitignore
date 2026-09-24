@@ -1,9 +1,5 @@
 # Raw + derived trade data (large; download/regenerate, see data/README.md).
-# Exception: Comtrade monthly batch caches are committed (public UN data, small
-# per-batch parquets) so the panel is reproducible without re-pulling quota.
-# TDM extracts are subscription-licensed and must NEVER be committed.
-data/raw/*
-!data/raw/comtrade_monthly/
+data/raw/
 data/derived/
 
 # Byte-compiled / optimized / DLL files
@@ -232,12 +228,3 @@ exports/*.log
 exports/*.fdb_latexmk
 exports/*.fls
 exports/*.synctex.gz
-
-# Price-pipeline tables that are large and fully regenerable from the scripts
-# (scripts/build_unit_values.py -> compute_prices_net_exports.py). The compact
-# headline tables -- terms_of_trade, net_exports, price_coverage,
-# terms_of_trade_net_position -- stay committed.
-results/tables/price_index_stage_monthly.csv
-results/tables/price_index_stage_roll12.csv
-results/tables/price_index_broad_roll12.csv
-results/tables/terms_of_trade_broad.csv

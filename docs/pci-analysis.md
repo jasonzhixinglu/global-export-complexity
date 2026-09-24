@@ -1,11 +1,7 @@
 # PCI workstream: global export market share by product complexity (2000–2024)
 
-> **Scope note (2026-07):** this documents the repo's *original* workstream — the
-> PCI/complexity analysis behind the dashboard. The second workstream — the AI
-> semiconductor supply-chain project (monthly panel, factor models, network
-> measures) — is documented in [data.md](data.md), [research-proposal.md](research-proposal.md),
-> [supply-chain-narrative.md](supply-chain-narrative.md), and [modeling-brainstorm.md](modeling-brainstorm.md).
-> The two share data infrastructure but are otherwise separate analyses.
+> **Scope note:** this documents the PCI/complexity analysis behind the dashboard. The
+> AI/semiconductor tech-trade research that used to share this repo has moved to a separate private repo.
 
 A non-parametric analysis of how the world's major exporters are positioned across the
 **Product Complexity Index (PCI)**, and how that has shifted over a quarter-century — built so the
